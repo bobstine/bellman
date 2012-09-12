@@ -21,10 +21,9 @@ int  main()
   if (true)
   { std::cout << "\nTEST: test vector utility object." << std::endl;
     double angle (135);
-    double omega (0.05);
     double alpha (0.025);
     double beta  (0.0125);
-    RejectVectorUtility rejectU (angle, omega);
+    RejectVectorUtility rejectU (angle, alpha);
     std::cout << "TEST: reject util with angle=" << angle << " at mu=0 " << rejectU(0) << "   and at mu=1 " << rejectU(1) << std::endl;
     std::cout << "                         Risk @ 0        Risk @ 1\n";
     for (int j = 1; j<10; ++j)
@@ -33,8 +32,8 @@ int  main()
     }
     // check additive
     double mu (1.8);
-    RiskVectorUtility riskU (angle, omega); 
-    riskU.set_constants(alpha, beta, 0,0);
+    RiskVectorUtility riskU (angle, alpha); 
+    riskU.set_constants(beta, 0,0);
     std::cout << "TEST: additivity...   net " << riskU(mu) << " = " << riskU.oracle_utility(mu, 0,0) << " - " << angle << "*" << riskU.bidder_utility(mu,0,0) << std::endl;
   }
     
@@ -58,7 +57,7 @@ int  main()
   
 
   if (true)
-  { std::cout << "\nTEST: test utility, and test maximizer with alpha=beta." << std::endl;
+  { std::cout << "\nTEST: test reject matrix utility, and test maximizer with alpha=beta." << std::endl;
     double angle ( 45 );
     double omega (0.05);
     double alpha (0.025);

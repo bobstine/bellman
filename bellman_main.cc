@@ -35,8 +35,8 @@ int  main(int argc, char** argv)
 
   // default arguments
   bool      riskUtil  = false;    // risk or rejection, default is rejection (which is fast)
-  double       angle  =  45;      // in degrees
-  int        nRounds  = 100;
+  double       angle  =     0;    // in degrees
+  int        nRounds  =   100;
   bool     constrain  = false;    // ignores oracle prob if not constrained
   double   oracleProb = 0.0;      // use univ oracle if zero prob and constrained
   double   bidderProb = 0.0;
@@ -44,17 +44,15 @@ int  main(int argc, char** argv)
   double    spendPct  = 0.5;
 
   parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, spendPct, writeTable);
-  if ((!constrain) && (oracleProb != 0))
-    std::cout << "Warning: Unconstrained but nonzero oracle probability " << oracleProb << " assigned." << std::endl;
   
   const int iOmega    (nRounds+1);   
   WealthArray* pBidderWealth = make_wealth_array(omega, iOmega, bidderProb);
-  WealthArray* pOracleWealth = make_wealth_array(omega, iOmega, oracleProb);
+  WealthArray* pOracleWealth = make_wealth_array(omega, iOmega, oracleProb);   // unused in unconstrained case
   
   if(!constrain)           // unconstrained oracle 
-  { std::cout <<                         "uncon " << pBidderWealth->name() << " ";
+    { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
-    { RiskVectorUtility utility(angle, omega);
+    { RiskVectorUtility utility(angle, oracleProb);
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
     else
@@ -63,7 +61,7 @@ int  main(int argc, char** argv)
     }
   }
   else                     // constrained expert
-  { std::cout << pOracleWealth->name() << " " << pBidderWealth->name() << " ";
+  { std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle, omega);
       solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, writeTable);

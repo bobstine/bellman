@@ -1,3 +1,8 @@
+*.dd
+*.o
+*.test
+*~
+uruns
 TAGS
 bellman
 bellman2.*

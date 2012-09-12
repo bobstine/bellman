@@ -40,27 +40,20 @@ class VectorUtility: public std::unary_function<double,double>
 {
  protected:
   const double mAngle, mSin, mCos;
-  const double mOmega;
-  double mAlpha, mBeta;
+  const double mAlpha;
+  double mBeta;
   double mRejectValue, mNoRejectValue;
   
  public:
 
- VectorUtility(double angle, double omega)
+ VectorUtility(double angle, double alphaLevel)
    : mAngle(angle), mSin(sin(angle * 3.1415926536/180)), mCos(cos(angle * 3.1415926536/180)),
-     mOmega(omega), mAlpha(omega), mBeta(0.0), mRejectValue(0.0), mNoRejectValue(0.0) { }
+     mAlpha(alphaLevel), mBeta(0.0), mRejectValue(0.0), mNoRejectValue(0.0) { }
 
-  double alpha      () const { return mAlpha; }   // equal to omega unless set outside
+  double alpha      () const { return mAlpha; }
   double beta       () const { return mBeta;  }
   double angle      () const { return mAngle; }
-  double omega      () const { return mOmega; }   // is alpha unless otherwise set
   
-  void set_constants (double alpha, double beta, double rejectValue, double noRejectValue)
-  { assert((0 <= alpha) && (alpha <= 1.0));
-    mAlpha = alpha;
-    set_constants(beta,rejectValue,noRejectValue);
-  }
-
   void set_constants (double beta, double rejectValue, double noRejectValue)
   { assert((0 <= beta) && (beta <= 1.0));
     mBeta = beta;
