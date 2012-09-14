@@ -11,9 +11,9 @@ int  main()
 
   const int univStart (1);
   
-  // test the probability function from wealth.h
   if (true)
   {
+    std::cout << "\nTest the probability function from wealth.h" << std::endl;
     UniversalDist univ(univStart);
     double total (0.0);
     int count = 100000;
@@ -39,15 +39,33 @@ int  main()
     std::cout << "TEST: Total of uniform for " << count << " terms = " << total << std::endl;
   } 
 
-  // test extremes in geometric wealth table for underflows
+ 
   if (true)
-  {
-    std::cout << "\n\n TEST wealth functions based on spending distributions." << std::endl;
+  { std::cout << "\n\n Test new type of wealth function based on arb function" << std::endl;
+
+    double scale (2);
+    ScaledUniversalDist g(scale);
+    std::cout << "    Scale g(2)@1 = " << g(1) << std::endl;
+    std::cout << "    Scale g(2)@2 = " << g(2) << std::endl;
+    
+    std::cout << "TEST: Wealth function starting from zero with universal bids throughout" << std::endl;
+    int     start   (  55 );
+    int     size    ( 300 );
+    int    iZero    (size - start + 1);
+    double wealth0  (6.7754711);
+    WealthArray wealth(wealth0, size-start, size, g);
+    std::cout << "   Wealth at position iZero is " << wealth.wealth(iZero) << " with next bid to be " << wealth.bid(iZero) << std::endl;
+    std::cout << "    : " << wealth << std::endl;
+  }
+  
+
+  if (false)
+  { std::cout << "\n\n Test extremes in geometric wealth table for underflows" << std::endl;
     
     double omega ( 0.05 );
     int    iZero ( 500  );
     double psi(0.01);
-
+      
     UniversalDist univ(univStart);
     GeometricDist geo(psi);
     UniformDist uni(1+iZero);  // add one to cover 0th position
@@ -84,7 +102,7 @@ int  main()
     int    steps ( iZero + 6 );  // need at least 6 above iZero.
     std::cout << "TEST: Initializing the wealth array." << std::endl;
 
-    ProbDist *p;
+    Distribution *p;
     UniversalDist univ(univStart);
     GeometricDist geo(0.005);
     p = &univ;

@@ -7,7 +7,7 @@
 #include <functional>
 #include <vector>
 
-class ProbDist: public std::unary_function<int,double>
+class Distribution: public std::unary_function<int,double>
 {
   public:
   virtual
@@ -24,7 +24,7 @@ class ProbDist: public std::unary_function<int,double>
 
  **********************************************************************************/
 
-class GeometricDist: public ProbDist
+class GeometricDist: public Distribution
 {
   const double mPsi;
   const double mOneMinusPsi;
@@ -37,7 +37,7 @@ class GeometricDist: public ProbDist
   double operator()(int k) const;    // percent of wealth spent at step k; adds to 1
 };
   
-class UniformDist: public ProbDist
+class UniformDist: public Distribution
 {
   const int     mLimit;
   const double  mP;     // 1/(number of tests)
@@ -50,13 +50,25 @@ class UniformDist: public ProbDist
   double operator()(int k) const;
 };
 
-class UniversalDist: public ProbDist
+class UniversalDist: public Distribution
 {
   const int mStart;  // starting index
   
   public:
 
   UniversalDist (int start): mStart (start) { }
+  
+  std::string identifier() const;
+  double operator()(int k) const;
+  };
+
+
+class ScaledUniversalDist: public Distribution
+{
+  const double mScale;
+  public:
+
+  ScaledUniversalDist (double scale): mScale(scale) { }
   
   std::string identifier() const;
   double operator()(int k) const;
@@ -90,8 +102,11 @@ class WealthArray
   WealthArray ()
     : mName("empty"), mPadding(0), mSize(mPadding), mOmega(0), mZeroIndex(0), mWealth(), mPositions() { }
   
- WealthArray(double omega, int zeroIndex, ProbDist const& pdf)
-   : mName(pdf.identifier()), mPadding(2), mSize(zeroIndex+mPadding), mOmega(omega), mZeroIndex(zeroIndex), mWealth(), mPositions() { initialize_array(pdf);}
+ WealthArray(double wealth0, int zeroIndex, int size, Distribution const& bidFunction)  // finds omega from wealth
+   : mName(bidFunction.identifier()), mPadding(size-zeroIndex), mSize(size), mOmega(0), mZeroIndex(zeroIndex), mWealth(), mPositions() { initialize_array_using_func(wealth0,bidFunction);}
+
+ WealthArray(double omega, int zeroIndex, Distribution const& pdf)
+   : mName(pdf.identifier()), mPadding(2), mSize(zeroIndex+mPadding), mOmega(omega), mZeroIndex(zeroIndex), mWealth(), mPositions() { initialize_array_using_pdf(pdf);}
 
  WealthArray(double omega, int zeroIndex, double psi) // use for geometric for numerical stability
    : mName(geom_name(psi)), mPadding(2), mSize(zeroIndex+mPadding), mOmega(omega), mZeroIndex(zeroIndex), mWealth(), mPositions() { initialize_geometric_array(psi);}
@@ -112,8 +127,10 @@ class WealthArray
   
  private:
   std::string geom_name(double p) const;
-  void initialize_array(ProbDist const& p);
-  void initialize_geometric_array(double psi);
+  void init_positions ();
+  void initialize_array_using_pdf (Distribution const& p);
+  void initialize_array_using_func(double w0, Distribution const& p);
+  void initialize_geometric_array (double psi);
   void fill_array_top();
   std::pair<int, double> find_wealth_position (int k, double increaseInWealth) const;
 
