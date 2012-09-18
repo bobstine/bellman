@@ -68,6 +68,8 @@ UniversalDist::operator() (int k) const
 
 //     scaled universal     scaled universal     scaled universal     scaled universal     scaled universal     scaled universal
 
+const double ScaledUniversalDist::mSumOfRecipLog = 3.387735532;
+
 std::string
 ScaledUniversalDist::identifier() const
 {
@@ -85,11 +87,27 @@ ScaledUniversalDist::operator() (int k) const
 }
 
 
+int
+ScaledUniversalDist::starting_index(double w0) const
+{
+  double tailSum = mScale * ScaledUniversalDist::mSumOfRecipLog;
+  int j=1;
+  while (tailSum > w0)
+  { double l (log (j+1));
+    tailSum -= mScale/(j*l*l);
+    ++j;
+  }
+  return j;
+}
+
+
+    //     uniform to end     uniform to end     uniform to end     uniform to end         
 
 double uniform_to_end (int k, int left)         // equal spread over possible locations
 {
   return 1.0/(double)(k + left);
 }
+
 
 
 
@@ -138,16 +156,17 @@ WealthArray::initialize_array_using_pdf(Distribution const& p)
 
 
 void
-WealthArray::initialize_array_using_func(double w0, Distribution const& f)
+WealthArray::initialize_array_using_func(ScaledUniversalDist const& f)
 {
   assert((0 < mZeroIndex) && (mZeroIndex < mSize-1));
   DynamicArray<double> da(0,mSize-1);
-  da.assign(mSize-1, w0);
-  for(int i=1; i<mSize; ++i)
-  { int j = mSize-1-i;
-    da.assign(j, da[j+1] - f(i-1));
+  std::cout << "  --  assigning " << f.max_wealth() << " to position " << mSize-1 << std::endl;
+  da.assign(mSize-1, f.max_wealth());
+  for(int i=0, j=mSize-2; i<mSize-1; ++i,--j)
+  { std::cout << "  --  assigning " << da[j+1]-f(i) << " to position " << j << std::endl;
+    da.assign(j, da[j+1]-f(i));
   }
-  mWealth=da;
+  std::cout << " Done filling the array; need to find positions." << std::endl;
   init_positions();
 }
 

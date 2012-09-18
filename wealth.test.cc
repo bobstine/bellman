@@ -41,20 +41,23 @@ int  main()
 
  
   if (true)
-  { std::cout << "\n\n Test new type of wealth function based on arb function" << std::endl;
+  { std::cout << "\n\n Test scaled universal wealth function " << std::endl;
 
     double scale (2);
     ScaledUniversalDist g(scale);
     std::cout << "    Scale g(2)@1 = " << g(1) << std::endl;
     std::cout << "    Scale g(2)@2 = " << g(2) << std::endl;
+    double W0 (0.5);
+    std::cout << "    Starting index for initial wealth " << W0 << " is " << g.starting_index(W0) << std::endl;
+    W0 = 1.5;
+    std::cout << "    Starting index for initial wealth " << W0 << " is " << g.starting_index(W0) << std::endl;
     
-    std::cout << "TEST: Wealth function starting from zero with universal bids throughout" << std::endl;
-    int     start   (  55 );
-    int     size    ( 300 );
-    int    iZero    (size - start + 1);
-    double wealth0  (6.7754711);
-    WealthArray wealth(wealth0, size-start, size, g);
-    std::cout << "   Wealth at position iZero is " << wealth.wealth(iZero) << " with next bid to be " << wealth.bid(iZero) << std::endl;
+    
+    W0 = 0.5;
+    std::cout << "\nTEST: Wealth function starting from wealth W0=" << W0 << " with universal bids throughout" << std::endl;
+    WealthArray wealth(W0, 50, g);
+    int iZ (wealth.zero_index());
+    std::cout << "   Wealth at position iZero=" << iZ << " is " << wealth.wealth(iZ) << " with next bid to be " << wealth.bid(iZ) << std::endl;
     std::cout << "    : " << wealth << std::endl;
   }
   

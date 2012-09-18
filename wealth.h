@@ -62,17 +62,26 @@ class UniversalDist: public Distribution
   double operator()(int k) const;
   };
 
+//  scaled     scaled     scaled     scaled     scaled     scaled     scaled
 
 class ScaledUniversalDist: public Distribution
 {
-  const double mScale;
-  public:
+  static const double mSumOfRecipLog;
 
-  ScaledUniversalDist (double scale): mScale(scale) { }
+  const double mScale;          // k in dean's notes
+
+ public:
+
+  ScaledUniversalDist (double scale)    : mScale(scale)  { ; }
   
   std::string identifier() const;
   double operator()(int k) const;
-  };
+
+  double max_wealth() const { return mScale * mSumOfRecipLog; }
+  
+  int starting_index(double initialWealth) const;   // int such that scaled tail sum matches initial wealth
+  
+};
 
 // double uniform_to_end (int k, int left);
 
@@ -91,25 +100,25 @@ class WealthArray
 {
   const std::string     mName;
   const int             mPadding;    // space for wealth above omega; keep < 15 or cannot solve for multiplier.
+  const int             mZeroIndex;  // position of W_0, the place used for omega; set to max number steps can take
   const int             mSize;       // number of distinct wealth values
   const double          mOmega;      // defines wealth at zeroIndex and determines how far 'up' wealth can go 
-  const int             mZeroIndex;  // position of W_0, the place used for omega
   DynamicArray<double>  mWealth;     // indices k < mZeroIndex denote wealth less than omega
   std::vector< std::pair<int,double> > mPositions;  // cache locations for new positions when increment wealth by rejection
 
  public:
 
   WealthArray ()
-    : mName("empty"), mPadding(0), mSize(mPadding), mOmega(0), mZeroIndex(0), mWealth(), mPositions() { }
+    : mName("empty"), mPadding(0), mZeroIndex(0), mSize(mPadding), mOmega(0), mWealth(), mPositions() { }
   
- WealthArray(double wealth0, int zeroIndex, int size, Distribution const& bidFunction)  // finds omega from wealth
-   : mName(bidFunction.identifier()), mPadding(size-zeroIndex), mSize(size), mOmega(0), mZeroIndex(zeroIndex), mWealth(), mPositions() { initialize_array_using_func(wealth0,bidFunction);}
-
+ WealthArray(double w0, int zeroIndex, ScaledUniversalDist const& f)
+   : mName(f.identifier()),   mPadding(f.starting_index(w0)), mZeroIndex(zeroIndex), mSize(zeroIndex+mPadding), mOmega(0),     mWealth(), mPositions() { initialize_array_using_func(f);}
+  
  WealthArray(double omega, int zeroIndex, Distribution const& pdf)
-   : mName(pdf.identifier()), mPadding(2), mSize(zeroIndex+mPadding), mOmega(omega), mZeroIndex(zeroIndex), mWealth(), mPositions() { initialize_array_using_pdf(pdf);}
+   : mName(pdf.identifier()), mPadding(2),                    mZeroIndex(zeroIndex), mSize(zeroIndex+mPadding), mOmega(omega), mWealth(), mPositions() { initialize_array_using_pdf(pdf);}
 
  WealthArray(double omega, int zeroIndex, double psi) // use for geometric for numerical stability
-   : mName(geom_name(psi)), mPadding(2), mSize(zeroIndex+mPadding), mOmega(omega), mZeroIndex(zeroIndex), mWealth(), mPositions() { initialize_geometric_array(psi);}
+   : mName(geom_name(psi)),   mPadding(2),                    mZeroIndex(zeroIndex), mSize(zeroIndex+mPadding), mOmega(omega), mWealth(), mPositions() { initialize_geometric_array(psi);}
 
 
   std::string name()               const { return mName; }
@@ -129,7 +138,7 @@ class WealthArray
   std::string geom_name(double p) const;
   void init_positions ();
   void initialize_array_using_pdf (Distribution const& p);
-  void initialize_array_using_func(double w0, Distribution const& p);
+  void initialize_array_using_func(ScaledUniversalDist const& p);
   void initialize_geometric_array (double psi);
   void fill_array_top();
   std::pair<int, double> find_wealth_position (int k, double increaseInWealth) const;
