@@ -25,14 +25,12 @@ void
 parse_arguments(int argc, char** argv,
 		bool &riskUtil, double &angle, int &nRounds, bool &constrained,
 		double &oracleProb, double &bidderProb,  
-		double &spendPct, bool &writeTable);
+		double &omega, bool &writeTable);
 
 
 // Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     
 int  main(int argc, char** argv)
 {
-  const double omega  = 0.05;
-
   // default arguments
   bool      riskUtil  = false;    // risk or rejection, default is rejection (which is fast)
   double       angle  =     0;    // in degrees
@@ -41,16 +39,17 @@ int  main(int argc, char** argv)
   double   oracleProb = 0.0;      // use univ oracle if zero prob and constrained
   double   bidderProb = 0.0;
   bool     writeTable = false;    // if false, only return final value
-  double    spendPct  = 0.5;
+  double     omega    = 0.05;     // also sets the initial wealth
 
-  parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, spendPct, writeTable);
-  
+  parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, omega, writeTable);
+
   const int iOmega    (nRounds+1);   
+  std::cout << "Made Wealth array with parameters " << omega << " " << omega << " " << bidderProb << std::endl;  
   WealthArray* pBidderWealth = make_wealth_array(omega, iOmega, bidderProb);
   WealthArray* pOracleWealth = make_wealth_array(omega, iOmega, oracleProb);   // unused in unconstrained case
-  
+
   if(!constrain)           // unconstrained oracle 
-    { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
+  { std::cout << omega << " uncon(" << oracleProb << ") " << pBidderWealth->name() << " " << std::endl;
     if (riskUtil)
     { RiskVectorUtility utility(angle, oracleProb);
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
@@ -61,7 +60,7 @@ int  main(int argc, char** argv)
     }
   }
   else                     // constrained expert
-  { std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
+  { std::cout << omega << " " << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle, omega);
       solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, writeTable);
@@ -80,7 +79,7 @@ void
 parse_arguments(int argc, char** argv,
 		bool &riskUtil, double &angle, int &nRounds, bool &constrain,
 		double &oracleProb, double &bidderProb,   // zero denotes universal
-		double &spendPct, bool &writeTable)
+		double &omega, bool &writeTable)
 {
   static struct option long_options[] = {
     {"risk",             no_argument, 0, 'R'},
@@ -90,14 +89,14 @@ parse_arguments(int argc, char** argv,
     {"oracleprob", required_argument, 0, 'o'},
     {"bidderprob", required_argument, 0, 'b'},
     {"rounds",     required_argument, 0, 'n'},
-    {"spend",      required_argument, 0, 's'},
+    {"omega",      required_argument, 0, 'W'},
     {"write",            no_argument, 0, 'w'},
     {0, 0, 0, 0}                             // terminator 
   };
   int key;
   int option_index = 0;
   bool rejectUtil = true;
-  while (-1 !=(key = getopt_long (argc, argv, "Rra:co:b:n:s:w", long_options, &option_index))) // colon means has argument
+  while (-1 !=(key = getopt_long (argc, argv, "Rra:co:b:n:W:w", long_options, &option_index))) // colon means has argument
   {
     // std::cout << "Option key " << char(key) << " for option " << long_options[option_index].name << ", option_index=" << option_index << std::endl;
     switch (key)
@@ -137,9 +136,9 @@ parse_arguments(int argc, char** argv,
 	bidderProb = read_utils::lexical_cast<double>(optarg);
 	break;
       }
-    case 's' :
+    case 'W' :
       {
-	spendPct = read_utils::lexical_cast<double>(optarg);
+	omega = read_utils::lexical_cast<double>(optarg);
 	break;
       }
     case 'w' : 
@@ -161,7 +160,11 @@ WealthArray*
 make_wealth_array(double omega, int iOmega, double prob)
 {
   if(0 == prob)         // universal
-    return new WealthArray(omega, iOmega, UniversalDist(universalStart));
+  { double scale (2.0);
+    std::cout << "Making new wealth array" << std::endl;
+    return new WealthArray(omega, omega, iOmega, ScaledUniversalDist(scale));
+  }
+    // return new WealthArray(omega, iOmega, UniversalDist(universalStart));
   else if (prob > 1)    // uniform
     return new WealthArray(omega, iOmega, UniformDist( trunc(prob) ));
   else                  // geometric

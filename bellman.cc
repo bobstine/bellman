@@ -257,7 +257,7 @@ solve_bellman_utility  (int nRounds, MatrixUtility & utility, WealthArray const&
 
 
 void
-solve_constrained_bellman_alpha_equation (double gamma, double omega, int nRounds, double spendPct, double oracleProb, ProbDist const& bidderProb, bool writeDetails)
+solve_constrained_bellman_alpha_equation (double gamma, double omega, int nRounds, double spendPct, double oracleProb, Distribution const& bidderProb, bool writeDetails)
 {
   const int maxIterations (200);   
   const double tolerance  (0.0001);
@@ -402,7 +402,7 @@ ConstrainedExpertCompetitiveAlphaGain::value_to_bidder(double mu, double v00, do
 
 // this version does alpha-wealth rather than input utility
 void
-solve_bellman_alpha_equation (double gamma, double omega, int nRounds, double spendPct, ProbDist const& f, bool writeDetails)
+solve_bellman_alpha_equation (double gamma, double omega, int nRounds, double spendPct, Distribution const& f, bool writeDetails)
 {
   const int maxIterations (100);
   const double tolerance  (0.0001);

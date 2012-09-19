@@ -160,13 +160,10 @@ WealthArray::initialize_array_using_func(ScaledUniversalDist const& f)
 {
   assert((0 < mZeroIndex) && (mZeroIndex < mSize-1));
   DynamicArray<double> da(0,mSize-1);
-  std::cout << "  --  assigning " << f.max_wealth() << " to position " << mSize-1 << std::endl;
   da.assign(mSize-1, f.max_wealth());
   for(int i=0, j=mSize-2; i<mSize-1; ++i,--j)
-  { std::cout << "  --  assigning " << da[j+1]-f(i) << " to position " << j << std::endl;
     da.assign(j, da[j+1]-f(i));
-  }
-  std::cout << " Done filling the array; need to find positions." << std::endl;
+  mWealth = da;
   init_positions();
 }
 
@@ -179,7 +176,6 @@ WealthArray::initialize_geometric_array(double psi)
   da.assign(mZeroIndex,mOmega);
   for(int i=mZeroIndex-1; 0 <= i; --i)
   { double bid (da[i+1]*psi);
-    // std::cout << i << "   " << da[i+1]-bid << "     bid " << bid << std::endl;
     da.assign(i, da[i+1] - bid ); 
   }
   mWealth=da;
@@ -217,6 +213,7 @@ WealthArray::init_positions ()
 {
   // lock in indexing for finding new positions since the increment is known in advance
   mPositions.push_back( std::make_pair(0,0) ) ;
+  std::cout << "In init_positions further" << std::endl;
   for(int j = 1; j<mSize-1; ++j)
     mPositions.push_back( find_wealth_position(j,mOmega-bid(j)) );
 }

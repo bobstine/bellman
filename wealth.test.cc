@@ -54,8 +54,9 @@ int  main()
     
     
     W0 = 0.5;
+    double omega (0.5);
     std::cout << "\nTEST: Wealth function starting from wealth W0=" << W0 << " with universal bids throughout" << std::endl;
-    WealthArray wealth(W0, 50, g);
+    WealthArray wealth(W0,omega, 50, g);
     int iZ (wealth.zero_index());
     std::cout << "   Wealth at position iZero=" << iZ << " is " << wealth.wealth(iZ) << " with next bid to be " << wealth.bid(iZ) << std::endl;
     std::cout << "    : " << wealth << std::endl;

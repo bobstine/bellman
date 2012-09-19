@@ -111,8 +111,8 @@ class WealthArray
   WealthArray ()
     : mName("empty"), mPadding(0), mZeroIndex(0), mSize(mPadding), mOmega(0), mWealth(), mPositions() { }
   
- WealthArray(double w0, int zeroIndex, ScaledUniversalDist const& f)
-   : mName(f.identifier()),   mPadding(f.starting_index(w0)), mZeroIndex(zeroIndex), mSize(zeroIndex+mPadding), mOmega(0),     mWealth(), mPositions() { initialize_array_using_func(f);}
+ WealthArray(double w0, double omega, int zeroIndex, ScaledUniversalDist const& f)
+   : mName(f.identifier()),   mPadding(f.starting_index(w0)), mZeroIndex(zeroIndex), mSize(zeroIndex+mPadding), mOmega(omega), mWealth(), mPositions() { initialize_array_using_func(f);}
   
  WealthArray(double omega, int zeroIndex, Distribution const& pdf)
    : mName(pdf.identifier()), mPadding(2),                    mZeroIndex(zeroIndex), mSize(zeroIndex+mPadding), mOmega(omega), mWealth(), mPositions() { initialize_array_using_pdf(pdf);}

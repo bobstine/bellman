@@ -32,10 +32,10 @@ solve_bellman_utility  (int nRounds, MatrixUtility & util, WealthArray const& or
 
 // --- Earlier version with the alpha-investing utility, only spending down alpha-wealth with gamma form for mixing
 void
-solve_bellman_alpha_equation             (double angle, double omega, int nRounds, double spendPct, ProbDist const& f, bool writeDetails);
+solve_bellman_alpha_equation             (double angle, double omega, int nRounds, double spendPct, Distribution const& f, bool writeDetails);
 
 void
-solve_constrained_bellman_alpha_equation (double angle, double omega, int nRounds, double spendPct, double oracleGeoProb, ProbDist const& bidderProb, bool printDetails);
+solve_constrained_bellman_alpha_equation (double angle, double omega, int nRounds, double spendPct, double oracleGeoProb, Distribution const& bidderProb, bool printDetails);
 
 
 //  This guy does the optimization to find the best mu at given state
@@ -50,14 +50,14 @@ class ExpertCompetitiveAlphaGain: public std::unary_function<double,double>
  private:
   const double mGamma;
   const double mOmega;
-  ProbDist const& mProb;
+  Distribution const& mProb;
   const double mSpendPct;
   double mBetaK;
   double mV0, mVkp1;
   
  public:
 
- ExpertCompetitiveAlphaGain(double gamma, double omega, ProbDist const& f, double spendPct)
+ ExpertCompetitiveAlphaGain(double gamma, double omega, Distribution const& f, double spendPct)
    : mGamma(gamma), mOmega(omega), mProb(f), mSpendPct(spendPct), mBetaK(0.0) {}
   
   double beta_k (void) const { return mBetaK; }
@@ -81,14 +81,14 @@ class ConstrainedExpertCompetitiveAlphaGain: public std::unary_function<double,d
   const double mGamma;
   const double mOmega;
   const GeometricDist mExpertDist;
-  ProbDist const& mBidderProb;
+  Distribution const& mBidderProb;
   const double mSpendPct;
   double mAlpha, mBeta;
   double mV00, mVi0, mVij, mV0j;
   
  public:
 
- ConstrainedExpertCompetitiveAlphaGain(double gamma, double omega, double spendPct, double geoProb, ProbDist const& bidderP)
+ ConstrainedExpertCompetitiveAlphaGain(double gamma, double omega, double spendPct, double geoProb, Distribution const& bidderP)
    : mGamma(gamma), mOmega(omega), mExpertDist(geoProb), mBidderProb(bidderP), mSpendPct(spendPct), mAlpha(0.0), mBeta(0.0) {}
 
   double alpha (void) const { return mAlpha; }

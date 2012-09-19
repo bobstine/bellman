@@ -14,7 +14,7 @@ PROJECT_NAME = bellman
 
 # OPT = -O3 -std=c++0x -DNDEBUG
 
-OPT = -O3 -std=c++0x
+OPT = -O3  -std=c++0x
 
 
 USES = utils random
@@ -74,7 +74,7 @@ bellman: bellman.o wealth.o utility.o bellman_main.o
 # g01000 univ(1) 1 2       153.435 0.05   200   0.05 10     -1.35152 -0.622174 -0.364673                                                                                   
 
 bellman_test: bellman 
-	./bellman --risk --angle 153.435   --rounds 200             --oracleprob 0.10 --bidderprob 0
+	./bellman --risk --omega 0.5 --angle 153.435   --rounds  20             --oracleprob 0.10 --bidderprob 0
 #	./bellman --risk --angle 153.435   --rounds 200 --constrain --oracleprob 0.01 --bidderprob 0
 
 #	./bellman --gamma 2   --rounds 400 --constrain --oracleprob 0 --bidderprob 0.01 --write
@@ -140,7 +140,7 @@ uruns/summary.risk_alpha$(atxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)
 	rm -f $@
 	cat $(filter $(up)/%,$^) >> $@
 
-# actual run command for unconstrained solution, with univ and geometric
+# actual run command for unconstrained solution
 $(up)/%: bellman bellman.sh $(up)/.directory_built
 	./bellman --$(goal) --angle $* --oracleprob $(alpha) --bidderprob 0      --rounds $(n) >  $@
 
