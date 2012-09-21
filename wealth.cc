@@ -5,6 +5,8 @@
 #include <math.h>
 #include <sstream>
 
+static const std::string messageTag ("WLTH: ");
+
 /////////////////////////////////////////  Distributions  ////////////////////////////////////////
 
 double
@@ -130,7 +132,7 @@ WealthArray::find_wealth_position (int k0, double increase)  const // k0 is curr
   }
   if (k0<k1)  // inside range
   { double p ( (target - mWealth[k0]) / (mWealth[k1] - mWealth[k0]) );
-    if (p < 0) std::cerr << "WTHA: *** Error ***  Wealth position is " << k0 << " " << p << std::endl;
+    if (p < 0) std::cerr << messageTag << "*** Error ***  Wealth position is " << k0 << " " << p << std::endl;
     return std::make_pair(k0,1-p);
   }
   else
@@ -196,7 +198,7 @@ WealthArray::fill_array_top()
 	      ([&w,&k,&b](double x){ double xk(x); for(int j=1;j<k;++j) xk *= x; return x*(1.0-xk)/(1-x) - w/b;}));
     if (m < 1)
     { m = 1.0;
-      std::cerr << "WLTH: Error. Wealth array cannot initialize upper wealth for inputs. Setting m = 1." << std::endl;
+      std::cerr << messageTag << " *** Error ***  Wealth array cannot initialize upper wealth for inputs. Setting m = 1." << std::endl;
       std::cout << "            w=" << w << "    k=" << k << "   b=" << b << std::endl;
     }
     for(int i=mZeroIndex+1; i < mSize-1; ++i)
@@ -217,7 +219,7 @@ WealthArray::init_positions ()
   for(int j = 1; j<mSize-1; ++j)
   { double increase (mOmega - bid(j));
     if (increase < 0)
-    { std::cerr << "WLTA:  *** Error ***  Wealth implies losing bid because bid " << bid(j) << " exceeds payoff " << mOmega << " Reset to zero." << std::endl;
+    { std::cerr << messageTag << "*Warning*  Wealth implies certain loss because bid " << bid(j) << " exceeds payoff " << mOmega << ".  Will stay at current position rather than loss." << std::endl;
       increase = 0;
     }
     mPositions.push_back( find_wealth_position(j,increase) );

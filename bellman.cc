@@ -29,18 +29,18 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
 
   // line search to max utility (or min risk)
   const int                      maxIterations   (200);   
-  const double                   tolerance       (0.0001);
+  const double                   tolerance       (0.001);
   const double                   initialGrid     (0.5);
-  const std::pair<double,double> searchInterval  (std::make_pair(0.05,10.0));
+  const std::pair<double,double> searchInterval  (std::make_pair(0.05,20.0));
   Line_Search::GoldenSection     search(tolerance, searchInterval, initialGrid, maxIterations);
   // pad arrays since need room to collect bid; initialize to zero
-  Matrix utilityMat= Matrix::Zero(nRounds+2, nColumns);   // extra 2 rows for start, stop
-  Matrix oracleMat = Matrix::Zero(nRounds+2, nColumns);
-  Matrix bidderMat = Matrix::Zero(nRounds+2, nColumns);
-  Matrix meanMat   = Matrix::Zero(nRounds+1, nColumns );
+  Matrix utilityMat= Matrix::Zero(nRounds+1, nColumns);   // extra row for start
+  Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns);
+  Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns);
+  Matrix meanMat   = Matrix::Zero(nRounds  , nColumns);
   // store intermediates in trapezoidal array; done=1 pads start; fill from bottom up
   int done = 1;
-  for (int row = nRounds; row > -1; --row, ++done)
+  for (int row = nRounds-1; row > -1; --row, ++done)
   { for (int k=done; k<nColumns-1; ++k)                             // -1 leaves room to avoid if clause
     { double bid (bidderWealth.bid(k));
       std::pair<int,double> kp (bidderWealth.wealth_position(k));   // where to go if reject (col, prob)
@@ -70,7 +70,7 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
     write_matrix_to_file(ss.str() + "utility", utilityMat.topLeftCorner(nRounds+1, utilityMat.cols()-1));  // omit boundary row, col
     write_matrix_to_file(ss.str() + "oracle" ,  oracleMat.topLeftCorner(nRounds+1, oracleMat.cols()-1));
     write_matrix_to_file(ss.str() + "bidder" ,  bidderMat.topLeftCorner(nRounds+1, bidderMat.cols()-1));
-    write_matrix_to_file(ss.str() + "mean"   ,    meanMat.topLeftCorner(nRounds+1, meanMat.cols()));
+    write_matrix_to_file(ss.str() + "mean"   ,    meanMat.topLeftCorner(nRounds  , meanMat.cols()));
   }
   std::cout << utility.angle() << " " << bidderWealth.omega() << "   " << nRounds   << "   " << searchInterval.first << " " << searchInterval.second  << "     "
 	    << utilityMat(0,nRounds+1) << " " << oracleMat(0,nRounds+1) << " " << bidderMat(0,nRounds+1) << std::endl;

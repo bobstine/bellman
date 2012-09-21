@@ -49,11 +49,11 @@ int  main(int argc, char** argv)
   if(!constrain)           // unconstrained oracle 
   { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
-    { RiskVectorUtility utility(angle, omega);
+    { RiskVectorUtility utility(angle, oracleProb);
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
     else
-    { RejectVectorUtility utility(angle, omega);
+    { RejectVectorUtility utility(angle, oracleProb);
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
   }
@@ -159,7 +159,7 @@ WealthArray*
 make_wealth_array(double omega, int iOmega, double prob)
 {
   if(0 == prob)         // universal
-  { double scale (2.0);
+  { double scale (1.0);
     std::clog << "MAIN: Making high-wealth universal array" << std::endl;
     return new WealthArray(omega, omega, iOmega, ScaledUniversalDist(scale));
   }

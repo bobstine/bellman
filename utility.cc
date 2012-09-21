@@ -4,6 +4,9 @@
 
 #include <utility> // pair
 
+const std::string messageTag ("UTIL: ");
+      int         messageCnt (0);
+const int         messageLim (2);
 
 ////////////////////////////////////  Utility functions  /////////////////////////////////////////
 
@@ -88,16 +91,32 @@ risk(double mu, double alpha)
   }
   else
   { ra = reject_prob(mu, alpha);
-    R = (1.0 - ra) * mu*mu;
+    R = (1.0 - ra) * mu * mu;
   }
-  double dev = z_alpha(alpha) - mu;
-  R += dev * normal_density(dev) + normal_cdf(-dev);
+  double z_a = z_alpha(alpha);
+  double dev = z_a - mu;
+  double sum = z_a + mu;
+  R += dev * normal_density(dev) + normal_cdf(-dev) + sum * normal_density(sum) + normal_cdf(-sum);
   return R;
 }
 
 
 // ------------------------------------------------------------------------------------------------------------
 // -----  VectorUtility  -----  VectorUtility  -----  VectorUtility  -----  VectorUtility  -----  VectorUtility
+
+void
+VectorUtility::set_constants (double beta, double rejectValue, double noRejectValue)
+{ assert (0 <= beta);
+  if (beta >= 1.0)
+  { ++messageCnt;
+    if (messageCnt == messageLim) std::cerr << messageTag << "Message limit reached." << std::endl;
+    if (messageCnt < messageLim) std::cerr << messageTag << "* Warning *  Bid beta too large; reduced to 0.99" << std::endl;
+    beta = 0.99;
+  }
+  mBeta = beta;
+  mRejectValue = rejectValue;
+  mNoRejectValue = noRejectValue;
+}
 
 double
 VectorUtility::r_mu_beta (double mu) const

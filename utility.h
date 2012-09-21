@@ -54,13 +54,7 @@ class VectorUtility: public std::unary_function<double,double>
   double beta       () const { return mBeta;  }
   double angle      () const { return mAngle; }
   
-  void set_constants (double beta, double rejectValue, double noRejectValue)
-  { assert (0 <= beta);
-    // some wealth functions bid rediculously large
-    mBeta = (beta < 1) ? beta : 0.99;
-    mRejectValue = rejectValue;
-    mNoRejectValue = noRejectValue;
-  }
+  void set_constants (double beta, double rejectValue, double noRejectValue);
 
   double r_mu_alpha (double mu) const;
   double r_mu_beta  (double mu) const;

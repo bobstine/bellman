@@ -74,7 +74,7 @@ bellman: bellman.o wealth.o utility.o bellman_main.o
 # g01000 univ(1) 1 2       153.435 0.05   200   0.05 10     -1.35152 -0.622174 -0.364673                                                                                   
 
 bellman_test: bellman 
-	./bellman --risk --omega 0.5 --angle 153.435 --rounds 200  --oracleprob 0.05 --bidderprob 0
+	./bellman --risk --omega 0.5 --angle 297 --rounds 200  --oracleprob 0.05 --bidderprob 0 --write
 
 #	./bellman --risk --angle 153.435   --rounds 200 --constrain --oracleprob 0.01 --bidderprob 0
 
@@ -108,7 +108,7 @@ reject_check: bellman
 # with these values chosen to match (don't know how to pick them from make input
 # so you have to define the constants here and match them in the make command.
 # Builds a directory in runs for these results, then files for each.
-n = 400
+n = 200
 
 # define geometric expert by rate
 psi = 0.0500
