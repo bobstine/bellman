@@ -2,9 +2,9 @@
 *.o
 *.test
 *~
-uruns
 TAGS
 bellman
 bellman2.*
 bellman_reject*
 runs
+uruns

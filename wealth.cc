@@ -81,27 +81,26 @@ ScaledUniversalDist::identifier() const
 double
 ScaledUniversalDist::operator() (int k) const
 {
-  const int start = 1;  // avoid divide by zero for f(0)
-  double ll = log(k+1+start);
-  return mScale/( (k+start) * ll * ll);
+  assert (0 < k);
+  double ll = log(k+1);
+  return mScale/(k * ll * ll);
 }
 
 
 int
-ScaledUniversalDist::starting_index(double w0) const
+ScaledUniversalDist::w0_index(double w0) const
 {
-  double tailSum = mScale * ScaledUniversalDist::mSumOfRecipLog;
-  int j=1;
-  while (tailSum > w0)
-  { double l (log (j+1));
-    tailSum -= mScale/(j*l*l);
+  double w (max_wealth());
+  int j (1);
+  while (w0 < w)
+  { w -= this->operator()(j);
     ++j;
   }
   return j;
 }
 
 
-    //     uniform to end     uniform to end     uniform to end     uniform to end         
+//     uniform to end     uniform to end     uniform to end     uniform to end         
 
 double uniform_to_end (int k, int left)         // equal spread over possible locations
 {
@@ -118,11 +117,12 @@ WealthArray::find_wealth_position (int k0, double increase)  const // k0 is curr
 {
   double target = mWealth[k0] + increase;      // 'wealth' is 'new wealth' > 'current wealth'
   int k1 (mSize-1);                            // W[k0] <= W[k1]
-  assert (target <= mWealth[k1]);              // needs to be in range of table
+  if (mWealth[k1] < target)                    // outside wealth range, as if bid > payoff
+    target = mWealth[k1];
   while (k0+1 < k1)                            // bracket between k0 and k1
   { int kk = floor((k0+k1)/2);
     // std::cout << "DEBUG: find_wealth_position   W[" << k0 << "]="
-    //          << mWealth[k0] << " W[" << kk << "]=" << mWealth[kk] << "  W[" << k1 << "]=" << mWealth[k1] << std::endl;
+    //           << mWealth[k0] << " W[" << kk << "]=" << mWealth[kk] << "  W[" << k1 << "]=" << mWealth[k1] << std::endl;
     if (target < mWealth[kk])
     { k1 = kk; }
     else
@@ -130,6 +130,7 @@ WealthArray::find_wealth_position (int k0, double increase)  const // k0 is curr
   }
   if (k0<k1)  // inside range
   { double p ( (target - mWealth[k0]) / (mWealth[k1] - mWealth[k0]) );
+    if (p < 0) std::cerr << "WTHA: *** Error ***  Wealth position is " << k0 << " " << p << std::endl;
     return std::make_pair(k0,1-p);
   }
   else
@@ -161,7 +162,7 @@ WealthArray::initialize_array_using_func(ScaledUniversalDist const& f)
   assert((0 < mZeroIndex) && (mZeroIndex < mSize-1));
   DynamicArray<double> da(0,mSize-1);
   da.assign(mSize-1, f.max_wealth());
-  for(int i=0, j=mSize-2; i<mSize-1; ++i,--j)
+  for(int i=1, j=mSize-2; i<mSize; ++i,--j)
     da.assign(j, da[j+1]-f(i));
   mWealth = da;
   init_positions();
@@ -213,10 +214,25 @@ WealthArray::init_positions ()
 {
   // lock in indexing for finding new positions since the increment is known in advance
   mPositions.push_back( std::make_pair(0,0) ) ;
-  std::cout << "In init_positions further" << std::endl;
   for(int j = 1; j<mSize-1; ++j)
-    mPositions.push_back( find_wealth_position(j,mOmega-bid(j)) );
+  { double increase (mOmega - bid(j));
+    if (increase < 0)
+    { std::cerr << "WLTA:  *** Error ***  Wealth implies losing bid because bid " << bid(j) << " exceeds payoff " << mOmega << " Reset to zero." << std::endl;
+      increase = 0;
+    }
+    mPositions.push_back( find_wealth_position(j,increase) );
+  }
 }
+
+
+void
+WealthArray::print_to (std::ostream& os) const
+{
+  os << "Wealth array " << mName << "  has wealth "
+     << mWealth[mZeroIndex] << " at iZero=" << mZeroIndex
+     << " with wealth vector : \n" << mWealth;
+}
+  
 
 
 std::string

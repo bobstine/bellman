@@ -42,16 +42,14 @@ int  main(int argc, char** argv)
   double     omega    = 0.05;     // also sets the initial wealth
 
   parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, omega, writeTable);
-
-  const int iOmega    (nRounds+1);   
-  std::cout << "Made Wealth array with parameters " << omega << " " << omega << " " << bidderProb << std::endl;  
+  const int iOmega    (nRounds+1);
+  
   WealthArray* pBidderWealth = make_wealth_array(omega, iOmega, bidderProb);
-  WealthArray* pOracleWealth = make_wealth_array(omega, iOmega, oracleProb);   // unused in unconstrained case
 
   if(!constrain)           // unconstrained oracle 
-  { std::cout << omega << " uncon(" << oracleProb << ") " << pBidderWealth->name() << " " << std::endl;
+  { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
-    { RiskVectorUtility utility(angle, oracleProb);
+    { RiskVectorUtility utility(angle, omega);
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
     else
@@ -59,8 +57,9 @@ int  main(int argc, char** argv)
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
   }
-  else                     // constrained expert
-  { std::cout << omega << " " << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
+  else                     // constrained oracle needs wealth to track
+  { WealthArray* pOracleWealth = make_wealth_array(omega, iOmega, oracleProb);
+    std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle, omega);
       solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, writeTable);
@@ -161,7 +160,7 @@ make_wealth_array(double omega, int iOmega, double prob)
 {
   if(0 == prob)         // universal
   { double scale (2.0);
-    std::cout << "Making new wealth array" << std::endl;
+    std::clog << "MAIN: Making high-wealth universal array" << std::endl;
     return new WealthArray(omega, omega, iOmega, ScaledUniversalDist(scale));
   }
     // return new WealthArray(omega, iOmega, UniversalDist(universalStart));

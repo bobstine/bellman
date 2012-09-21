@@ -55,8 +55,9 @@ class VectorUtility: public std::unary_function<double,double>
   double angle      () const { return mAngle; }
   
   void set_constants (double beta, double rejectValue, double noRejectValue)
-  { assert((0 <= beta) && (beta <= 1.0));
-    mBeta = beta;
+  { assert (0 <= beta);
+    // some wealth functions bid rediculously large
+    mBeta = (beta < 1) ? beta : 0.99;
     mRejectValue = rejectValue;
     mNoRejectValue = noRejectValue;
   }

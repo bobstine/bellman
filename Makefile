@@ -74,7 +74,8 @@ bellman: bellman.o wealth.o utility.o bellman_main.o
 # g01000 univ(1) 1 2       153.435 0.05   200   0.05 10     -1.35152 -0.622174 -0.364673                                                                                   
 
 bellman_test: bellman 
-	./bellman --risk --omega 0.5 --angle 153.435   --rounds  20             --oracleprob 0.10 --bidderprob 0
+	./bellman --risk --omega 0.5 --angle 153.435 --rounds 200  --oracleprob 0.05 --bidderprob 0
+
 #	./bellman --risk --angle 153.435   --rounds 200 --constrain --oracleprob 0.01 --bidderprob 0
 
 #	./bellman --gamma 2   --rounds 400 --constrain --oracleprob 0 --bidderprob 0.01 --write
@@ -87,7 +88,7 @@ bellman_test: bellman
 #   angle      : g01000 univ(1) 0.447214 -0.894427 153.435 0.05   7   0.05 10     8.50491 -19.82   -19.4188
 
 risk_check: bellman
-	./bellman --risk --angle 153.434949  --rounds 7  --constrain --oracleprob 0.01 --bidderprob 0 --write
+	./bellman --risk --omega 0.5 --angle 153.434949  --rounds 7  --constrain --oracleprob 0.01 --bidderprob 0 --write
 
 risk_test: bellman
 	./bellman --gamma 100  --rounds 100  --constrain --oracleprob 0 --bidderprob 0.05
@@ -102,13 +103,14 @@ reject_check: bellman
 # define these constants, then use a command like  (use uruns for unconstrained)
 #    make -j lots  -k runs/summary.reject_psi0090_n100
 # or
-#    make -j lots  -k runs/summary.risk_psi0010_n250
+#    make -k -j lots  runs/summary.risk_psi0010_n250
+#    make -k -j lots uruns/summary.risk_alpha0500_n200
 # with these values chosen to match (don't know how to pick them from make input
 # so you have to define the constants here and match them in the make command.
 # Builds a directory in runs for these results, then files for each.
-n = 200
+n = 400
 
-# define expert by geometric rate 
+# define geometric expert by rate
 psi = 0.0500
 ptxt=   0500
 
@@ -123,11 +125,15 @@ atxt=     0500
 # criterion should be risk or reject (and make it so in the C++ code)
 goal = risk
 
+
+
 #--------------------------------------------------------------------------------------------
 #  below here is automagic, building output in runs/   
 #--------------------------------------------------------------------------------------------
 
-# unconstrained. define path within uruns subdirectory for each alpha (oracle) and n combination
+# -----  unconstrained -----
+
+# define path within uruns subdirectory for each alpha (oracle) and n combination
 up = uruns/$(goal)_alpha$(atxt)_n$(n)
 
 $(up)/.directory_built: 
@@ -136,14 +142,13 @@ $(up)/.directory_built:
 	touch $@
 
 # main unconstrained target with parameters that identify angle over tasks
-uruns/summary.risk_alpha$(atxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/300 $(up)/315 $(up)/330 $(up)/345
+uruns/summary.risk_alpha$(atxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295 $(up)/296.758  $(up)/296.759  $(up)/300 $(up)/315 $(up)/330 $(up)/345
 	rm -f $@
 	cat $(filter $(up)/%,$^) >> $@
 
 # actual run command for unconstrained solution
 $(up)/%: bellman bellman.sh $(up)/.directory_built
-	./bellman --$(goal) --angle $* --oracleprob $(alpha) --bidderprob 0      --rounds $(n) >  $@
-
+	./bellman --$(goal) --omega 0.5 --angle $* --oracleprob $(alpha) --bidderprob 0      --rounds $(n) >  $@
 
 # -----  constrained -----
 

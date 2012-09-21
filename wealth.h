@@ -64,23 +64,36 @@ class UniversalDist: public Distribution
 
 //  scaled     scaled     scaled     scaled     scaled     scaled     scaled
 
+/*
+  A scaled universal distribution starts with the function
+
+      g(k) = c/(k log^2(k+1))   k = 1, 2, ...
+
+  The scaling constant c is a bit arbitrary though one can make an argument for
+  k about 4 based on a recurrance (Deans notes).  g determines the bid amounts
+  for the first bid (the maximum bid, k=1), second and so forth on down.  We set
+  the wealth by inserting the sum of g(k) into the wealth function at W[0] and
+  decrementing that sum by g(k).  The find indexing function requires adjustment
+  as well since some of the bid amounts are larger than the payout.
+*/
+
 class ScaledUniversalDist: public Distribution
 {
   static const double mSumOfRecipLog;
-
   const double mScale;          // k in dean's notes
-
+  
  public:
-
-  ScaledUniversalDist (double scale)    : mScale(scale)  { ; }
+  
+  ScaledUniversalDist (double scale)    : mScale(scale)  { }
   
   std::string identifier() const;
   double operator()(int k) const;
+  
+  int w0_index(double initialWealth) const;   // int such that scaled tail sum matches initial wealth
+  double max_wealth()                const  { return mScale * mSumOfRecipLog; }
 
-  double max_wealth() const { return mScale * mSumOfRecipLog; }
-  
-  int starting_index(double initialWealth) const;   // int such that scaled tail sum matches initial wealth
-  
+ private:  
+  double g(int k)          const; // the log recip with scaling factor
 };
 
 // double uniform_to_end (int k, int left);
@@ -112,7 +125,7 @@ class WealthArray
     : mName("empty"), mPadding(0), mZeroIndex(0), mSize(mPadding), mOmega(0), mWealth(), mPositions() { }
   
  WealthArray(double w0, double omega, int zeroIndex, ScaledUniversalDist const& f)
-   : mName(f.identifier()),   mPadding(f.starting_index(w0)), mZeroIndex(zeroIndex), mSize(zeroIndex+mPadding), mOmega(omega), mWealth(), mPositions() { initialize_array_using_func(f);}
+   : mName(f.identifier()),   mPadding(f.w0_index(w0)), mZeroIndex(zeroIndex), mSize(zeroIndex+mPadding), mOmega(omega), mWealth(), mPositions() { initialize_array_using_func(f);}
   
  WealthArray(double omega, int zeroIndex, Distribution const& pdf)
    : mName(pdf.identifier()), mPadding(2),                    mZeroIndex(zeroIndex), mSize(zeroIndex+mPadding), mOmega(omega), mWealth(), mPositions() { initialize_array_using_pdf(pdf);}
@@ -132,7 +145,8 @@ class WealthArray
   
   std::pair<int, double> wealth_position (int k) const { return mPositions[k]; }
   
-  void print_to (std::ostream& os) const { os << "Wealth array " << mName << "  " << mWealth; }
+  void print_to (std::ostream& os) const;
+
   
  private:
   std::string geom_name(double p) const;

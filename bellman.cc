@@ -41,9 +41,9 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
   // store intermediates in trapezoidal array; done=1 pads start; fill from bottom up
   int done = 1;
   for (int row = nRounds; row > -1; --row, ++done)
-  { for (int k=done; k<nColumns-1; ++k)    // -1 leaves room to avoid if clause
+  { for (int k=done; k<nColumns-1; ++k)                             // -1 leaves room to avoid if clause
     { double bid (bidderWealth.bid(k));
-      std::pair<int,double> kp (bidderWealth.wealth_position(k));
+      std::pair<int,double> kp (bidderWealth.wealth_position(k));   // where to go if reject (col, prob)
       double utilityIfReject = utilityMat(row+1,kp.first)*kp.second + utilityMat(row+1,kp.first+1)*(1-kp.second);
       double bidderIfReject  =  bidderMat(row+1,kp.first)*kp.second +  bidderMat(row+1,kp.first+1)*(1-kp.second);
       double oracleIfReject  =  oracleMat(row+1,kp.first)*kp.second +  oracleMat(row+1,kp.first+1)*(1-kp.second);
@@ -56,7 +56,7 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
       utilityMat(row,k) = maxPair.second;
       bidderMat (row,k) = utility.bidder_utility(maxPair.first, bidderIfReject, bidderMat(row+1,k-1));
       oracleMat (row,k) = utility.oracle_utility(maxPair.first, oracleIfReject, oracleMat(row+1,k-1));
-      if (false) std::cout << "     @ " << k << " " << row << " kk= " << kp.first << " { (" << utilityIfReject << "="
+      if (false) std::cout << "     @ " << k << " " << row << " k_r= " << kp.first << " { (" << utilityIfReject << "="
 			   << utilityMat(row+1,kp.first  ) << "*" <<   kp.second << " + "
 			   << utilityMat(row+1,kp.first+1) << "*" << 1-kp.second  << "), " << utilityMat(row+1,k-1)
 			   << "}  with bid " << bidderWealth.bid(k) << "    max  : " << maxPair.second << " @ " << maxPair.first << std::endl;

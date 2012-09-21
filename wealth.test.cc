@@ -11,7 +11,7 @@ int  main()
 
   const int univStart (1);
   
-  if (true)
+  if (false)
   {
     std::cout << "\nTest the probability function from wealth.h" << std::endl;
     UniversalDist univ(univStart);
@@ -44,19 +44,23 @@ int  main()
   { std::cout << "\n\n Test scaled universal wealth function " << std::endl;
 
     double scale (2);
-    ScaledUniversalDist g(scale);
-    std::cout << "    Scale g(2)@1 = " << g(1) << std::endl;
-    std::cout << "    Scale g(2)@2 = " << g(2) << std::endl;
+    double omega (0.5);
+    ScaledUniversalDist u(scale);
+    std::cout << "Total wealth is " << u.max_wealth() << std::endl;
+    std::cout << "    Scale u(2)@1 = " << u(1) << std::endl;
+    std::cout << "    Scale u(2)@2 = " << u(2) << std::endl;
+    std::cout << "    Scale u(2)@3 = " << u(3) << std::endl;
+    std::cout << "    Scale u(2)@4 = " << u(4) << std::endl;
+    std::cout << "    Scale u(2)@5 = " << u(5) << std::endl;
     double W0 (0.5);
-    std::cout << "    Starting index for initial wealth " << W0 << " is " << g.starting_index(W0) << std::endl;
+    std::cout << "    Starting index for initial wealth " << W0 << " is " << u.w0_index(W0) << std::endl;
     W0 = 1.5;
-    std::cout << "    Starting index for initial wealth " << W0 << " is " << g.starting_index(W0) << std::endl;
+    std::cout << "    Starting index for initial wealth " << W0 << " is " << u.w0_index(W0) << std::endl;
     
     
     W0 = 0.5;
-    double omega (0.5);
     std::cout << "\nTEST: Wealth function starting from wealth W0=" << W0 << " with universal bids throughout" << std::endl;
-    WealthArray wealth(W0,omega, 50, g);
+    WealthArray wealth(W0, omega, 50, u);
     int iZ (wealth.zero_index());
     std::cout << "   Wealth at position iZero=" << iZ << " is " << wealth.wealth(iZ) << " with next bid to be " << wealth.bid(iZ) << std::endl;
     std::cout << "    : " << wealth << std::endl;
