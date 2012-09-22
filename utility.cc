@@ -98,7 +98,6 @@ risk(double mu, double alpha)
     R = (1.0 - ra) * mu * mu;
   }
   double z_a = z_alpha(alpha/2);
-  std::cout << "Risk: r_" << mu << "(" << alpha << ") = " << ra << " with z_a=" << z_a << std::endl;
   double dev = z_a - mu;
   double sum = z_a + mu;   // two-sided
   R += dev * normal_density(dev) + normal_cdf(-dev) + sum * normal_density(sum) + normal_cdf(-sum);

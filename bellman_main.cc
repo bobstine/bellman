@@ -159,7 +159,7 @@ WealthArray*
 make_wealth_array(double omega, int iOmega, double prob)
 {
   if(0 == prob)         // universal
-  { double scale (4.0);
+  { double scale (2.0);
     std::clog << "MAIN: Making high-wealth universal array" << std::endl;
     return new WealthArray(omega, omega, iOmega, ScaledUniversalDist(scale));
   }
