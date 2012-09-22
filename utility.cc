@@ -14,12 +14,14 @@ double maximumZ = 8.0;
 double epsilon  = 1.0e-15;
 
 double
-reject_prob(double mu, double level)    // r_mu(alpha)
+reject_prob(double mu, double alpha)    // r_mu(alpha)
 {
-  if(level < epsilon)
+  if(alpha < epsilon)
     return 0.0;
   else
-    return normal_cdf(mu-normal_quantile(1-level));
+  { double z = z_alpha(alpha/2);   // two sided
+    return normal_cdf(mu-z) + normal_cdf(-mu-z);
+  }
 }
 
 double
@@ -28,7 +30,8 @@ reject_value(int i, WIndex const& kp, Matrix const& value, bool show)
   const int    k (kp.first);
   const double p (kp.second);
   const double v (value(i,k)*p + value(i,k+1)*(1-p));
-  if (show) std::cout << "   reject_value( i=" << i << ",kp=(" << k << "," << p << ") ) = " << value(i,k) << "*" << p << "+" << value(i,k+1) << "*" << (1-p) << "=" << v << std::endl;
+  if (show) std::cout << "   reject_value( i=" << i << ",kp=(" << k << "," << p << ") ) = "
+		      << value(i,k) << "*" << p << "+" << value(i,k+1) << "*" << (1-p) << "=" << v << std::endl;
   return v;
 }
 
@@ -38,7 +41,8 @@ reject_value(WIndex const& ip, int k, Matrix const& value, bool show)
   const int    i (ip.first);
   const double p (ip.second);
   const double v (value(i,k)*p + value(i+1,k)*(1-p));
-  if (show) std::cout << "   reject_value( ip=(" << i << "," << p << "),k=" << k << " ) = " << value(i,k) << "*" << p << "+" << value(i+1,k) << "*" << (1-p) << "=" << v << std::endl;
+  if (show) std::cout << "   reject_value( ip=(" << i << "," << p << "),k=" << k << " ) = "
+		      << value(i,k) << "*" << p << "+" << value(i+1,k) << "*" << (1-p) << "=" << v << std::endl;
   return v;
 }
 
@@ -93,9 +97,10 @@ risk(double mu, double alpha)
   { ra = reject_prob(mu, alpha);
     R = (1.0 - ra) * mu * mu;
   }
-  double z_a = z_alpha(alpha);
+  double z_a = z_alpha(alpha/2);
+  std::cout << "Risk: r_" << mu << "(" << alpha << ") = " << ra << " with z_a=" << z_a << std::endl;
   double dev = z_a - mu;
-  double sum = z_a + mu;
+  double sum = z_a + mu;   // two-sided
   R += dev * normal_density(dev) + normal_cdf(-dev) + sum * normal_density(sum) + normal_cdf(-sum);
   return R;
 }

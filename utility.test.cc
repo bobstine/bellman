@@ -14,8 +14,9 @@ int  main()
   if (true)
   { std::cout << "\nTEST: risk calculations." << std::endl;
     std::cout << "   risk(0,0)   = " << risk(0,0)     << std::endl;  // mu, alpha
-    std::cout << "   risk(0,.1)  = " << risk(0,0.1)   << std::endl;
+    std::cout << "   risk(0,.05) = " << risk(0,0.05)   << std::endl;
     std::cout << "   risk(1,.05) = " << risk(1,0.05)  << std::endl;
+    std::cout << "   risk(2,.05) = " << risk(2,0.05)  << std::endl;
   }
 
   if (true)
@@ -90,7 +91,7 @@ int  main()
     double omega (0.05);
     int    iZero (10);
     UniversalDist univ(univStart);
-    ProbDist *p = &univ;
+    Distribution *p = &univ;
     WealthArray wealth(omega, iZero, *p);
     RejectVectorUtility utility (angle, omega);
     
