@@ -73,7 +73,7 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
     write_matrix_to_file(ss.str() + "mean"   ,    meanMat.topLeftCorner(nRounds  , meanMat.cols()));
   }
   std::cout << utility.angle() << " " << bidderWealth.omega() << "   " << nRounds   << "   " << searchInterval.first << " " << searchInterval.second  << "     "
-	    << utilityMat(0,nRounds+1) << " " << oracleMat(0,nRounds+1) << " " << bidderMat(0,nRounds+1) << std::endl;
+	    << utilityMat(0,nRounds) << " " << oracleMat(0,nRounds) << " " << bidderMat(0,nRounds) << std::endl;
 }
 
 
