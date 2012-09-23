@@ -16,7 +16,7 @@ const int universalStart (1);
 // prob=0 signals universal, prob > 0 is geometric
 
 WealthArray*
-make_wealth_array(double omega, int iOmega, double prob);
+make_wealth_array(double omega, int iOmega, double prob, double scale);
 
 
 //  prob character indicates the distribution, u for universal and g for geometric
@@ -24,7 +24,7 @@ make_wealth_array(double omega, int iOmega, double prob);
 void
 parse_arguments(int argc, char** argv,
 		bool &riskUtil, double &angle, int &nRounds, bool &constrained,
-		double &oracleProb, double &bidderProb,  
+		double &oracleProb, double &bidderProb,  double &scale,
 		double &omega, bool &writeTable);
 
 
@@ -38,13 +38,14 @@ int  main(int argc, char** argv)
   bool     constrain  = false;    // ignores oracle prob if not constrained
   double   oracleProb = 0.0;      // use univ oracle if zero prob and constrained
   double   bidderProb = 0.0;
+  double     scale    = 1.0;      // multiplier of universal code in unconstrained
   bool     writeTable = false;    // if false, only return final value
   double     omega    = 0.05;     // also sets the initial wealth
 
-  parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, omega, writeTable);
+  parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, scale, omega, writeTable);
   const int iOmega    (nRounds+1);
   
-  WealthArray* pBidderWealth = make_wealth_array(omega, iOmega, bidderProb);
+  WealthArray* pBidderWealth = make_wealth_array(omega, iOmega, bidderProb, scale);
 
   if(!constrain)           // unconstrained oracle 
   { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
@@ -58,7 +59,7 @@ int  main(int argc, char** argv)
     }
   }
   else                     // constrained oracle needs wealth to track
-  { WealthArray* pOracleWealth = make_wealth_array(omega, iOmega, oracleProb);
+  { WealthArray* pOracleWealth = make_wealth_array(omega, iOmega, oracleProb, scale);
     std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle, omega);
@@ -78,7 +79,7 @@ void
 parse_arguments(int argc, char** argv,
 		bool &riskUtil, double &angle, int &nRounds, bool &constrain,
 		double &oracleProb, double &bidderProb,   // zero denotes universal
-		double &omega, bool &writeTable)
+		double &scale, double &omega, bool &writeTable)
 {
   static struct option long_options[] = {
     {"risk",             no_argument, 0, 'R'},
@@ -87,6 +88,7 @@ parse_arguments(int argc, char** argv,
     {"constrain",        no_argument, 0, 'c'},
     {"oracleprob", required_argument, 0, 'o'},
     {"bidderprob", required_argument, 0, 'b'},
+    {"scale",      required_argument, 0, 's'},
     {"rounds",     required_argument, 0, 'n'},
     {"omega",      required_argument, 0, 'W'},
     {"write",            no_argument, 0, 'w'},
@@ -95,7 +97,7 @@ parse_arguments(int argc, char** argv,
   int key;
   int option_index = 0;
   bool rejectUtil = true;
-  while (-1 !=(key = getopt_long (argc, argv, "Rra:co:b:n:W:w", long_options, &option_index))) // colon means has argument
+  while (-1 !=(key = getopt_long (argc, argv, "Rra:co:b:s:n:W:w", long_options, &option_index))) // colon means has argument
   {
     // std::cout << "Option key " << char(key) << " for option " << long_options[option_index].name << ", option_index=" << option_index << std::endl;
     switch (key)
@@ -135,6 +137,11 @@ parse_arguments(int argc, char** argv,
 	bidderProb = read_utils::lexical_cast<double>(optarg);
 	break;
       }
+    case 's' : 
+      {
+	scale = read_utils::lexical_cast<double>(optarg);
+	break;
+      }
     case 'W' :
       {
 	omega = read_utils::lexical_cast<double>(optarg);
@@ -156,11 +163,10 @@ parse_arguments(int argc, char** argv,
 
 
 WealthArray*
-make_wealth_array(double omega, int iOmega, double prob)
+make_wealth_array(double omega, int iOmega, double prob, double scale)
 {
   if(0 == prob)         // universal
-  { double scale (2.0);
-    std::clog << "MAIN: Making high-wealth universal array" << std::endl;
+  { std::clog << "MAIN: Making high-wealth universal array with scale " << scale << std::endl;
     return new WealthArray(omega, omega, iOmega, ScaledUniversalDist(scale));
   }
     // return new WealthArray(omega, iOmega, UniversalDist(universalStart));

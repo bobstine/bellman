@@ -74,7 +74,7 @@ bellman: bellman.o wealth.o utility.o bellman_main.o
 # g01000 univ(1) 1 2       153.435 0.05   200   0.05 10     -1.35152 -0.622174 -0.364673                                                                                   
 
 bellman_test: bellman 
-	./bellman --risk --omega 0.5 --angle 297 --rounds 200  --oracleprob 0.05 --bidderprob 0 --write
+	./bellman --risk --omega 0.5 --angle 297 --rounds 200  --oracleprob 0.05 --bidderprob 0 --scale 1.5 --write   # unconstrained
 
 #	./bellman --risk --angle 153.435   --rounds 200 --constrain --oracleprob 0.01 --bidderprob 0
 
@@ -104,7 +104,7 @@ reject_check: bellman
 #    make -j lots  -k runs/summary.reject_psi0090_n100
 # or
 #    make -k -j lots  runs/summary.risk_psi0010_n250
-#    make -k -j lots uruns/summary.risk_alpha0500_n200
+#    make -k -j lots uruns/summary.risk_alpha0500_scale2_n200
 # with these values chosen to match (don't know how to pick them from make input
 # so you have to define the constants here and match them in the make command.
 # Builds a directory in runs for these results, then files for each.
@@ -125,7 +125,8 @@ atxt=     0500
 # criterion should be risk or reject (and make it so in the C++ code)
 goal = risk
 
-
+# multiplier for unconstrained universal code
+scale = 1
 
 #--------------------------------------------------------------------------------------------
 #  below here is automagic, building output in runs/   
@@ -134,7 +135,7 @@ goal = risk
 # -----  unconstrained -----
 
 # define path within uruns subdirectory for each alpha (oracle) and n combination
-up = uruns/$(goal)_alpha$(atxt)_n$(n)
+up = uruns/$(goal)_alpha$(atxt)_scale$(scale)_n$(n)
 
 $(up)/.directory_built: 
 	echo Building directory for unconstrained runs $(up)
@@ -142,13 +143,13 @@ $(up)/.directory_built:
 	touch $@
 
 # main unconstrained target with parameters that identify angle over tasks
-uruns/summary.risk_alpha$(atxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295 $(up)/296.758  $(up)/296.759  $(up)/300 $(up)/315 $(up)/330 $(up)/345
+uruns/summary.risk_alpha$(atxt)_scale$(scale)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295 $(up)/296.758  $(up)/296.759  $(up)/300 $(up)/315 $(up)/330 $(up)/345
 	rm -f $@
 	cat $(filter $(up)/%,$^) >> $@
 
 # actual run command for unconstrained solution
 $(up)/%: bellman bellman.sh $(up)/.directory_built
-	./bellman --$(goal) --omega 0.5 --angle $* --oracleprob $(alpha) --bidderprob 0      --rounds $(n) >  $@
+	./bellman --$(goal) --omega 0.5 --angle $* --oracleprob $(alpha) --bidderprob 0 --scale $(scale)  --rounds $(n) >  $@
 
 # -----  constrained -----
 
