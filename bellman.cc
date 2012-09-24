@@ -24,9 +24,7 @@ imin(int a, int b)
 void
 solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& bidderWealth, bool writeDetails)
 {
-  // initialize: iOmega is omega location, iOmega+6 gives five states above omega
   const int nColumns (bidderWealth.size());   
-
   // line search to max utility (or min risk)
   const int                      maxIterations   (200);   
   const double                   tolerance       (0.001);
@@ -38,7 +36,7 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
   Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns);
   Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns);
   Matrix meanMat   = Matrix::Zero(nRounds  , nColumns);
-  // store intermediates in trapezoidal array; done=1 pads start; fill from bottom up
+  // store intermediates in trapezoidal array; done=1 pads start in last row; fill from bottom up
   int done = 1;
   for (int row = nRounds-1; row > -1; --row, ++done)
   { for (int k=done; k<nColumns-1; ++k)                             // -1 leaves room to avoid if clause
