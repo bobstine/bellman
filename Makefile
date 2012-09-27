@@ -19,9 +19,10 @@ OPT = -O3  -std=c++0x
 
 USES = utils random
 
-level_0 = wealth.o
-level_1 = utility.o
-level_2 = bellman.o
+level_1 = distribution.o
+level_2 = wealth.o
+level_3 = utility.o
+level_4 = bellman.o
 
 ############################################################################
 #
@@ -54,7 +55,7 @@ unconstrained_test: bellman
 
 bellman_main.o: bellman_main.cc
 
-bellman: bellman.o wealth.o utility.o bellman_main.o
+bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
 	$(GCC) $^ $(LDLIBS) -o  $@
 
 # Test geometric oracle, universal bidder
@@ -75,6 +76,9 @@ bellman: bellman.o wealth.o utility.o bellman_main.o
 
 bellman_test: bellman 
 	./bellman --risk --omega 0.5 --angle 210 --rounds 200  --oracleprob 0.05 --bidderprob 0 --scale 1 --write   # unconstrained
+
+# uncon(0.05) scaled_univ(1) UTIL: * Warning *  Bid beta too large; reduced to 0.99 UTIL: Message limit reached. 
+# 210 0.5   200   0.05 20     427.449 -488.064 -211.792
 
 #	./bellman --risk --angle 153.435   --rounds 200 --constrain --oracleprob 0.01 --bidderprob 0
 
