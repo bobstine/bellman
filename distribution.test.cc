@@ -10,9 +10,35 @@ int  main()
 
   const int univStart (1);
   
-  if (false)
+  if (true)
   {
-    std::cout << "\nTest the probability function from wealth.h" << std::endl;
+    std::cout << "\nTest that distributions sum to 1 on k = 0, ... " << std::endl;
+    double sum;
+    int sumLimit = 1000;
+    
+    GeometricDist geo1(0.5);
+    sum = 0.0; for (int i=0; i<sumLimit; ++i) sum += geo1(i); std::cout << "  Geo sum = " << sum << std::endl;    
+    GeometricDist geo2(0.23);
+    sum = 0.0; for (int i=0; i<sumLimit; ++i) sum += geo2(i); std::cout << "  Geo sum = " << sum << std::endl;
+    
+    sumLimit *= 1000;  // need lots for universal
+    UniversalDist univ1(1);
+    sum = 0.0; for (int i=0; i<sumLimit; ++i) sum += univ1(i); std::cout << "  Univ(1) sum = " << sum << std::endl;
+    UniversalDist univ2(2);
+    sum = 0.0; for (int i=0; i<sumLimit; ++i) sum += univ2(i); std::cout << "  Univ(2) sum = " << sum << std::endl;
+
+    ScaledUniversalDist su(2);  // note that the scaled universal is not a pdf
+    sum = 0.0; for (int i=0; i<sumLimit; ++i) sum += su(i); std::cout << "  scaled univ sum = " << sum << std::endl;
+  }
+
+
+  if (true)
+  {
+    std::cout << "\n\nInspect leading terms of distributions" << std::endl;
+    ScaledUniversalDist scaledUniv(2);
+    std::cout << "TEST: initial 20 rates from " << scaledUniv.identifier() << "  ";
+    for(int k=0; k<20; ++k) std::cout << scaledUniv(k) << " "; std::cout << std::endl;
+
     UniversalDist univ(univStart);
     double total (0.0);
     int count = 100000;
@@ -39,7 +65,7 @@ int  main()
   } 
 
  
-  if (true)
+  if (false)
   { std::cout << "\n\n--- Test scaled universal wealth function ---" << std::endl;
     std::vector<double> scales = {1,2,4};
 

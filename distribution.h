@@ -19,6 +19,8 @@ class Distribution: public std::unary_function<int,double>
 
    Probability distributions that control spending
 
+      Zero origin: All operator() defined so that \sum_{k=0} p(k) = 1 
+
  **********************************************************************************/
 
 class GeometricDist: public Distribution
