@@ -13,18 +13,66 @@ int  main()
       
   if (false)
   { double W0 = 0.5;
-    std::cout << "\nTEST: Wealth function starting from wealth W0=" << W0 << " with universal bids throughout" << std::endl;
+    double omega = 0.5;
+    std::cout << "\n\nTEST: Scaled wealth function starting from wealth W0=" << W0 << " with universal bids throughout and omega " << omega << std::endl;
     double scale =  4;   // note that the wealth array gets very large as the scale increases (about 3000 for k=4)
     ScaledUniversalDist u(scale);
-    double omega = W0;
     int nRounds = 100;
     WealthArray wealth(W0, omega, nRounds, u);
     int iZ (wealth.zero_index());
     std::cout << "   Wealth at position iZero=" << iZ << " is " << wealth.wealth(iZ) << " with next bid to be " << wealth.bid(iZ) << std::endl;
     std::cout << "    : " << wealth << std::endl;
   }
-  
+
   if (true)
+  {
+    std::cout << "\n\nTEST: Test bidding from wealth array." << std::endl;
+    double omega (  0.05);
+    int  nRounds ( 50   );
+    int    iZero ( 10   );
+    
+    Distribution *p;
+    UniversalDist univ(univStart);
+    p = &univ;
+    WealthArray uWealth(omega, iZero, nRounds, *p);
+    GeometricDist geo(0.005);
+    p = &geo;
+    WealthArray gWealth(omega, iZero, nRounds, *p);
+    std::cout << "TEST: wealth array  \n" << uWealth << std::endl;
+    std::cout << "TEST: wealth array  \n" << gWealth << std::endl;
+    std::cout << "TEST: high wealth bids, then those starting from iZero" << std::endl;
+    for(int k=0; k<5; ++k)
+      std::cout << "  bid at k " << k << " geo bid=" <<  gWealth.bid(k) << " out of " << gWealth[k]
+		<< "    universal bid=" << uWealth.bid(k) << " out of " << uWealth[k] << std::endl;
+    for (int r=0; r < nRounds; ++r) std::cout << "round=" << r+1
+					      << " geo bid=" <<  gWealth.bid(iZero+r) << " out of " << gWealth[iZero+r]
+					      << "    universal bid=" << uWealth.bid(iZero+r) << " out of " << uWealth[iZero+r] << std::endl;
+  }
+
+  if (true)
+  {
+    std::cout << "\n\nTEST: Test bracketing search in wealth." << std::endl;
+    double omega (  0.05);
+    int  nRounds ( 50   );
+    int    iZero ( 10   );
+    UniversalDist univ(1);
+
+    std::vector<int> ii = { 3, 6, 10, 15, 25};
+    WealthArray uWealth(omega, iZero, nRounds, univ);
+    for (unsigned int j=0; j<ii.size(); ++j)
+    { int i = ii[j];
+      double bid = uWealth.bid(i);
+      std::pair<int,double>  kk (uWealth.wealth_position(i));
+      std::cout << "TEST:  increment W[" << i << "]= " << uWealth[i] << " by " << 0.05-bid << " to " << 0.05+uWealth[i]-bid
+		<< " bracketed by " << uWealth[kk.first] << " * (" << kk.second << ")  +  ";
+      if(kk.first < nRounds-1)
+	std::cout << uWealth[kk.first+1] << " * (" << 1-kk.second << ")" << std::endl;
+      else
+	std::cout << uWealth[kk.first] << " * (" << 1-kk.second << ")" << std::endl;
+    }
+  }
+  
+  if (false)
   { std::cout << "\n\n Test extremes in geometric wealth table for underflows" << std::endl;
     
     double omega ( 0.05 );
@@ -58,39 +106,6 @@ int  main()
     std::cout << "TEST:   uniform wealth array  \n" << uniformWealth << std::endl;
   } 
 
-  // test bracket function from wealth 
-  if (false)
-  {
-    double omega (  0.05);
-    int    iZero (  6   );
-    int  nRounds (250   );
-    std::cout << "TEST: Initializing the wealth array." << std::endl;
-
-    Distribution *p;
-    UniversalDist univ(univStart);
-    GeometricDist geo(0.005);
-    p = &univ;
-    WealthArray uWealth(omega, iZero, nRounds, *p);
-    p = &geo;
-    WealthArray gWealth(omega, iZero, nRounds, *p);
-    std::cout << "TEST: wealth array  \n" << uWealth << std::endl;
-    std::cout << "TEST: wealth array  \n" << gWealth << std::endl;
-    std::cout << "TEST:  bids are " ;
-    
-    for (int r=1; r <= nRounds; ++r) std::cout << gWealth.bid(r) << "  " << uWealth.bid(r) << "     ";
-    std::cout << std::endl;
-    
-    { int i = 3;  // boundary
-      double bid = uWealth.bid(i);
-      std::pair<int,double>  kk (uWealth.wealth_position(i));
-      std::cout << "TEST:  increment W[" << i << "]= " << uWealth[i] << " by " << 0.05-bid << " to " << 0.05+uWealth[i]-bid
-		<< " bracketed by " << uWealth[kk.first] << " * (" << kk.second << ")  +  ";
-      if(kk.first < nRounds-1)
-	std::cout << uWealth[kk.first+1] << " * (" << 1-kk.second << ")" << std::endl;
-      else
-	std::cout << uWealth[kk.first] << " * (" << 1-kk.second << ")" << std::endl;
-    }
-  }
 
   return 0;
 }

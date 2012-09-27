@@ -37,9 +37,8 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
   Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns);
   Matrix meanMat   = Matrix::Zero(nRounds  , nColumns);
   // store intermediates in trapezoidal array; done=1 pads start in last row; fill from bottom up
-  int done = 1;
-  for (int row = nRounds-1; row > -1; --row, ++done)
-  { for (int k=done; k<nColumns-1; ++k)                                     // -1 leaves room to avoid if clause
+  for (int row = nRounds-1; row > -1; --row)
+  { for (int k=0; k<nColumns-row; ++k)                                     // -1 leaves room to avoid if clause
     { double bid (bidderWealth.bid(k));
       std::pair<int,double> kp (bidderWealth.wealth_position(k));           // where to go if reject (col, prob)
       double utilityIfReject = utilityMat(row+1,kp.first)*kp.second + utilityMat(row+1,kp.first+1)*(1-kp.second);

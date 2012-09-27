@@ -30,13 +30,13 @@ class WealthArray
     : mName("empty"), mZeroIndex(0), mOmega(0), mWealth(), mPositions() { }
   
  WealthArray(double w0, double omega,                int steps, ScaledUniversalDist const& f)
-   : mName(f.identifier()),   mZeroIndex(f.w0_index(w0)), mOmega(omega), mWealth(mZeroIndex+steps), mPositions() { initialize_array_using_func(f);}
+   : mName(f.identifier()),   mZeroIndex(f.w0_index(w0)), mOmega(omega), mWealth(mZeroIndex+steps+1), mPositions() { initialize_array_using_func(f);}
   
  WealthArray(           double omega, int zeroIndex, int steps, Distribution const& pdf)
-   : mName(pdf.identifier()), mZeroIndex(zeroIndex)     , mOmega(omega), mWealth(zeroIndex+steps), mPositions() { initialize_array_using_pdf(pdf);}
+   : mName(pdf.identifier()), mZeroIndex(zeroIndex)     , mOmega(omega), mWealth(zeroIndex+steps+1), mPositions() { initialize_array_using_pdf(pdf);}
 
  WealthArray(           double omega, int zeroIndex, int steps, double psi) // use for geometric for numerical stability
-   : mName(geom_name(psi)),   mZeroIndex(zeroIndex)     , mOmega(omega), mWealth(zeroIndex+steps), mPositions() { initialize_geometric_array(psi);}
+   : mName(geom_name(psi)),   mZeroIndex(zeroIndex)     , mOmega(omega), mWealth(zeroIndex+steps+1), mPositions() { initialize_geometric_array(psi);}
 
 
   std::string name()               const { return mName; }
@@ -44,9 +44,9 @@ class WealthArray
   int    zero_index ()             const { return mZeroIndex ; }
   double omega ()                  const { return mOmega; }
   
-  double bid(int k)                const { return mWealth[k]-mWealth[k+1]; }
-  double wealth(int k)             const { return mWealth[k]; }
-  double operator[](int k)         const { return mWealth[k]; }
+  double bid(int k)                const { return mWealth[k]-mWealth.at(k+1); }
+  double wealth(int k)             const { return mWealth.at(k); }
+  double operator[](int k)         const { return mWealth.at(k); }
   
   std::pair<int, double> wealth_position (int k) const { return mPositions[k]; }  // access to cached array
   

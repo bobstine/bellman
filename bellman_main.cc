@@ -16,7 +16,7 @@ const int universalStart (1);
 // prob=0 signals universal, prob > 0 is geometric
 
 WealthArray*
-make_wealth_array(double omega, int iOmega, double prob, double scale);
+make_wealth_array(int nRounds, double omega, int iOmega, double prob, double scale);
 
 
 //  prob character indicates the distribution, u for universal and g for geometric
@@ -45,7 +45,7 @@ int  main(int argc, char** argv)
   parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, scale, omega, writeTable);
   const int iOmega    (nRounds+1);
   
-  WealthArray* pBidderWealth = make_wealth_array(omega, iOmega, bidderProb, scale);
+  WealthArray* pBidderWealth = make_wealth_array(nRounds, omega, iOmega, bidderProb, scale);
 
   if(!constrain)           // unconstrained oracle 
   { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
@@ -59,7 +59,7 @@ int  main(int argc, char** argv)
     }
   }
   else                     // constrained oracle needs wealth to track
-  { WealthArray* pOracleWealth = make_wealth_array(omega, iOmega, oracleProb, scale);
+  { WealthArray* pOracleWealth = make_wealth_array(nRounds, omega, iOmega, oracleProb, scale);
     std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle, omega);
@@ -163,15 +163,15 @@ parse_arguments(int argc, char** argv,
 
 
 WealthArray*
-make_wealth_array(double omega, int iOmega, double prob, double scale)
+make_wealth_array(int nRounds, double omega, int iOmega, double prob, double scale)
 {
   if(0 == prob)         // universal
-  { std::clog << "MAIN: Making high-wealth universal array with scale " << scale << std::endl;
-    return new WealthArray(omega, omega, iOmega, ScaledUniversalDist(scale));
+  { std::clog << "MAIN: Making high-wealth universal array with scale " << scale << " omega=" << omega << " iOmega=" << iOmega << std::endl;
+    return new WealthArray(omega, omega, nRounds, ScaledUniversalDist(scale));
   }
     // return new WealthArray(omega, iOmega, UniversalDist(universalStart));
   else if (prob > 1)    // uniform
-    return new WealthArray(omega, iOmega, UniformDist( trunc(prob) ));
+    return new WealthArray(omega, iOmega, nRounds, UniformDist( trunc(prob) ));
   else                  // geometric
-    return new WealthArray(omega, iOmega, prob);
+    return new WealthArray(omega, iOmega, nRounds, prob);
 }

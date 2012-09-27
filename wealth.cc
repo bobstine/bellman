@@ -50,8 +50,8 @@ WealthArray::initialize_array_using_pdf(Distribution const& p)
   init_check();
   mWealth[mZeroIndex]=mOmega;
   for(int i=mZeroIndex+1; i < size(); ++i)
-  { double bid (mOmega * p(i-mZeroIndex));
-    std::cout << "    wealth[i="<<i<<"] = (wealth["<<i-1<<"]="<< mWealth[i-1]<<")-("<<mOmega<<")*(p["<< i-mZeroIndex <<"]="<< p(i-mZeroIndex)<<")\n";
+  { double bid (mOmega * p(i-mZeroIndex-1));
+    // std::cout << "    wealth[i="<<i<<"] = (wealth["<<i-1<<"]="<< mWealth[i-1]<<")-("<<mOmega<<")*(p["<< i-mZeroIndex-1 <<"]="<< p(i-mZeroIndex-1)<<")\n";
     mWealth[i] = mWealth[i-1] - bid;
   }
   fill_array_top();
@@ -65,7 +65,7 @@ WealthArray::initialize_array_using_func(ScaledUniversalDist const& f)
   init_check();
   mWealth[0] = f.max_wealth();
   for(int i=1; i<size(); ++i)
-    mWealth[i] = mWealth[i-1]-f(i);
+    mWealth[i] = mWealth[i-1]-f(i-1);
   init_positions();
 }
 
@@ -84,24 +84,25 @@ WealthArray::initialize_geometric_array(double psi)
 }
 
 
+//  accumulate wealth above omega by incrementing omega over iZero
 void
 WealthArray::fill_array_top()
-{ if (mZeroIndex > 2)                 // Add padding to accumulate wealth above omega by incrementing omega over padding steps
-  { double w (0.5);                   // allow to grow this much
-    int    k (mZeroIndex) ;           // over this many steps
-    // geometric sum
-    double b (bid(mZeroIndex));       // incrementing initial bid
-    double m (Line_Search::Bisection(0.00001,std::make_pair(1.000001,3))
-	      ([&w,&k,&b](double x){ double xk(x); for(int j=1;j<k;++j) xk *= x; return x*(1.0-xk)/(1-x) - w/b;}));
-    if (m < 1)
-    { m = 1.0;
-      std::cerr << messageTag << " *** Error ***  Wealth array cannot initialize upper wealth for inputs. Setting m = 1." << std::endl;
-      std::cout << "            w=" << w << "    k=" << k << "   b=" << b << std::endl;
-    }
-    for(int i=mZeroIndex-1; i >= size()-1; --i)
-    { b *= m;
-      mWealth[i] = mWealth[i+1] + b;
-    }
+{
+  double w (0.5);                   // allow to grow this much
+  int    k (mZeroIndex) ;           // over this many steps
+  // geometric sum
+  double b (bid(mZeroIndex));       // incrementing initial bid
+  double m (Line_Search::Bisection(0.00001,std::make_pair(1.000001,3))
+	    ([&w,&k,&b](double x){ double xk(x); for(int j=1;j<k;++j) xk *= x; return x*(1.0-xk)/(1-x) - w/b;}));
+  // std::cout << messageTag << "Geometric to top, b=" << b << " and growth factor m= " << m << " applied to " << mWealth[mZeroIndex] <<std::endl;
+  if (m < 1)
+  { m = 1.0;
+    std::cerr << messageTag << " *** Error ***  Wealth array cannot initialize upper wealth for inputs. Setting m = 1." << std::endl;
+    std::cout << "            w=" << w << "    k=" << k << "   b=" << b << std::endl;
+  }
+  for(int i=mZeroIndex-1; 0 < i; --i)
+  { b *= m;
+    mWealth[i] = mWealth[i+1] + b;
   }
   // last increment must be omega
   mWealth[0] = mWealth[1] + mOmega;
@@ -115,7 +116,8 @@ WealthArray::init_positions ()
   for(int j = 0; j<size()-1; ++j)
   { double increase (mOmega - bid(j));
     if (increase < 0)
-    { std::cerr << messageTag << "*Warning*  Wealth implies certain loss because bid " << bid(j) << " exceeds payoff " << mOmega << ".  Will stay at current position." << std::endl;
+    { std::cerr << messageTag << "*Warning*  Wealth implies certain loss because bid " << bid(j)
+		<< " exceeds payoff " << mOmega << ".  Will stay at current position." << std::endl;
       increase = 0;
     }
     mPositions.push_back( find_wealth_position(j,increase) );

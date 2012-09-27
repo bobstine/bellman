@@ -98,7 +98,7 @@ ScaledUniversalDist::w0_index(double w0) const
   double w (max_wealth());
   int j (0);
   while (w0 < w)
-  { w -= this->operator()(j+1);
+  { w -= this->operator()(j);
     ++j;
   }
   return j;
