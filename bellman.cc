@@ -39,14 +39,14 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
   // store intermediates in trapezoidal array; done=1 pads start in last row; fill from bottom up
   int done = 1;
   for (int row = nRounds-1; row > -1; --row, ++done)
-  { for (int k=done; k<nColumns-1; ++k)                             // -1 leaves room to avoid if clause
+  { for (int k=done; k<nColumns-1; ++k)                                     // -1 leaves room to avoid if clause
     { double bid (bidderWealth.bid(k));
-      std::pair<int,double> kp (bidderWealth.wealth_position(k));   // where to go if reject (col, prob)
+      std::pair<int,double> kp (bidderWealth.wealth_position(k));           // where to go if reject (col, prob)
       double utilityIfReject = utilityMat(row+1,kp.first)*kp.second + utilityMat(row+1,kp.first+1)*(1-kp.second);
       double bidderIfReject  =  bidderMat(row+1,kp.first)*kp.second +  bidderMat(row+1,kp.first+1)*(1-kp.second);
       double oracleIfReject  =  oracleMat(row+1,kp.first)*kp.second +  oracleMat(row+1,kp.first+1)*(1-kp.second);
       utility.set_constants(bid, utilityIfReject, utilityMat(row+1,k-1));   // last is util if not reject
-      std::pair<double,double> maxPair (search.find_maximum(utility));
+      std::pair<double,double> maxPair (search.find_maximum(utility));      // mean and maximal utility
       double utilAtMuEqualZero (utility(0.0));
       if (maxPair.second < utilAtMuEqualZero)
 	maxPair = std::make_pair(0.0,utilAtMuEqualZero);
