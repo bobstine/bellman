@@ -115,8 +115,8 @@ psi = 0.0500
 ptxt=   0500
 
 # define uncontrained expert by alpha level
-alpha = 0.0500
-atxt=     0500
+alpha = 0.1000
+atxt=     1000
 
 # define expert by uniform n (one more than n)
 # psi =   251
@@ -126,7 +126,7 @@ atxt=     0500
 goal = risk
 
 # multiplier for unconstrained universal code
-scale = 1
+scale = 2
 
 #--------------------------------------------------------------------------------------------
 #  below here is automagic, building output in runs/   
@@ -143,7 +143,7 @@ $(up)/.directory_built:
 	touch $@
 
 # main unconstrained target with parameters that identify angle over tasks
-uruns/summary.risk_alpha$(atxt)_scale$(scale)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295 $(up)/296.758  $(up)/296.759  $(up)/300 $(up)/315 $(up)/330 $(up)/345
+uruns/summary.risk_alpha$(atxt)_scale$(scale)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/345
 	rm -f $@
 	cat $(filter $(up)/%,$^) >> $@
 
