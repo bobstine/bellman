@@ -84,11 +84,11 @@ WealthArray::initialize_geometric_array(double psi)
 }
 
 
-//  accumulate wealth above omega by incrementing omega over iZero
+//  fill wealth above omega by incrementing omega over iZero steps
 void
 WealthArray::fill_array_top()
 {
-  double w (0.5);                   // allow to grow this much
+  double w (0.5);                   // allow to grow by this much 
   int    k (mZeroIndex) ;           // over this many steps
   // geometric sum
   double b (bid(mZeroIndex));       // incrementing initial bid
@@ -100,12 +100,10 @@ WealthArray::fill_array_top()
     std::cerr << messageTag << " *** Error ***  Wealth array cannot initialize upper wealth for inputs. Setting m = 1." << std::endl;
     std::cout << "            w=" << w << "    k=" << k << "   b=" << b << std::endl;
   }
-  for(int i=mZeroIndex-1; 0 < i; --i)
+  for(int i=mZeroIndex-1; 0 <= i; --i)
   { b *= m;
     mWealth[i] = mWealth[i+1] + b;
   }
-  // last increment must be omega
-  mWealth[0] = mWealth[1] + mOmega;
 }
 
 
