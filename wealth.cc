@@ -128,10 +128,9 @@ WealthArray::init_positions ()
       std::cerr << messageTag << "*Warning*  Wealth implies certain loss because bid " << bid(j) << " exceeds payoff " << mOmega  << std::endl;
     mPositions.push_back( find_wealth_position(j,increase) );
   }
-  for (int i=0; i<size()-1; ++i) 
-  { std::cout << messageTag << "DEBUG i=" << i << "  $" <<mWealth[i] << "  " << bid(i)
-	      << "  [" << mPositions[i].first << "," << mPositions[i].second << "]" << std::endl;
-  }
+  //  for (int i=0; i<size()-1; ++i) 
+  //  std::cout << messageTag << "DEBUG i=" << i << "  $" <<mWealth[i] << "  " << bid(i)
+  //	      << "  [" << mPositions[i].first << "," << mPositions[i].second << "]" << std::endl;
 }
 
 

@@ -40,7 +40,7 @@ class WealthArray
 
 
   std::string name()               const { return mName; }
-  int    size ()                   const { return (int) mWealth.size(); }
+  int    number_of_bids()          const { return (int) mWealth.size() - 1; } // -1 to avoid bidding off end of array
   int    zero_index ()             const { return mZeroIndex ; }
   double omega ()                  const { return mOmega; }
   
@@ -55,6 +55,7 @@ class WealthArray
   
  private:
   std::string geom_name(double p) const;
+  int  size()       const { return mWealth.size(); }
   void init_check() const;
   void init_positions ();
   void initialize_array_using_pdf (Distribution const& p);

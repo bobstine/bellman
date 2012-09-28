@@ -24,38 +24,39 @@ imin(int a, int b)
 void
 solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& bidderWealth, bool writeDetails)
 {
-  const int nColumns (bidderWealth.size());   
+  const int nColumns (bidderWealth.number_of_bids());   
   // line search to max utility (or min risk)
   const int                      maxIterations   (200);   
   const double                   tolerance       (0.001);
   const double                   initialGrid     (0.5);
   const std::pair<double,double> searchInterval  (std::make_pair(0.05,20.0));
   Line_Search::GoldenSection     search(tolerance, searchInterval, initialGrid, maxIterations);
-  // pad arrays since need room to collect bid; initialize to zero
-  Matrix utilityMat= Matrix::Zero(nRounds+1, nColumns);   // extra row for start
-  Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns);
-  Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns);
+  // pad arrays since need room to collect bid; initialize to zero; extra row for starting bottom up recursion
+  Matrix utilityMat= Matrix::Zero(nRounds+1, nColumns+1);  // +1 for initializing
+  Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns+1);
+  Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns+1);
   Matrix meanMat   = Matrix::Zero(nRounds  , nColumns);
-  // store intermediates in trapezoidal array; done=1 pads start in last row; fill from bottom up
-  for (int row = nRounds-1; row > -1; --row)
-  { for (int k=0; k<nColumns-row; ++k)                                     // -1 leaves room to avoid if clause
+  // store intermediates in trapezoidal array with shape |\ ; fill from bottom up
+  int done = 0;
+  for (int row = nRounds-1; row > -1; ++done, --row)
+  { for (int k=0; k<nColumns-done; ++k)
     { double bid (bidderWealth.bid(k));
       std::pair<int,double> kp (bidderWealth.wealth_position(k));           // where to go if reject (col, prob)
       double utilityIfReject = utilityMat(row+1,kp.first)*kp.second + utilityMat(row+1,kp.first+1)*(1-kp.second);
       double bidderIfReject  =  bidderMat(row+1,kp.first)*kp.second +  bidderMat(row+1,kp.first+1)*(1-kp.second);
       double oracleIfReject  =  oracleMat(row+1,kp.first)*kp.second +  oracleMat(row+1,kp.first+1)*(1-kp.second);
-      utility.set_constants(bid, utilityIfReject, utilityMat(row+1,k-1));   // last is util if not reject
+      utility.set_constants(bid, utilityIfReject, utilityMat(row+1,k+1));   // last is util if not reject
       std::pair<double,double> maxPair (search.find_maximum(utility));      // mean and maximal utility
       double utilAtMuEqualZero (utility(0.0));
       if (maxPair.second < utilAtMuEqualZero)
 	maxPair = std::make_pair(0.0,utilAtMuEqualZero);
       meanMat   (row,k) = maxPair.first;
       utilityMat(row,k) = maxPair.second;
-      bidderMat (row,k) = utility.bidder_utility(maxPair.first, bidderIfReject, bidderMat(row+1,k-1));
-      oracleMat (row,k) = utility.oracle_utility(maxPair.first, oracleIfReject, oracleMat(row+1,k-1));
+      bidderMat (row,k) = utility.bidder_utility(maxPair.first, bidderIfReject, bidderMat(row+1,k+1));
+      oracleMat (row,k) = utility.oracle_utility(maxPair.first, oracleIfReject, oracleMat(row+1,k+1));
       if (false) std::cout << "     @ " << k << " " << row << " k_r= " << kp.first << " { (" << utilityIfReject << "="
 			   << utilityMat(row+1,kp.first  ) << "*" <<   kp.second << " + "
-			   << utilityMat(row+1,kp.first+1) << "*" << 1-kp.second  << "), " << utilityMat(row+1,k-1)
+			   << utilityMat(row+1,kp.first+1) << "*" << 1-kp.second  << "), " << utilityMat(row+1,k+1)
 			   << "}  with bid " << bidderWealth.bid(k) << "    max  : " << maxPair.second << " @ " << maxPair.first << std::endl;
     }
   }
@@ -69,8 +70,11 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
     write_matrix_to_file(ss.str() + "bidder" ,  bidderMat.topLeftCorner(nRounds+1, bidderMat.cols()-1));
     write_matrix_to_file(ss.str() + "mean"   ,    meanMat.topLeftCorner(nRounds  , meanMat.cols()));
   }
+  // locate starting position in |\ array
+  int iZero = bidderWealth.number_of_bids() - nRounds;
+  std::cout << " iZero " << iZero<< std::endl;
   std::cout << utility.angle() << " " << bidderWealth.omega() << "   " << nRounds   << "   " << searchInterval.first << " " << searchInterval.second  << "     "
-	    << utilityMat(0,nRounds) << " " << oracleMat(0,nRounds) << " " << bidderMat(0,nRounds) << std::endl;
+	    << utilityMat(0,iZero) << " " << oracleMat(0,iZero) << " " << bidderMat(0,iZero) << std::endl;
 }
 
 
@@ -82,7 +86,7 @@ solve_bellman_utility  (int nRounds, MatrixUtility & utility, WealthArray const&
 {
   // initialize: omega location, size includes padding for wealth above omega
   const int iOmega   (nRounds + 1);   
-  const int nColumns (bidderWealth.size());   
+  const int nColumns (bidderWealth.number_of_bids());   
   // line search to find max utility
   const int                      maxIterations   (200);   
   const double                   tolerance       (0.0001);
