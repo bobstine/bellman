@@ -44,9 +44,9 @@ class WealthArray
   int    zero_index ()             const { return mZeroIndex ; }
   double omega ()                  const { return mOmega; }
   
-  double bid(int k)                const { return mWealth[k]-mWealth.at(k+1); }
   double wealth(int k)             const { return mWealth.at(k); }
   double operator[](int k)         const { return mWealth.at(k); }
+  double bid(int k)                const;
   
   std::pair<int, double> wealth_position (int k) const { return mPositions[k]; }  // access to cached array
   

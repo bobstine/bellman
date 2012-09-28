@@ -9,16 +9,21 @@
 static const std::string messageTag ("WLTH: ");
 
 
-//     WealthArray     WealthArray     WealthArray     WealthArray     WealthArray     WealthArray     WealthArray     WealthArray
+double
+WealthArray::bid(int k)                const
+{
+  assert ((0 <= k) && (k < size()-1));   // cannot find bid past end of array
+  return mWealth[k]-mWealth[k+1];
+}
 
 std::pair<int, double>
 WealthArray::find_wealth_position (int k1, double increase)  const // k0 is current position denoting current wealth
 {
   double target = mWealth[k1] + increase;       // 'wealth' is 'new wealth' > 'current wealth'
   int k0 (0);                            
-  if (mWealth[k0] < target)                     // outside wealth range, as if bid > payoff
-    target = mWealth[0];
-  while (k0+1 < k1)                             // bracket between k0 and k1
+  while (mWealth[k1] > target)                  // if bid > payoff
+    ++k1;
+  while (k0+1 < k1)                             // bracket target by wealth[k0] >= target >= wealth[k1]
   { int kk = floor((k0+k1)/2);
     // std::cout << "DEBUG: find_wealth_position   W[" << k0 << "]="
     //           << mWealth[k0] << " W[" << kk << "]=" << mWealth[kk] << "  W[" << k1 << "]=" << mWealth[k1] << std::endl;
@@ -40,7 +45,8 @@ WealthArray::find_wealth_position (int k1, double increase)  const // k0 is curr
 void
 WealthArray::init_check() const
 {
-  std::cout << messageTag << "Building dyn array with " << size()-mZeroIndex << " steps and wealth " << mOmega << " @ " << mZeroIndex << std::endl;
+  std::cout << messageTag << "Initializing wealth array with " << size()-mZeroIndex
+	    << " steps and wealth " << mOmega << " @ " << mZeroIndex << std::endl;
   assert((0 < mZeroIndex) && (mZeroIndex < size()));
 }
 
@@ -104,6 +110,11 @@ WealthArray::fill_array_top()
   { b *= m;
     mWealth[i] = mWealth[i+1] + b;
   }
+  // check that top bid is at least omega
+  if (bid(0) < mOmega)
+  { std::clog << messageTag << "Note: Moving bid at zero to omega."<< std::endl;
+    mWealth[0] = mWealth[1]+mOmega;
+  }
 }
 
 
@@ -112,13 +123,14 @@ WealthArray::init_positions ()
 {
   // cache indexing for new positions since the increment omega is fixed
   for(int j = 0; j<size()-1; ++j)
-  { double increase (mOmega - bid(j));
+  { double increase = mOmega - bid(j);
     if (increase < 0)
-    { std::cerr << messageTag << "*Warning*  Wealth implies certain loss because bid " << bid(j)
-		<< " exceeds payoff " << mOmega << ".  Will stay at current position." << std::endl;
-      increase = 0;
-    }
+      std::cerr << messageTag << "*Warning*  Wealth implies certain loss because bid " << bid(j) << " exceeds payoff " << mOmega  << std::endl;
     mPositions.push_back( find_wealth_position(j,increase) );
+  }
+  for (int i=0; i<size()-1; ++i) 
+  { std::cout << messageTag << "DEBUG i=" << i << "  $" <<mWealth[i] << "  " << bid(i)
+	      << "  [" << mPositions[i].first << "," << mPositions[i].second << "]" << std::endl;
   }
 }
 

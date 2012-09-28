@@ -24,11 +24,11 @@ int  main()
     std::cout << "    : " << wealth << std::endl;
   }
 
-  if (true)
+  if (false)
   {
     std::cout << "\n\nTEST: Test bidding from wealth array." << std::endl;
     double omega (  0.05);
-    int  nRounds ( 50   );
+    int  nRounds ( 20   );
     int    iZero ( 10   );
     
     Distribution *p;
@@ -49,6 +49,7 @@ int  main()
 					      << "    universal bid=" << uWealth.bid(iZero+r) << " out of " << uWealth[iZero+r] << std::endl;
   }
 
+  
   if (true)
   {
     std::cout << "\n\nTEST: Test bracketing search in wealth." << std::endl;
@@ -59,16 +60,14 @@ int  main()
 
     std::vector<int> ii = { 3, 6, 10, 15, 25};
     WealthArray uWealth(omega, iZero, nRounds, univ);
-    for (unsigned int j=0; j<ii.size(); ++j)
+    for (unsigned int j=0; j<ii.size()-1; ++j)
     { int i = ii[j];
       double bid = uWealth.bid(i);
       std::pair<int,double>  kk (uWealth.wealth_position(i));
-      std::cout << "TEST:  increment W[" << i << "]= " << uWealth[i] << " by " << 0.05-bid << " to " << 0.05+uWealth[i]-bid
-		<< " bracketed by " << uWealth[kk.first] << " * (" << kk.second << ")  +  ";
-      if(kk.first < nRounds-1)
-	std::cout << uWealth[kk.first+1] << " * (" << 1-kk.second << ")" << std::endl;
-      else
-	std::cout << uWealth[kk.first] << " * (" << 1-kk.second << ")" << std::endl;
+      double value =  uWealth[kk.first] * kk.second + uWealth[kk.first+1] * (1-kk.second);
+      std::cout << "TEST:  increment W[" << i << "]= " << uWealth[i] << " by " << 0.05-bid << " to " << 0.05+uWealth[i]-bid << " bracketed by "
+		<< uWealth[kk.first]   << " * (" << kk.second << ")  +  "
+		<< uWealth[kk.first+1] << " * (" << 1-kk.second << ") = " << value << std::endl;
     }
   }
   
