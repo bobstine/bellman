@@ -72,7 +72,6 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
   }
   // locate starting position in |\ array
   int iZero = bidderWealth.number_of_bids() - nRounds;
-  std::cout << " iZero " << iZero<< std::endl;
   std::cout << utility.angle() << " " << bidderWealth.omega() << "   " << nRounds   << "   " << searchInterval.first << " " << searchInterval.second  << "     "
 	    << utilityMat(0,iZero) << " " << oracleMat(0,iZero) << " " << bidderMat(0,iZero) << std::endl;
 }
