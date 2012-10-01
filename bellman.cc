@@ -35,22 +35,27 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
   Matrix utilityMat= Matrix::Zero(nRounds+1, nColumns+1);  // +1 for initializing
   Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns+1);
   Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns+1);
+  // save for recreating mean stochastic process
+  Matrix probMat   = Matrix::Zero(nRounds  , nColumns);    // rejection prob
+  Matrix indxMat   = Matrix::Zero(nRounds  , nColumns);    // if reject, where to
   Matrix meanMat   = Matrix::Zero(nRounds  , nColumns);
   // store intermediates in trapezoidal array with shape |\ ; fill from bottom up
   int done = 0;
   for (int row = nRounds-1; row > -1; ++done, --row)
   { for (int k=0; k<nColumns-done; ++k)
     { double bid (bidderWealth.bid(k));
-      std::pair<int,double> kp (bidderWealth.wealth_position(k));           // where to go if reject (col, prob)
+      std::pair<int,double> kp (bidderWealth.wealth_position(k));                 // where to go if reject (col, prob)
       double utilityIfReject = utilityMat(row+1,kp.first)*kp.second + utilityMat(row+1,kp.first+1)*(1-kp.second);
       double bidderIfReject  =  bidderMat(row+1,kp.first)*kp.second +  bidderMat(row+1,kp.first+1)*(1-kp.second);
       double oracleIfReject  =  oracleMat(row+1,kp.first)*kp.second +  oracleMat(row+1,kp.first+1)*(1-kp.second);
-      utility.set_constants(bid, utilityIfReject, utilityMat(row+1,k+1));   // last is util if not reject
-      std::pair<double,double> maxPair (search.find_maximum(utility));      // mean and maximal utility
+      utility.set_constants(bid, utilityIfReject, utilityMat(row+1,k+1));         // last is util if not reject
+      std::pair<double,double> maxPair (search.find_maximum(utility));            // mean and maximal utility
       double utilAtMuEqualZero (utility(0.0));
       if (maxPair.second < utilAtMuEqualZero)
 	maxPair = std::make_pair(0.0,utilAtMuEqualZero);
       meanMat   (row,k) = maxPair.first;
+      probMat   (row,k) = reject_prob(meanMat(row,k), (bid < 0.99) ? bid : 0.99); // insure prob less than 1
+      indxMat   (row,k) = kp.first;                                               // ignore averaging in rejection destination
       utilityMat(row,k) = maxPair.second;
       bidderMat (row,k) = utility.bidder_utility(maxPair.first, bidderIfReject, bidderMat(row+1,k+1));
       oracleMat (row,k) = utility.oracle_utility(maxPair.first, oracleIfReject, oracleMat(row+1,k+1));
@@ -69,6 +74,8 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
     write_matrix_to_file(ss.str() + "oracle" ,  oracleMat.topLeftCorner(nRounds+1, oracleMat.cols()-1));
     write_matrix_to_file(ss.str() + "bidder" ,  bidderMat.topLeftCorner(nRounds+1, bidderMat.cols()-1));
     write_matrix_to_file(ss.str() + "mean"   ,    meanMat.topLeftCorner(nRounds  , meanMat.cols()));
+    write_matrix_to_file(ss.str() + "prob"   ,    probMat.topLeftCorner(nRounds  , probMat.cols()));
+    write_matrix_to_file(ss.str() + "indx"   ,    indxMat.topLeftCorner(nRounds  , indxMat.cols()));
   }
   // locate starting position in |\ array
   int iZero = bidderWealth.number_of_bids() - nRounds;
