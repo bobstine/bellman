@@ -58,20 +58,7 @@ bellman_main.o: bellman_main.cc
 bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
 	$(GCC) $^ $(LDLIBS) -o  $@
 
-# Test geometric oracle, universal bidder
-# With revised geometric wealth array and different top fill (19 Jun 12)
-#           g01000 univ  2 0.05   200   0.5 7      515.584 -448.759 -482.172
-# Done with sobolev and prior code the geometric got higher risk
-#           g01000 univ  2 0.05   200   0.5 7      500.546 -463.415 -481.981
-# With code set to find the minimum risk, get same answer (so make neg_risk to retain legacy figures)
-#           g01000 univ  2 0.05   200   0.5 7     -515.584 448.759 482.172
-# With universal starting at 1, got this... geometric kills universal
-#           g01000 univ1 2 0.05   200   0.05 10     909.463 -423.46 -666.461
-# With revised (improved) tail wealth, get this [tail has more effect than I'd prefer]
-#           g01000 univ1 2 0.05   200   0.05 10     904.399 -470.746 -687.572
-
-
-# --- using latest code, angular style with force sine and cosine
+# --- using latest code, angular style with sine and cosine
 # g01000 univ(1) 1 2       153.435 0.05   200   0.05 10     -1.35152 -0.622174 -0.364673                                                                                   
 
 bellman_test: bellman 

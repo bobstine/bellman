@@ -45,6 +45,9 @@ class WealthArray
   double omega ()                  const { return mOmega; }
   
   double wealth(int k)             const { return mWealth.at(k); }
+  int    reject_jumps_to(int k)    const { return mPositions.at(k).first; }
+  double reject_jump_share(int k)  const { return mPositions.at(k).second; }
+  
   double operator[](int k)         const { return mWealth.at(k); }
   double bid(int k)                const;
   

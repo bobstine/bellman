@@ -121,8 +121,8 @@ WealthArray::fill_array_top()
 void
 WealthArray::init_positions ()
 {
-  // cache indexing for new positions since the increment omega is fixed
-  for(int j = 0; j<size()-1; ++j)
+  // cache indexing for new positions since the increment omega is fixed; -1 since do not have 'next' at end.
+  for(int j = 0; j<size()-1; ++j)  
   { double increase = mOmega - bid(j);
     if (increase < 0)
       std::cerr << messageTag << "*Warning*  Wealth implies certain loss because bid " << bid(j) << " exceeds payoff " << mOmega  << std::endl;

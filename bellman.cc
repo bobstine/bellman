@@ -6,7 +6,9 @@
 #include <math.h>
 #include <functional>
 #include <iostream>
+#include <fstream>
 #include <iomanip>
+#include <ios>
 
 // #define SHOW_PROGRESS
 
@@ -75,7 +77,27 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
     write_matrix_to_file(ss.str() + "bidder" ,  bidderMat.topLeftCorner(nRounds+1, bidderMat.cols()-1));
     write_matrix_to_file(ss.str() + "mean"   ,    meanMat.topLeftCorner(nRounds  , meanMat.cols()));
     write_matrix_to_file(ss.str() + "prob"   ,    probMat.topLeftCorner(nRounds  , probMat.cols()));
-    write_matrix_to_file(ss.str() + "indx"   ,    indxMat.topLeftCorner(nRounds  , indxMat.cols()));
+    std::string fileName = ss.str() + "indx";
+    { // tack wealth details to first 3 lines of file with indices
+      std::ios_base::openmode mode = std::ios_base::app;
+      std::ofstream output (fileName.c_str(), mode);
+      for (int i=0; i<bidderWealth.number_of_bids(); ++i)
+	output << bidderWealth.wealth(i) << " ";
+      output << std::endl;
+      for (int i=0; i<bidderWealth.number_of_bids(); ++i)
+	output << bidderWealth.reject_jumps_to(i) << " ";
+      output << std::endl;
+      std::cout << " k=" << 1 << " share  " << bidderWealth.reject_jump_share(1) << std::endl; 
+      for (int i=0; i<bidderWealth.number_of_bids(); ++i)
+	output << bidderWealth.reject_jump_share(i) << " +foo+ ";
+      output << std::endl;
+      output.close();
+      std::pair<int,double> pos (bidderWealth.wealth_position(3));
+      std::cout << pos.first << "  " << pos.second << std::endl;
+      pos = bidderWealth.wealth_position(7);
+      std::cout << pos.first << "  " << pos.second << std::endl;
+    }
+    write_matrix_to_file(fileName ,                 indxMat.topLeftCorner(nRounds  , indxMat.cols()), true); //  true = append
   }
   // locate starting position in |\ array
   int iZero = bidderWealth.number_of_bids() - nRounds;
