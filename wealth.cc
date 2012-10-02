@@ -142,6 +142,13 @@ WealthArray::print_to (std::ostream& os) const
   for (int i=0; i<size(); ++i) os << mWealth[i] << " ";
 }
   
+void
+WealthArray::write_to(std::ostream& os) const
+{
+  print_to(os);
+  for (int i=0; i<number_of_bids(); ++i)     os << reject_jumps_to(i)   << " ";    os << std::endl;
+  for (int i=0; i<number_of_bids(); ++i)     os << reject_jump_share(i) << " ";    os << std::endl;
+}
 
 
 std::string

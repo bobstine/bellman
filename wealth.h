@@ -54,7 +54,7 @@ class WealthArray
   std::pair<int, double> wealth_position (int k) const { return mPositions[k]; }  // access to cached array
   
   void print_to (std::ostream& os) const;
-
+  void write_to (std::ostream& os) const;   // more details
   
  private:
   std::string geom_name(double p) const;
