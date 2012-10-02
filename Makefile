@@ -33,6 +33,11 @@ level_4 = bellman.o
 # TAGS 
 # find . | grep ".*\.\(h\|cc\)" | xargs etags -f TAGS
 
+
+# find utility for simulated mean process
+simulate_risk: simulate
+	./simulate
+
 # -------------------------------------------------------------------
 # bellman recursion for competitive value
 #
@@ -56,6 +61,9 @@ unconstrained_test: bellman
 bellman_main.o: bellman_main.cc
 
 bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
+	$(GCC) $^ $(LDLIBS) -o  $@
+
+simulate: bellman.o wealth.o utility.o distribution.o bellman_simulator.o
 	$(GCC) $^ $(LDLIBS) -o  $@
 
 # --- using latest code, angular style with sine and cosine

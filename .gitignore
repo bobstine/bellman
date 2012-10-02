@@ -3,6 +3,7 @@
 *.test
 *~
 TAGS
+simulate
 bellman
 bellman.a*
 bellman2.*

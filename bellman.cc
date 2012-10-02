@@ -17,6 +17,34 @@ imin(int a, int b)
 { if (a < b) return a; else return b; }
 
 
+
+
+std::pair<double,double>
+find_process_risk (VectorUtility & utility, WealthArray const& bidderWealth, std::vector<double> const& mean)
+{
+  const int nColumns (bidderWealth.number_of_bids());   
+  const int nRounds  ((int)mean.size());
+  // pad arrays since need room to collect bid; initialize to zero; extra row for starting bottom up recursion
+  Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns+1);
+  Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns+1);
+  // store intermediates in trapezoidal array with shape |\ ; fill from bottom up
+  int done = 0;
+  for (int row = nRounds-1; row > -1; ++done, --row)
+  { for (int k=0; k<nColumns-done; ++k)
+    { double bid (bidderWealth.bid(k));
+      std::pair<int,double> kp (bidderWealth.wealth_position(k));                 // where to go if reject (col, prob)
+      double bidderIfReject  =  bidderMat(row+1,kp.first)*kp.second +  bidderMat(row+1,kp.first+1)*(1-kp.second);
+      double oracleIfReject  =  oracleMat(row+1,kp.first)*kp.second +  oracleMat(row+1,kp.first+1)*(1-kp.second);
+      utility.set_constants(bid, 0.0, 0.0);
+      bidderMat (row,k) = utility.bidder_utility(mean[row], bidderIfReject, bidderMat(row+1,k+1));
+      oracleMat (row,k) = utility.oracle_utility(mean[row], oracleIfReject, oracleMat(row+1,k+1));
+    }
+  }
+  int iZero = bidderWealth.number_of_bids() - nRounds;
+  return std::make_pair(oracleMat(0,iZero), bidderMat(0,iZero));
+}
+  
+
 //
 //    Unconstrained   Unconstrained   Unconstrained   Unconstrained   Unconstrained   Unconstrained
 //

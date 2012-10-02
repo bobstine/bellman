@@ -33,10 +33,10 @@ class WealthArray
    : mName(f.identifier()),   mZeroIndex(f.w0_index(w0)), mOmega(omega), mWealth(mZeroIndex+steps+1), mPositions() { initialize_array_using_func(f);}
   
  WealthArray(           double omega, int zeroIndex, int steps, Distribution const& pdf)
-   : mName(pdf.identifier()), mZeroIndex(zeroIndex)     , mOmega(omega), mWealth(zeroIndex+steps+1), mPositions() { initialize_array_using_pdf(pdf);}
+   : mName(pdf.identifier()), mZeroIndex(zeroIndex)     , mOmega(omega), mWealth(mZeroIndex+steps+1), mPositions() { initialize_array_using_pdf(pdf);}
 
  WealthArray(           double omega, int zeroIndex, int steps, double psi) // use for geometric for numerical stability
-   : mName(geom_name(psi)),   mZeroIndex(zeroIndex)     , mOmega(omega), mWealth(zeroIndex+steps+1), mPositions() { initialize_geometric_array(psi);}
+   : mName(geom_name(psi)),   mZeroIndex(zeroIndex)     , mOmega(omega), mWealth(mZeroIndex+steps+1), mPositions() { initialize_geometric_array(psi);}
 
 
   std::string name()               const { return mName; }
