@@ -80,6 +80,7 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
     write_matrix_to_file(ss.str() + "indx"   ,    indxMat.topLeftCorner(nRounds  , indxMat.cols()));
     { std::ios_base::openmode mode = std::ios_base::trunc;
       std::ofstream output (ss.str() + "wealth", mode);
+      bidderWealth.print_to(output);
       bidderWealth.write_to(output);
       output.close();
     }
