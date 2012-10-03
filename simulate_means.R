@@ -47,10 +47,20 @@ for(round in 2:nRounds) {
 	meanProcess[round] <- mean[round,k]
 	p.reject <- prob[round,k]
 	}    
-		             
-row<-1; nCols<-7
+	
+	
+plot(meanProcess)
 
-prob[row,1:nCols]
-mean[row,1:nCols]
-indx[row,1:nCols]
 
+#------------------------------------------------------------------
+#
+#  read utilities simulated in C++
+#
+
+setwd("/Users/bob/C/bellman/")
+
+mu<-3.2; pZero<-0.5; n<-200; angle<-210
+risk <- read.table(paste("sim_risk_",angle,"_",pZero,"_",mu,sep="")); dim(risk)
+plot(-risk[,1],-risk[,2], xlab="Oracle Risk", ylab="Universal Risk", 
+	main="Bellman Risk Simulations",
+	sub=paste("Mixing angle ",angle," with  n=",n,"  p0=",pZero,"  mu=",mu, sep=""))

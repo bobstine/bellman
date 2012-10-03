@@ -36,7 +36,7 @@ level_4 = bellman.o
 
 # find utility for simulated mean process
 simulate_risk: simulate
-	./simulate
+	./simulate --length 200 --reps 1000 --angle 210 --scale 2 --pzero 0.50 --signal 3.2
 
 # -------------------------------------------------------------------
 # bellman recursion for competitive value
