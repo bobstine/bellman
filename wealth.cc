@@ -45,7 +45,7 @@ WealthArray::find_wealth_position (int k1, double increase)  const // k0 is curr
 void
 WealthArray::init_check() const
 {
-  std::cout << messageTag << "Initializing wealth array with " << size()-mZeroIndex
+  std::clog << messageTag << "Initializing wealth array with " << size() << " values for run with "<< size()-mZeroIndex
 	    << " steps and wealth " << mOmega << " @ " << mZeroIndex << std::endl;
   assert((0 < mZeroIndex) && (mZeroIndex < size()));
 }
@@ -70,6 +70,7 @@ WealthArray::initialize_array_using_func(ScaledUniversalDist const& f)
 {
   init_check();
   mWealth[0] = f.max_wealth();
+  std::clog << messageTag << "Initial wealth W[0]=" << mWealth[0] << std::endl;
   for(int i=1; i<size(); ++i)
     mWealth[i] = mWealth[i-1]-f(i-1);
   init_positions();

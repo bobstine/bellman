@@ -4,6 +4,7 @@
 #include <math.h>
 #include <assert.h>
 #include <sstream>
+#include <iostream>
 
 static const std::string messageTag ("DIST: ");
 
@@ -95,12 +96,15 @@ ScaledUniversalDist::operator() (int k) const
 int
 ScaledUniversalDist::w0_index(double w0) const
 {
+  const int sizeLimit (100000);
   double w (max_wealth());
   int j (0);
-  while (w0 < w)
+  while ((w0 < w) && (j < sizeLimit))
   { w -= this->operator()(j);
     ++j;
   }
+  if(sizeLimit == j)
+    std::clog << messageTag << "*** Error *** Scaled distribution requires more than " << sizeLimit << " positions." << std::endl;
   return j;
 }
 

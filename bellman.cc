@@ -1,4 +1,5 @@
 #include "bellman.h"
+#include "random.h"
 #include "line_search.Template.h"
 #include "eigen_utils.h"
 
@@ -20,10 +21,9 @@ imin(int a, int b)
 
 
 std::pair<double,double>
-find_process_risk (VectorUtility & utility, WealthArray const& bidderWealth, std::vector<double> const& mean)
+find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, WealthArray const& bidderWealth)
 {
   const int nColumns (bidderWealth.number_of_bids());   
-  const int nRounds  ((int)mean.size());
   // pad arrays since need room to collect bid; initialize to zero; extra row for starting bottom up recursion
   Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns+1);
   Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns+1);
@@ -36,8 +36,10 @@ find_process_risk (VectorUtility & utility, WealthArray const& bidderWealth, std
       double bidderIfReject  =  bidderMat(row+1,kp.first)*kp.second +  bidderMat(row+1,kp.first+1)*(1-kp.second);
       double oracleIfReject  =  oracleMat(row+1,kp.first)*kp.second +  oracleMat(row+1,kp.first+1)*(1-kp.second);
       utility.set_constants(bid, 0.0, 0.0);
-      bidderMat (row,k) = utility.bidder_utility(mean[row], bidderIfReject, bidderMat(row+1,k+1));
-      oracleMat (row,k) = utility.oracle_utility(mean[row], oracleIfReject, oracleMat(row+1,k+1));
+      bidderMat (row,k) = pZero * utility.bidder_utility(0, bidderIfReject, bidderMat(row+1,k+1))
+	                  + (1-pZero) * utility.bidder_utility(mu, bidderIfReject, bidderMat(row+1,k+1));
+      oracleMat (row,k) = pZero * utility.oracle_utility(0, oracleIfReject, oracleMat(row+1,k+1))
+	+ (1-pZero) * utility.oracle_utility(mu, oracleIfReject, oracleMat(row+1,k+1));
     }
   }
   int iZero = bidderWealth.number_of_bids() - nRounds;

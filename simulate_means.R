@@ -2,7 +2,7 @@
 
 setwd("/Users/bob/C/bellman/")
 
-filename <- "bellman.a210.n200"
+filename <- "sim_risk_200_0.5_3.2_2"
 
 
 # --- read wealth array data
@@ -54,13 +54,16 @@ plot(meanProcess)
 
 #------------------------------------------------------------------
 #
-#  read utilities simulated in C++
+#  read risks computed in C++
 #
+#------------------------------------------------------------------
+
+calc_risk_200_3.2_2
 
 setwd("/Users/bob/C/bellman/")
 
-mu<-3.2; pZero<-0.5; n<-200; angle<-210
-risk <- read.table(paste("sim_risk_",angle,"_",pZero,"_",mu,sep="")); dim(risk)
+n<-200; mu<-3.2; scale<-2;
+risk <- read.table(paste("calc_risk_",n,"_",mu,"_",scale,sep="")); dim(risk)
 plot(-risk[,1],-risk[,2], xlab="Oracle Risk", ylab="Universal Risk", 
-	main="Bellman Risk Simulations",
-	sub=paste("Mixing angle ",angle," with  n=",n,"  p0=",pZero,"  mu=",mu, sep=""))
+	main="Bellman Risk Calculation",
+	sub=paste("n=",n," mu=",mu,", varying p_zero", sep=""))

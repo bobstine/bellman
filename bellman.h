@@ -14,7 +14,8 @@
 //  Finds the expected risk for the give list of means, such as those from a simulation
 
 std::pair<double,double>
-find_process_risk (VectorUtility & util, WealthArray const& bidderWealth, std::vector<double> const& means);
+  find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, WealthArray const& bidderWealth);
+
 
 //  These use a discrete wealth array to track the wealth of the bidder and (in constrained case) the oracle.
 //  Both use a convex mixture of states when new wealth is not element of the array
