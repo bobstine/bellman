@@ -8,70 +8,78 @@
 
 int  main()
 {
-
   const int univStart (1);
-  
-  if (false)
-  {
-    std::cout << "\nTest the probability function from wealth.h" << std::endl;
-    UniversalDist univ(univStart);
-    double total (0.0);
-    int count = 100000;
-    std::cout << "TEST: initial 20 universal rates (" << univ.identifier() << ")  ";
-    for(int k=0; k<20; ++k) std::cout << univ(k) << " "; std::cout << std::endl;
-    for(int k=0; k<count; ++k) total += univ(k);
-    std::cout << "TEST: Total of universal(*,0.05) for " << count << " terms = " << total << std::endl;
 
-    total = 0.0;
-    count = 10000;
-    GeometricDist geo(0.005);
-    std::cout << "TEST: initial 20 geometric rates (" << geo.identifier() << ")  ";
-    for(int k=0; k<20; ++k) std::cout << geo(k) << " "; std::cout << std::endl;
-    for(int k=0; k<count; ++k) total += geo(k);
-    std::cout << "TEST: Total of geometric for " << count << " terms = " << total << std::endl;
-
-    total = 0.0;
-    count = 100;
-    UniformDist uni(count);
-    std::cout << "TEST: initial 20 uniform rates (" << uni.identifier() << ")  ";
-    for(int k=0; k<20; ++k) std::cout << uni(k) << " "; std::cout << std::endl;
-    for(int k=0; k<count; ++k) total += uni(k);
-    std::cout << "TEST: Total of uniform for " << count << " terms = " << total << std::endl;
-  } 
-
- 
+      
   if (true)
-  { std::cout << "\n\n Test scaled universal wealth function " << std::endl;
-
-    double scale (2);
-    double omega (0.5);
+  { double   W0  = 0.05;
+    double omega = 0.05;
+    double scale =  0.5;   // wealth array gets very large as the scale increases (about 3000 for scale=4, w=0.5; 22000 for scale=0.5,w=0.05)
+    std::cout << "\n\nTEST: Scaled wealth (" << scale << ") starting from wealth W0=" << W0
+	      << " with universal bids throughout and omega " << omega << std::endl;
     ScaledUniversalDist u(scale);
-    std::cout << "Total wealth is " << u.max_wealth() << std::endl;
-    std::cout << "    Scale u(2)@1 = " << u(1) << std::endl;
-    std::cout << "    Scale u(2)@2 = " << u(2) << std::endl;
-    std::cout << "    Scale u(2)@3 = " << u(3) << std::endl;
-    std::cout << "    Scale u(2)@4 = " << u(4) << std::endl;
-    std::cout << "    Scale u(2)@5 = " << u(5) << std::endl;
-    double W0 (0.5);
-    std::cout << "    Starting index for initial wealth " << W0 << " is " << u.w0_index(W0) << std::endl;
-    W0 = 1.5;
-    std::cout << "    Starting index for initial wealth " << W0 << " is " << u.w0_index(W0) << std::endl;
-    
-    
-    W0 = 0.5;
-    std::cout << "\nTEST: Wealth function starting from wealth W0=" << W0 << " with universal bids throughout" << std::endl;
-    WealthArray wealth(W0, omega, 50, u);
+    int nRounds = 100;
+    WealthArray wealth(W0, omega, nRounds, u);
     int iZ (wealth.zero_index());
     std::cout << "   Wealth at position iZero=" << iZ << " is " << wealth.wealth(iZ) << " with next bid to be " << wealth.bid(iZ) << std::endl;
     std::cout << "    : " << wealth << std::endl;
+    for(int i=0; i<10; ++i)
+      std::cout << "W[" << i << "] = " << wealth[i] << "  with bid " << wealth.bid(i) << std::endl;
+  }
+
+  if (false)
+  {
+    std::cout << "\n\nTEST: Test bidding from wealth array." << std::endl;
+    double omega (  0.05);
+    int  nRounds ( 20   );
+    int    iZero ( 10   );
+    
+    Distribution *p;
+    UniversalDist univ(univStart);
+    p = &univ;
+    WealthArray uWealth(omega, iZero, nRounds, *p);
+    GeometricDist geo(0.005);
+    p = &geo;
+    WealthArray gWealth(omega, iZero, nRounds, *p);
+    std::cout << "TEST: wealth array  \n" << uWealth << std::endl;
+    std::cout << "TEST: wealth array  \n" << gWealth << std::endl;
+    std::cout << "TEST: high wealth bids, then those starting from iZero" << std::endl;
+    for(int k=0; k<5; ++k)
+      std::cout << "  bid at k " << k << " geo bid=" <<  gWealth.bid(k) << " out of " << gWealth[k]
+		<< "    universal bid=" << uWealth.bid(k) << " out of " << uWealth[k] << std::endl;
+    for (int r=0; r < nRounds; ++r) std::cout << "round=" << r+1
+					      << " geo bid=" <<  gWealth.bid(iZero+r) << " out of " << gWealth[iZero+r]
+					      << "    universal bid=" << uWealth.bid(iZero+r) << " out of " << uWealth[iZero+r] << std::endl;
+  }
+
+  
+  if (true)
+  {
+    std::cout << "\n\nTEST: Test bracketing search in wealth." << std::endl;
+    double omega (  0.05);
+    int  nRounds ( 50   );
+    int    iZero ( 10   );
+    UniversalDist univ(1);
+
+    std::vector<int> ii = { 3, 6, 10, 15, 25};
+    WealthArray uWealth(omega, iZero, nRounds, univ);
+    for (unsigned int j=0; j<ii.size()-1; ++j)
+    { int i = ii[j];
+      double bid = uWealth.bid(i);
+      std::pair<int,double>  kk (uWealth.wealth_position(i));
+      double value =  uWealth[kk.first] * kk.second + uWealth[kk.first+1] * (1-kk.second);
+      std::cout << "TEST:  increment W[" << i << "]= " << uWealth[i] << " by " << 0.05-bid << " to " << 0.05+uWealth[i]-bid << " bracketed by "
+		<< uWealth[kk.first]   << " * (" << kk.second << ")  +  "
+		<< uWealth[kk.first+1] << " * (" << 1-kk.second << ") = " << value << std::endl;
+    }
   }
   
-
   if (false)
   { std::cout << "\n\n Test extremes in geometric wealth table for underflows" << std::endl;
     
     double omega ( 0.05 );
-    int    iZero ( 500  );
+    int    iZero (   5  );
+    int    steps (  50  );
     double psi(0.01);
       
     UniversalDist univ(univStart);
@@ -79,9 +87,9 @@ int  main()
     UniformDist uni(1+iZero);  // add one to cover 0th position
  
     //    WealthArray gWealth(" Geom ", omega, iZero, geo );   // not numerically stable for long trials
-    std::cout << "TEST: init universal wealths \n" ;  WealthArray uWealth(omega, iZero, univ);
-    std::cout << "TEST: init geometric wealths \n" ;  WealthArray uniformWealth(omega, iZero, uni);
-    std::cout << "TEST: init uniform   wealths \n" ;  WealthArray gWealth(omega, iZero, psi );                   // better geometric
+    std::cout << "TEST: init universal wealths \n" ;  WealthArray uWealth(omega, iZero, steps, univ);
+    std::cout << "TEST: init geometric wealths \n" ;  WealthArray uniformWealth(omega, iZero, steps, uni);
+    std::cout << "TEST: init uniform   wealths \n" ;  WealthArray gWealth(omega, iZero, steps, psi );  // better geometric
     
     std::cout << "TEST: geometric name for psi=" << psi << " is " << gWealth.name() << std::endl;
 
@@ -100,41 +108,6 @@ int  main()
     std::cout << "TEST:   uniform wealth array  \n" << uniformWealth << std::endl;
   } 
 
-
-  // test bracket function from wealth 
-  if (false)
-  {
-    double omega (0.05);
-    int  nRounds (250);
-    int    iZero ( nRounds + 1 ) ;
-    int    steps ( iZero + 6 );  // need at least 6 above iZero.
-    std::cout << "TEST: Initializing the wealth array." << std::endl;
-
-    Distribution *p;
-    UniversalDist univ(univStart);
-    GeometricDist geo(0.005);
-    p = &univ;
-    WealthArray uWealth(omega, iZero, *p);
-    p = &geo;
-    WealthArray gWealth(omega, iZero, *p);
-    std::cout << "TEST: wealth array  \n" << uWealth << std::endl;
-    std::cout << "TEST: wealth array  \n" << gWealth << std::endl;
-    std::cout << "TEST:  bids are " ;
-    
-    for (int r=1; r <= nRounds; ++r) std::cout << gWealth.bid(r) << "  " << uWealth.bid(r) << "     ";
-    std::cout << std::endl;
-    
-    { int i = 3;  // boundary
-      double bid = uWealth.bid(i);
-      std::pair<int,double>  kk (uWealth.wealth_position(i));
-      std::cout << "TEST:  increment W[" << i << "]= " << uWealth[i] << " by " << 0.05-bid << " to " << 0.05+uWealth[i]-bid
-		<< " bracketed by " << uWealth[kk.first] << " * (" << kk.second << ")  +  ";
-      if(kk.first < steps-1)
-	std::cout << uWealth[kk.first+1] << " * (" << 1-kk.second << ")" << std::endl;
-      else
-	std::cout << uWealth[kk.first] << " * (" << 1-kk.second << ")" << std::endl;
-    }
-  }
 
   return 0;
 }
