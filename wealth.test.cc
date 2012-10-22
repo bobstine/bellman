@@ -11,17 +11,20 @@ int  main()
   const int univStart (1);
 
       
-  if (false)
-  { double W0 = 0.5;
-    double omega = 0.5;
-    std::cout << "\n\nTEST: Scaled wealth function starting from wealth W0=" << W0 << " with universal bids throughout and omega " << omega << std::endl;
-    double scale =  4;   // note that the wealth array gets very large as the scale increases (about 3000 for k=4)
+  if (true)
+  { double   W0  = 0.05;
+    double omega = 0.05;
+    double scale =  0.5;   // wealth array gets very large as the scale increases (about 3000 for scale=4, w=0.5; 22000 for scale=0.5,w=0.05)
+    std::cout << "\n\nTEST: Scaled wealth (" << scale << ") starting from wealth W0=" << W0
+	      << " with universal bids throughout and omega " << omega << std::endl;
     ScaledUniversalDist u(scale);
     int nRounds = 100;
     WealthArray wealth(W0, omega, nRounds, u);
     int iZ (wealth.zero_index());
     std::cout << "   Wealth at position iZero=" << iZ << " is " << wealth.wealth(iZ) << " with next bid to be " << wealth.bid(iZ) << std::endl;
     std::cout << "    : " << wealth << std::endl;
+    for(int i=0; i<10; ++i)
+      std::cout << "W[" << i << "] = " << wealth[i] << "  with bid " << wealth.bid(i) << std::endl;
   }
 
   if (false)

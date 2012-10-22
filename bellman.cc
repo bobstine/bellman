@@ -1,4 +1,5 @@
 #include "bellman.h"
+#include "random.h"
 #include "line_search.Template.h"
 #include "eigen_utils.h"
 
@@ -16,6 +17,35 @@ int
 imin(int a, int b)
 { if (a < b) return a; else return b; }
 
+
+
+
+std::pair<double,double>
+find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, WealthArray const& bidderWealth)
+{
+  const int nColumns (bidderWealth.number_of_bids());   
+  // pad arrays since need room to collect bid; initialize to zero; extra row for starting bottom up recursion
+  Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns+1);
+  Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns+1);
+  // store intermediates in trapezoidal array with shape |\ ; fill from bottom up
+  int done = 0;
+  for (int row = nRounds-1; row > -1; ++done, --row)
+  { for (int k=0; k<nColumns-done; ++k)
+    { double bid (bidderWealth.bid(k));
+      std::pair<int,double> kp (bidderWealth.wealth_position(k));                 // where to go if reject (col, prob)
+      double bidderIfReject  =  bidderMat(row+1,kp.first)*kp.second +  bidderMat(row+1,kp.first+1)*(1-kp.second);
+      double oracleIfReject  =  oracleMat(row+1,kp.first)*kp.second +  oracleMat(row+1,kp.first+1)*(1-kp.second);
+      utility.set_constants(bid, 0.0, 0.0);
+      bidderMat (row,k) = pZero * utility.bidder_utility(0, bidderIfReject, bidderMat(row+1,k+1))
+	                  + (1-pZero) * utility.bidder_utility(mu, bidderIfReject, bidderMat(row+1,k+1));
+      oracleMat (row,k) = pZero * utility.oracle_utility(0, oracleIfReject, oracleMat(row+1,k+1))
+	+ (1-pZero) * utility.oracle_utility(mu, oracleIfReject, oracleMat(row+1,k+1));
+    }
+  }
+  int iZero = bidderWealth.number_of_bids() - nRounds;
+  return std::make_pair(oracleMat(0,iZero), bidderMat(0,iZero));
+}
+  
 
 //
 //    Unconstrained   Unconstrained   Unconstrained   Unconstrained   Unconstrained   Unconstrained
@@ -80,6 +110,7 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
     write_matrix_to_file(ss.str() + "indx"   ,    indxMat.topLeftCorner(nRounds  , indxMat.cols()));
     { std::ios_base::openmode mode = std::ios_base::trunc;
       std::ofstream output (ss.str() + "wealth", mode);
+      bidderWealth.print_to(output);
       bidderWealth.write_to(output);
       output.close();
     }
