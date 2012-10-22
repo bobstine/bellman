@@ -115,8 +115,8 @@ psi = 0.0500
 ptxt=   0500
 
 # define uncontrained expert by alpha level
-alpha = 0.1000
-atxt=     1000
+alpha = 0.4000
+atxt=     4000
 
 # define expert by uniform n (one more than n)
 # psi =   251
@@ -126,7 +126,7 @@ atxt=     1000
 goal = risk
 
 # multiplier for unconstrained universal code
-scale = 2
+scale = 4
 
 #--------------------------------------------------------------------------------------------
 #  below here is automagic, building output in runs/   
