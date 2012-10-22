@@ -1,4 +1,4 @@
-###  Code to simulation mean stochastic process
+###  Code to simulate mean stochastic process
 
 setwd("/Users/bob/C/bellman/")
 
