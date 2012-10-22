@@ -3,7 +3,6 @@
 #include <math.h>
 
 #include <iostream>
-#include <sstream>
 #include <getopt.h>
 #include "read_utils.h"     
 
@@ -16,7 +15,7 @@ const int universalStart (1);
 // prob=0 signals universal, prob > 0 is geometric
 
 WealthArray*
-make_wealth_array(double omega, int iOmega, double prob, double scale);
+make_wealth_array(int nRounds, double omega, double prob, double scale);
 
 
 //  prob character indicates the distribution, u for universal and g for geometric
@@ -43,10 +42,12 @@ int  main(int argc, char** argv)
   double     omega    = 0.05;     // also sets the initial wealth
 
   parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, scale, omega, writeTable);
-  const int iOmega    (nRounds+1);
   
-  WealthArray* pBidderWealth = make_wealth_array(omega, iOmega, bidderProb, scale);
-
+  std::clog << "MAIN: Building wealth array for " << nRounds << " rounds with omega=" << omega
+	    << ", bidder prob=" << bidderProb << ", and scale=" << scale << std::endl;
+  WealthArray* pBidderWealth = make_wealth_array(nRounds, omega, bidderProb, scale);
+  std::clog << "MAIN: Bidder wealth array... " << *pBidderWealth << std::endl;
+  
   if(!constrain)           // unconstrained oracle 
   { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
@@ -59,7 +60,7 @@ int  main(int argc, char** argv)
     }
   }
   else                     // constrained oracle needs wealth to track
-  { WealthArray* pOracleWealth = make_wealth_array(omega, iOmega, oracleProb, scale);
+  { WealthArray* pOracleWealth = make_wealth_array(nRounds, omega, oracleProb, scale);
     std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle, omega);
@@ -163,15 +164,18 @@ parse_arguments(int argc, char** argv,
 
 
 WealthArray*
-make_wealth_array(double omega, int iOmega, double prob, double scale)
+make_wealth_array(int nRounds, double omega, double prob, double scale)
 {
   if(0 == prob)         // universal
-  { std::clog << "MAIN: Making high-wealth universal array with scale " << scale << std::endl;
-    return new WealthArray(omega, omega, iOmega, ScaledUniversalDist(scale));
+  { std::clog << "MAIN: Making high-wealth universal array with scale=" << scale << " and omega=" << omega << std::endl;
+    return new WealthArray(omega, omega, nRounds, ScaledUniversalDist(scale));
   }
-    // return new WealthArray(omega, iOmega, UniversalDist(universalStart));
-  else if (prob > 1)    // uniform
-    return new WealthArray(omega, iOmega, UniformDist( trunc(prob) ));
-  else                  // geometric
-    return new WealthArray(omega, iOmega, prob);
+  // return new WealthArray(omega, iOmega,UniversalDist(universalStart));
+  else
+  { int iZero (15);  // padding above initial wealth at omega
+    if (prob > 1)    // uniform
+      return new WealthArray(omega, iZero, nRounds, UniformDist( trunc(prob) ));
+    else                  // geometric
+      return new WealthArray(omega, iZero, nRounds, prob);
+  }
 }
