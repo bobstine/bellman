@@ -138,7 +138,7 @@ WealthArray::init_positions ()
 void
 WealthArray::print_to (std::ostream& os) const
 {
-  os << "Wealth array " << mName << " with wealth vector beginning W[0]=" << mWealth[0]
+  os << "Wealth array " << mName << "[dim=" << mWealth.size() << "] with wealth vector beginning W[0]=" << mWealth[0]
      << " and at zero index W[" << mZeroIndex << "]=" <<  mWealth[mZeroIndex] << std::endl;
 }
   

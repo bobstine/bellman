@@ -35,6 +35,7 @@ int  main(int argc, char** argv)
     
   // set up utility and wealth; angle 0.0 is not used
   WealthArray bidderWealth(omega, omega, nRounds, ScaledUniversalDist(scale));
+  std::clog << "MAIN: Wealth array... " << bidderWealth << std::endl;
   RiskVectorUtility utility(0.0, alpha);
 
   // open output file if want further output, otherwise direct to stdio

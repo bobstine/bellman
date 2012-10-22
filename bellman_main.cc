@@ -43,8 +43,11 @@ int  main(int argc, char** argv)
 
   parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, scale, omega, writeTable);
   
+  std::clog << "MAIN: Building wealth array for " << nRounds << " rounds with omega=" << omega
+	    << ", bidder prob=" << bidderProb << ", and scale=" << scale << std::endl;
   WealthArray* pBidderWealth = make_wealth_array(nRounds, omega, bidderProb, scale);
-
+  std::clog << "MAIN: Bidder wealth array... " << *pBidderWealth << std::endl;
+  
   if(!constrain)           // unconstrained oracle 
   { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
@@ -164,7 +167,7 @@ WealthArray*
 make_wealth_array(int nRounds, double omega, double prob, double scale)
 {
   if(0 == prob)         // universal
-  { std::clog << "MAIN: Making high-wealth universal array with scale " << scale << " omega=" << omega << std::endl;
+  { std::clog << "MAIN: Making high-wealth universal array with scale=" << scale << " and omega=" << omega << std::endl;
     return new WealthArray(omega, omega, nRounds, ScaledUniversalDist(scale));
   }
   // return new WealthArray(omega, iOmega,UniversalDist(universalStart));
