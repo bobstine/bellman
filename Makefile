@@ -133,9 +133,6 @@ reject_check: bellman
 
 n = 200
 
-# define geometric expert by rate
-# psi = 0.0500
-# ptxt=   0500
 # define expert by uniform n (one more than n)
 # psi =   251
 # ptxt=   251
