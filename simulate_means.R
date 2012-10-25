@@ -40,6 +40,7 @@ iZero <- ncol(mean)-nRounds + 1
 
 # --- simulation fills these vectors
 meanProcess <- rep(0, nRounds)
+indxProcess <- rep(0, nRounds)
 
 
 # --- initial conditions
@@ -65,8 +66,12 @@ for(round in 2:nRounds) {
 	
 	
 plot(meanProcess, main=paste("Angle",angle,"  Omega",omega, "  Oracle alpha",alpha,sep=" "),
-	xlab="Test Round", ylab="Mean(i)")
+	xlab="Test Round", ylab="Mean(i)", col=indxProcess)
 
+plot(indxProcess, main=paste("Angle",angle,"  Omega",omega, "  Oracle alpha",alpha,sep=" "),
+	xlab="Test Round", ylab="Wealth Index(i)", col=indxProcess)
+
+plot(wealth.array)
 
 #------------------------------------------------------------------
 #
@@ -74,7 +79,6 @@ plot(meanProcess, main=paste("Angle",angle,"  Omega",omega, "  Oracle alpha",alp
 #
 #------------------------------------------------------------------
 
-calc_risk_200_3.2_2
 
 setwd("/Users/bob/C/bellman/")
 
