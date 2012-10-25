@@ -2,7 +2,9 @@ include ../c_flags
 
 ###########################################################################
 #
-#        Options
+#   Note on special forms
+#      $^ are prereq    $@ is target    $* is stem
+#
 #   Examples of depending on libaries
 #        LDLIBS =  -lthing -lregression 
 #        libs_used =  ../lib/libthing.a ../lib/libregression.a 
@@ -41,7 +43,7 @@ compiler: bellman
 
 
 
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------
 # Find risk for specific mixture of signal and probabilities
 # Need to prefix variables like 'n' to avoid conflicts
 #
@@ -79,13 +81,23 @@ calculate: bellman.o wealth.o utility.o distribution.o bellman_calculator.o
 	$(GCC) $^ $(LDLIBS) -o  $@
 
 
+# use these to write means, probs to file for simulation (which is done in simulate_means.R)
+sim_details/.directory_built: 
+	echo "Building directory for holding simulation details."
+	mkdir sim_details
+	touch $@
 
-# -------------------------------------------------------------------
+sim_gen: bellman sim_details/.directory_built
+	./bellman --risk --omega 0.5 --angle 210 --rounds 200  --oracleprob 0.05 --bidderprob 0 --scale 1 --write   # unconstrained
+
+
+
+# -------------------------------------------------------------------------------------------------------------
 # bellman recursion for competitive value
 #
 # constrained:  univ univ 2 0.05   50   0.5 7     -0.015669 0.015669 0.015669
 # uncons      uncon g50 2 0.05   50   0.05 7     37.1289 37.7115 0.291287
-# -------------------------------------------------------------------
+
 
 constrained_test: bellman
 	./bellman --gamma 2 --rounds 50 --constrain --oracleprob 0.5 --bidderprob 0.0 --write    # geometric oracle
@@ -96,19 +108,10 @@ unconstrained_test: bellman
 	./bellman --gamma 2 --rounds 50                              --bidderprob 0.5 --write   
 
 
-
 bellman_main.o: bellman_main.cc
 
 bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
 	$(GCC) $^ $(LDLIBS) -o  $@
-
-# --- using latest code, angular style with sine and cosine
-# g01000 univ(1) 1 2       153.435 0.05   200   0.05 10     -1.35152 -0.622174 -0.364673                                                                                   
-bellman_test: bellman 
-	./bellman --risk --omega 0.5 --angle 90 --rounds 200  --oracleprob 0.05 --bidderprob 0 --scale 1 --write   # unconstrained
-
-# uncon(0.05) scaled_univ(1) UTIL: * Warning *  Bid beta too large; reduced to 0.99 UTIL: Message limit reached. 
-# 210 0.5   200   0.05 20     427.449 -488.064 -211.792
 
 risk_check: bellman
 	./bellman --risk --omega 0.5 --angle 153.434949  --rounds 7  --constrain --oracleprob 0.01 --bidderprob 0 --write
@@ -118,10 +121,6 @@ risk_test: bellman
 
 reject_check: bellman
 	./bellman --reject  --angle 0  --rounds 7  --constrain --oracleprob 0 --bidderprob 0.1 --write
-
-# ---  $^ are prereq    $@ is target    $* is stem
-#      change n to change path, file names, and the length of run;  gp is path
-#      Once run, cat combines these lines to show all of the results.
 
 # define these constants, then use a command like  (use uruns for unconstrained)
 #    make -j lots  -k runs/summary.reject_psi0090_n100

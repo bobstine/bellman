@@ -1,38 +1,52 @@
 ###  Code to simulate mean stochastic process
 
-setwd("/Users/bob/C/bellman/")
+setwd("/Users/bob/C/bellman/sim_details/")
 
-filename <- "sim_risk_200_0.5_3.2_2"
+angle <- 210
+  n   <- 200
+alpha <- 0.05
+omega <- 0.50
+filename <- paste("bellman.a",angle,".n",n,".o",round(100*omega),".al",round(100*alpha),sep="")
 
+####################################################################
+#
+#  read simulation details from C++ files
+#
+####################################################################
 
-# --- read wealth array data
-Wealth <- readLines(paste(filename,"wealth",sep="."), n=4)
-wealth.desc <- Wealth[1]
-wealth.array<- as.numeric(unlist(strsplit(Wealth[2]," ")))
-wealth.prob <- as.numeric(unlist(strsplit(Wealth[4]," ")))
-wealth.indx <- 1 + as.numeric(unlist(strsplit(Wealth[3]," ")))
+WealthArray <- readLines(paste(filename,"wealth",sep="."), n=4)
+wealth.desc <- WealthArray[1]
+wealth.array<- as.numeric(unlist(strsplit(WealthArray[2]," ")))
+wealth.prob <- as.numeric(unlist(strsplit(WealthArray[4]," ")))
+wealth.indx <- 1 + as.numeric(unlist(strsplit(WealthArray[3]," ")))
 
 # --- read arrays with optimal process means
-mean <- read.table (paste(filename,"mean",sep="."))
-prob <- read.table (paste(filename,"prob",sep="."))
-indx <- 1 + read.table (paste(filename,"indx",sep="."))
+mean   <- read.table (paste(filename,"mean",sep="."))
+prob   <- read.table (paste(filename,"prob",sep="."))
+indx   <- 1 + read.table (paste(filename,"indx",sep="."))
 dim(mean)
 
+
+####################################################################
+#
+#  run simulation
+#
+####################################################################
 
 # --- note that R is 1-based indexing
 nRounds <- nrow(mean)
 iZero <- ncol(mean)-nRounds + 1
 
 
-
-# --- simulation fills this vector
+# --- simulation fills these vectors
 meanProcess <- rep(0, nRounds)
 
 
 # --- initial conditions
-             k <- iZero 
-meanProcess[1] <- mean[1,k]
-      p.reject <- prob[1,k]
+             k   <- iZero 
+  meanProcess[1] <-   mean[1,k]   # randomly chosen mean
+  indxProcess[1] <-        k      # position
+      p.reject   <-   prob[1,k]
 
 # --- need to random per round if reject
 unif <- runif(2*nRounds)
@@ -44,12 +58,14 @@ for(round in 2:nRounds) {
 	if (unif[2*round-1] < p.reject) { #reject
 		k <- indx[round-1,k] + (wealth.prob[k] < unif[2*round]) }
 	else k <- k + 1; # did not reject
+	indxProcess[round] <- k
 	meanProcess[round] <- mean[round,k]
-	p.reject <- prob[round,k]
+	p.reject           <- prob[round,k]
 	}    
 	
 	
-plot(meanProcess)
+plot(meanProcess, main=paste("Angle",angle,"  Omega",omega, "  Oracle alpha",alpha,sep=" "),
+	xlab="Test Round", ylab="Mean(i)")
 
 
 #------------------------------------------------------------------

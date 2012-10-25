@@ -101,7 +101,8 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
   if(writeDetails)
   { std::ostringstream ss;
     int angle (trunc(utility.angle()));
-    ss << "bellman.a" << angle << ".n" << nRounds << ".";
+    ss << "sim_details/bellman.a" << angle << ".n" << nRounds
+       << ".o" << round(100*bidderWealth.omega()) << ".al" << round(100*utility.alpha()) << ".";
     write_matrix_to_file(ss.str() + "utility", utilityMat.topLeftCorner(nRounds+1, utilityMat.cols()-1));  // omit boundary row, col
     write_matrix_to_file(ss.str() + "oracle" ,  oracleMat.topLeftCorner(nRounds+1, oracleMat.cols()-1));
     write_matrix_to_file(ss.str() + "bidder" ,  bidderMat.topLeftCorner(nRounds+1, bidderMat.cols()-1));

@@ -42,6 +42,13 @@ int  main(int argc, char** argv)
   double     omega    = 0.05;     // also sets the initial wealth
 
   parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, scale, omega, writeTable);
+
+  /*
+     Note that alpha (aka, the oracle probability for a Bayes oracle)
+     'lives' in the utility function object, and omega is embedding
+     into the wealth function for encoding the index position of the
+     wealth when a rejection occurs.
+  */
   
   std::clog << "MAIN: Building wealth array for " << nRounds << " rounds with omega=" << omega
 	    << ", bidder prob=" << bidderProb << ", and scale=" << scale << std::endl;
