@@ -128,14 +128,14 @@ class DualWealthArray
   
 
   void print_to (std::ostream& os) const;
-  void write_to (std::ostream& os) const;   // more details
+  void write_to (std::ostream& os, bool asLines=false) const;   // more details
   
  private:
   void initialize_wealth_bid_array (UniversalBidder f, int nRounds);
   std::pair<int,double> find_wealth_position(int loIndex, int hiIndex, double w) const;
   void initialize_reject_array ();
   void initialize_bid_array    ();
-  void print_arrays   (std::ostream& os) const;
+  void print_arrays   (std::ostream& os, bool asLines=false) const;
 };
 
 

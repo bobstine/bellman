@@ -2,11 +2,11 @@
 
 setwd("/Users/bob/C/bellman/sim_details/")
 
-angle <- 210
+angle <- 334
   n   <- 200
 alpha <- 0.05
 omega <- 0.50
-filename <- paste("bellman.a",angle,".n",n,".o",round(100*omega),".al",round(100*alpha),sep="")
+filename <- paste("dual_bellman.a",angle,".n",n,".o",round(100*omega),".al",round(100*alpha),sep="")
 
 ####################################################################
 #
@@ -14,16 +14,18 @@ filename <- paste("bellman.a",angle,".n",n,".o",round(100*omega),".al",round(100
 #
 ####################################################################
 
-WealthArray <- readLines(paste(filename,"wealth",sep="."), n=4)
-wealth.desc <- WealthArray[1]
-wealth.array<- as.numeric(unlist(strsplit(WealthArray[2]," ")))
-wealth.prob <- as.numeric(unlist(strsplit(WealthArray[4]," ")))
-wealth.indx <- 1 + as.numeric(unlist(strsplit(WealthArray[3]," ")))
+WealthLines <- readLines(paste(filename,"wealth",sep="."), n=7)
+wealth.desc <- WealthLines[1]
+wealth.array<- as.numeric(unlist(strsplit(WealthLines[2]," ")))
+wealth.bids <- as.numeric(unlist(strsplit(WealthLines[3]," ")))
+wealth.rIndx<- 1+as.numeric(unlist(strsplit(WealthLines[4]," ")))
+wealth.rWts <- as.numeric(unlist(strsplit(WealthLines[5]," ")))
+wealth.bIndx<- 1+as.numeric(unlist(strsplit(WealthLines[6]," ")))
+wealth.bWts <- as.numeric(unlist(strsplit(WealthLines[7]," ")))
 
 # --- read arrays with optimal process means
 mean   <- read.table (paste(filename,"mean",sep="."))
 prob   <- read.table (paste(filename,"prob",sep="."))
-indx   <- 1 + read.table (paste(filename,"indx",sep="."))
 dim(mean)
 
 
@@ -33,9 +35,10 @@ dim(mean)
 #
 ####################################################################
 
-# --- note that R is 1-based indexing
+# --- note that R is 1-based indexing; need iZero from calculation as omega column
 nRounds <- nrow(mean)
-iZero <- ncol(mean)-nRounds + 1
+iZero <- 80
+wealth.array[iZero] # should be omega (or closest that is less)
 
 
 # --- simulation fills these vectors
@@ -56,9 +59,10 @@ unif <- runif(2*nRounds)
 k <- iZero 
 for(round in 2:nRounds) {
 	cat("@ k=", k, " mean=", meanProcess[round-1]," p.reject=",p.reject,"\n");
-	if (unif[2*round-1] < p.reject) { #reject
-		k <- indx[round-1,k] + (wealth.prob[k] < unif[2*round]) }
-	else k <- k + 1; # did not reject
+	if (unif[2*round-1] < p.reject) { # reject
+		k <- wealth.rIndx[k] + (wealth.rWts[k] < unif[2*round]) }
+	else {                            # did not reject
+		k <- wealth.bIndx[k] + (wealth.bWts[k] < unif[2*round]) }
 	indxProcess[round] <- k
 	meanProcess[round] <- mean[round,k]
 	p.reject           <- prob[round,k]

@@ -54,7 +54,8 @@ int  main(int argc, char** argv)
 	    << ", bidder prob=" << bidderProb << ", and scale=" << scale << std::endl;
 
   // WealthArray *pBidderWealth = make_wealth_array(nRounds, omega, bidderProb, scale);
-  DualWealthArray *pBidderWealth = new DualWealthArray("Universal", omega, omega, UniversalBidder(scale), nRounds);
+  UniversalBidder bidder(scale);
+  DualWealthArray *pBidderWealth = new DualWealthArray(bidder.identifier(), omega, omega, bidder, nRounds);
   std::clog << "MAIN: Bidder wealth array... " << *pBidderWealth << std::endl;
   
   if(!constrain)           // unconstrained oracle 

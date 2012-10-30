@@ -195,27 +195,46 @@ DualWealthArray::print_to (std::ostream& os) const
 }
   
 void
-DualWealthArray::write_to(std::ostream& os) const
+DualWealthArray::write_to(std::ostream& os, bool asLines) const
 {
   print_to(os);
-  print_arrays(os);
+  print_arrays(os, asLines);
 }
 
 void
-DualWealthArray::print_arrays (std::ostream& os) const
+DualWealthArray::print_arrays (std::ostream& os, bool asLines) const
 {
-  os << messageTag << " Wealth/Bid, Reject and Bid Position Arrays " << std::endl;
-  for (int i=0; i<(int)mRejectPositions.size(); ++i)
-  { os << " i=" << i << "   ";
-    print_pair_to_os(os, mWealthBid[i]);
-    os << "    ";
-    print_pair_to_os(os, mRejectPositions[i]);
-    os << "    ";
-    print_pair_to_os(os, mBidPositions[i]);    
+  if (asLines)
+  { for(int i=0; i<(int) mWealthBid.size(); ++i)          // wealths
+      os << mWealthBid[i].first << " ";
     os << std::endl;
+    for(int i=0; i<(int) mWealthBid.size(); ++i)          // bids
+      os << mWealthBid[i].second << " ";
+    os << std::endl;
+    for(int i=0; i<(int) mRejectPositions.size(); ++i)    // reject positions
+      os << mRejectPositions[i].first << " ";
+    os << std::endl;
+    for(int i=0; i<(int) mRejectPositions.size(); ++i)
+      os << mRejectPositions[i].second << " ";
+    os << std::endl;
+    for(int i=0; i<(int) mBidPositions.size(); ++i)       // bid positions
+      os << mBidPositions[i].first << " ";
+    os << std::endl;
+    for(int i=0; i<(int) mBidPositions.size(); ++i)
+      os << mBidPositions[i].second << " ";
+    os << std::endl;
+  } else
+  { for (int i=0; i<(int)mRejectPositions.size(); ++i)
+    { os << " i=" << i << "   ";
+      print_pair_to_os(os, mWealthBid[i]);
+      os << "    ";
+      print_pair_to_os(os, mRejectPositions[i]);
+      os << "    ";
+      print_pair_to_os(os, mBidPositions[i]);    
+      os << std::endl;
+    }
   }
 }
-
 
 double
 interpolate_round(double w, int i0, std::vector<double> const& wealthVec)

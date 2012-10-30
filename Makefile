@@ -88,7 +88,7 @@ sim_details/.directory_built:
 	touch $@
 
 sim_gen: bellman sim_details/.directory_built
-	./bellman --risk --omega 0.5 --angle 210 --rounds 200  --oracleprob 0.05 --bidderprob 0 --scale 1 --write   # unconstrained
+	./bellman --risk --omega 0.5 --angle 334 --rounds 200  --oracleprob 0.05 --bidderprob 0 --scale 2 --write   # unconstrained
 
 
 
@@ -135,8 +135,8 @@ atxt=     0500
 goal = risk
 
 # multiplier for unconstrained universal code
-scale = 0.5
-stxt  = 05
+scale = 2
+stxt  = 2
 
 #--------------------------------------------------------------------------------------------
 #  below here is automagic, building output in runs/   
@@ -153,7 +153,7 @@ $(up)/.directory_built:
 	touch $@
 
 # main unconstrained target with parameters that identify angle over tasks
-uruns/summary.risk_alpha$(atxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/345
+uruns/summary.risk_alpha$(atxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/333 $(up)/334 $(up)/335 $(up)/336 $(up)/337 $(up)/345
 	rm -f $@
 	cat $(filter $(up)/%,$^) >> $@
 
