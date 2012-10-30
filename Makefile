@@ -95,32 +95,22 @@ sim_gen: bellman sim_details/.directory_built
 # -------------------------------------------------------------------------------------------------------------
 # bellman recursion for competitive value
 #
-# constrained:  univ univ 2 0.05   50   0.5 7     -0.015669 0.015669 0.015669
-# uncons      uncon g50 2 0.05   50   0.05 7     37.1289 37.7115 0.291287
-
-
-constrained_test: bellman
-	./bellman --gamma 2 --rounds 50 --constrain --oracleprob 0.5 --bidderprob 0.0 --write    # geometric oracle
-	./bellman --gamma 2 --rounds 50 --constrain --oracleprob 0.0 --bidderprob 0.5 --write    # univ oracle
-	./bellman --gamma 2 --rounds 50             --oracleprob 0.5 --bidderprob 0.0 --write    # warning message
-
-unconstrained_test: bellman
-	./bellman --gamma 2 --rounds 50                              --bidderprob 0.5 --write   
-
 
 bellman_main.o: bellman_main.cc
 
 bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
 	$(GCC) $^ $(LDLIBS) -o  $@
 
-risk_check: bellman
-	./bellman --risk --omega 0.5 --angle 153.434949  --rounds 7  --constrain --oracleprob 0.01 --bidderprob 0 --write
+# Wealth array scaled_univ(1)[dim=78] with wealth vector beginning W[0]=3.38774 and at zero index W[7]=0.482787
+# uncon(0) scaled_univ(1) 153.435 0.5   70   0.05 20     103.028 -2.2802e-07 -115.189
+# Dual Wealth Array 'Universal'[dim=37] with wealth W[0]=<3.38774,2.08137> and at zero index W[29]=<0.487736,0.0292789>
+# uncon(0) Universal      153.435 0.5   70   0.05 20     104.155 -6.44542e-07 -116.449
 
-risk_test: bellman
-	./bellman --gamma 100  --rounds 100  --constrain --oracleprob 0 --bidderprob 0.05
+risk_check: bellman
+	./bellman --risk --omega 0.5 --angle 153.434949  --rounds 70                               --bidderprob 0   --write
 
 reject_check: bellman
-	./bellman --reject  --angle 0  --rounds 7  --constrain --oracleprob 0 --bidderprob 0.1 --write
+	./bellman --reject           --angle 0           --rounds 7  --constrain --oracleprob 0    --bidderprob 0.1 --write
 
 # define these constants, then use a command like  (use uruns for unconstrained)
 #    make -j lots  -k runs/summary.reject_psi0090_n100

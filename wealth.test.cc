@@ -6,12 +6,23 @@
 #include <Eigen/Core>
  
 
+// output pair ... why is this wrong?
+/*
+  inline
+  std::ostream&
+  std::operator<<(std::ostream& os, std::pair<double,double> const& p)
+  { os << "<" << p.first << "," << p.second << ">";
+  return os;
+  }
+*/
+
+
 int  main()
 {
   const int univStart (1);
 
       
-  if (true)
+  if (false)
   { double   W0  = 0.05;
     double omega = 0.05;
     double scale =  0.5;   // wealth array gets very large as the scale increases (about 3000 for scale=4, w=0.5; 22000 for scale=0.5,w=0.05)
@@ -22,7 +33,7 @@ int  main()
     WealthArray wealth(W0, omega, nRounds, u);
     int iZ (wealth.zero_index());
     std::cout << "   Wealth at position iZero=" << iZ << " is " << wealth.wealth(iZ) << " with next bid to be " << wealth.bid(iZ) << std::endl;
-    std::cout << "    : " << wealth << std::endl;
+    // std::cout << "    : " << wealth << std::endl;
     for(int i=0; i<10; ++i)
       std::cout << "W[" << i << "] = " << wealth[i] << "  with bid " << wealth.bid(i) << std::endl;
   }
@@ -53,7 +64,7 @@ int  main()
   }
 
   
-  if (true)
+  if (false)
   {
     std::cout << "\n\nTEST: Test bracketing search in wealth." << std::endl;
     double omega (  0.05);
@@ -108,6 +119,13 @@ int  main()
     std::cout << "TEST:   uniform wealth array  \n" << uniformWealth << std::endl;
   } 
 
-
+  if (true)
+  { std::cout << "\n\nTEST: Testing dual wealth array." << std::endl;
+    DualWealthArray wealth("test", 0.5, 0.5, UniversalBidder(2.0), 20);
+    std::cout << "TEST: Zero index is at " << wealth.zero_index() << std::endl;
+    wealth.write_to(std::cout);
+    std::cout << "\n\nTEST: Finished test of dual wealth array" << std::endl;
+  }
+  
   return 0;
 }

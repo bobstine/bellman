@@ -77,24 +77,41 @@ class UniversalDist: public Distribution
   as well since some of the bid amounts are larger than the payout.
 */
 
+class UniversalBidder: public std::unary_function<double,double>
+{
+  double const mScale;                        // k in dean's notes
+  
+ public:
+  
+  UniversalBidder (double scale)    : mScale(scale)  { }
+  
+  std::string identifier()                const;
+  double      operator()(double round)    const;
+  
+  double      total_wealth()              const;
+};
+  
+
+
 class ScaledUniversalDist: public Distribution
 {
   static const double mSumOfRecipLog;
-  const double mScale;          // k in dean's notes
+  const double mScale;                        // k in dean's notes
   
  public:
   
   ScaledUniversalDist (double scale)    : mScale(scale)  { }
   
-  std::string identifier() const;
-  double operator()(int k) const;
+  std::string identifier()           const;
+  double operator()(int k)           const;
   
   int w0_index(double initialWealth) const;   // int such that scaled tail sum matches initial wealth
-  double max_wealth()                const  { return mScale * mSumOfRecipLog; }
+  double   max_wealth()              const  { return mScale * mSumOfRecipLog; }
 
  private:  
-  double g(int k)          const; // the log recip with scaling factor
+  double g(int k)                    const;   // the log recip with scaling factor
 };
+
 
 // double uniform_to_end (int k, int left);
 

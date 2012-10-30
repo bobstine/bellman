@@ -8,7 +8,7 @@
 
 
 inline std::ostream&
-operator<<(std::ostream &output, const std::pair<double,double> pair)
+operator<<(std::ostream &output,  std::pair<double,double> const& pair)
 { output << " < " << pair.first << " , " << pair.second << " > "; return output; }
 
 
