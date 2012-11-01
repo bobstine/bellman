@@ -72,9 +72,6 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, DualWealthArray con
   // save for recreating mean stochastic process
   Matrix meanMat       = Matrix::Zero(nRounds  , nColumns);
   Matrix rejectProbMat = Matrix::Zero(nRounds  , nColumns);    // rejection prob
-  //  these are known same for every round
-  //  Matrix rejectIndxMat = Matrix::Zero(nRounds  , nColumns);    // if reject, where to
-  //  Matrix bidIndxMat    = Matrix::Zero(nRounds  , nColumns);    // if fail to reject, where to
   // store intermediates in rectangular array; fill from bottom up (don't get trapezoid with dual wealth)
   for (int row = nRounds-1; row > -1; --row)
   { for (int k=0; k<nColumns; ++k)
@@ -94,8 +91,6 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, DualWealthArray con
 	maxPair = std::make_pair(0.0,utilAtMuEqualZero);
       meanMat       (row,k) = maxPair.first;
       rejectProbMat (row,k) = reject_prob(meanMat(row,k), (bid < 0.99) ? bid : 0.99); // insure prob less than 1
-      // rejectIndxMat (row,k) = rejectPos.first;
-      //  bidIndxMat    (row,k) = bidPos.first;
       utilityMat    (row,k) = maxPair.second;
       bidderMat     (row,k) = utility.bidder_utility(maxPair.first, bidderIfReject, bidderIfBid);
       oracleMat     (row,k) = utility.oracle_utility(maxPair.first, oracleIfReject, oracleIfBid);
@@ -106,14 +101,12 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, DualWealthArray con
   { std::ostringstream ss;
     int angle (trunc(utility.angle()));
     ss << "sim_details/dual_bellman.a" << angle << ".n" << nRounds
-       << ".o" << round(100*wealth.omega()) << ".al" << round(100*utility.alpha()) << ".";
+       << ".s" << round(10*wealth.scale()) << ".o" << round(100*wealth.omega()) << ".al" << round(100*utility.alpha()) << ".";
     write_matrix_to_file(ss.str() + "utility",    utilityMat.topLeftCorner(nRounds+1,    utilityMat.cols()-1));  // omit boundary row, col
     write_matrix_to_file(ss.str() + "oracle" ,     oracleMat.topLeftCorner(nRounds+1,     oracleMat.cols()-1));
     write_matrix_to_file(ss.str() + "bidder" ,     bidderMat.topLeftCorner(nRounds+1,     bidderMat.cols()-1));
     write_matrix_to_file(ss.str() + "mean"   ,       meanMat.topLeftCorner(nRounds  ,       meanMat.cols()));
     write_matrix_to_file(ss.str() + "prob"   , rejectProbMat.topLeftCorner(nRounds  , rejectProbMat.cols()));
-    write_matrix_to_file(ss.str() + "rIndx"  , rejectIndxMat.topLeftCorner(nRounds  , rejectIndxMat.cols()));
-    write_matrix_to_file(ss.str() + "bIndx"  ,    bidIndxMat.topLeftCorner(nRounds  ,    bidIndxMat.cols()));
     { std::ios_base::openmode mode = std::ios_base::trunc;
       std::ofstream output (ss.str() + "wealth", mode);
       wealth.write_to(output, true);  // true = as lines

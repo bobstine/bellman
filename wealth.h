@@ -92,6 +92,7 @@ class DualWealthArray
   
   const std::string     mName;
   const double          mW0;               // initial wealth
+  const double          mScale;            // from universal
   double const          mOmega;            // defines wealth at zeroIndex and determines change when reject
   int                   mZeroIndex;        // position of W_0, the place used for locating initial wealth W0
   std::vector< std::pair<double,double> > mWealthBid;     
@@ -101,15 +102,16 @@ class DualWealthArray
  public:
 
   DualWealthArray ()
-    : mName("empty"), mW0(0), mOmega(0), mZeroIndex(0), mWealthBid(), mRejectPositions(), mBidPositions() { }
+    : mName("empty"), mW0(0), mScale(1), mOmega(0), mZeroIndex(0), mWealthBid(), mRejectPositions(), mBidPositions() { }
   
  DualWealthArray(std::string name, double w0, double omega, UniversalBidder f, int nRounds)
-   : mName(name), mW0(w0), mOmega(omega), mZeroIndex(0), mWealthBid(), mRejectPositions(), mBidPositions()
+   : mName(name), mW0(w0), mScale(f.scale()), mOmega(omega), mZeroIndex(0), mWealthBid(), mRejectPositions(), mBidPositions()
     { initialize_wealth_bid_array(f, nRounds); initialize_reject_array(); initialize_bid_array(); }
 
   std::string name()               const { return mName; }
   double      initial_wealth()     const { return mW0; }
   double      omega ()             const { return mOmega; }
+  double      scale ()             const { return mScale; }
   int         zero_index ()        const { return mZeroIndex ; }
   int  number_wealth_positions()   const { return (int) mWealthBid.size(); }
   

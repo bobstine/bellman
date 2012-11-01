@@ -251,17 +251,21 @@ void
 DualWealthArray::initialize_wealth_bid_array(UniversalBidder f, int nRounds)
 {
   // build wealth table for later interpolation
-  std::vector< double > wealths;
+  std::vector< double > wealths, bids;
   double       w       (f.total_wealth());
   double       i       (0);
   while (w > mOmega)
-  { wealths.push_back(w);
-    w -= f(i);
+  { double b (f(i));
+    wealths.push_back(w);
+    bids.push_back(b);
+    w -= b;
     ++i;
   }
   for (double j=0; j<=nRounds; ++j)   // extra round
-  { w -= f(i+j);
+  { double b = f(i+j);
+    w -= b;
     wealths.push_back(w);
+    bids.push_back(b);
   }
   double minWealth (wealths[wealths.size()-1]);
   // initial wealth spacing
@@ -275,11 +279,13 @@ DualWealthArray::initialize_wealth_bid_array(UniversalBidder f, int nRounds)
   double wealth     (f.total_wealth());
   double baseWealth (f.total_wealth());
   int    iStart  (0);
-  int limit (1000);
+  int    limit (1000);
   while ((wealth > minWealth) && limit--)
-  { double indx (interpolate_round(wealth, iStart, wealths));
+  { // std::clog << "DEBG: seeking  wealth=" << wealth << "   wealths[iStart="<<iStart<<"]" << std::endl;
+    double indx (interpolate_round(wealth, iStart, wealths));
     iStart = floor(indx);
-    double bid  (f(indx));
+    double shr (indx-iStart);
+    double bid  (bids[iStart]*(1.0-shr) + bids[iStart+1]*shr);
     mWealthBid.push_back( std::make_pair(wealth,bid) );
     if (baseWealth > 10 * wealth)
     { delta /= 10; baseWealth /= 10; }

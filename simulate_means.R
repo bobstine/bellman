@@ -1,18 +1,56 @@
 ###  Code to simulate mean stochastic process
 
+
+####################################################################
+#
+#  Bid as function of wealth
+#
+####################################################################
+
+sum.of.log.recip <- 3.387735532
+
+bid.int <- function(k,scale) { k<-k+1; scale/(k*(log(k+1))^2) }
+
+bid <- function(w,scale) {
+	wealth <- scale * sum.of.log.recip;
+	k <- 0; delta <- 0;
+	while(wealth > w) { delta<-bid.int(k,scale); wealth <- wealth - delta; k <- k+1; }
+	wt <- (w-wealth)/delta;
+	wt*delta + (1-wt)*bid.int(k,scale)
+	}
+
+# check: graph of bid(wealth) with integer version imposed
+n<-10;
+x <- 0:n
+scale <- 2
+wealth <- scale*sum.of.log.recip - c(0,cumsum(sapply(0:(n-1), function(x) bid.int(x,scale))))
+bids   <- sapply(x,function(x) bid.int(x,scale))
+#    reference points at integers
+plot(wealth,bids)
+#    add interpolator
+w <- seq(min(wealth),max(wealth),length.out=60)
+lines(w, sapply(w, function(x) bid(x,scale)))
+#    add into plot from below of the tables used in C++
+lines(wealth.array, wealth.bids, col="gray")
+
+
+####################################################################
+#
+#  Simulation process from C++ files
+#
+####################################################################
+
 setwd("/Users/bob/C/bellman/sim_details/")
 
 angle <- 334
   n   <- 200
 alpha <- 0.05
 omega <- 0.50
-filename <- paste("dual_bellman.a",angle,".n",n,".o",round(100*omega),".al",round(100*alpha),sep="")
+scale <- 2
+filename <- paste("dual_bellman.a",angle,".n",n,".s",round(10*scale),
+						".o",round(100*omega),".al",round(100*alpha),sep=""); filename
 
-####################################################################
-#
-#  read simulation details from C++ files
-#
-####################################################################
+# --- read simulation details from C++ files
 
 WealthLines <- readLines(paste(filename,"wealth",sep="."), n=7)
 wealth.desc <- WealthLines[1]
@@ -22,6 +60,7 @@ wealth.rIndx<- 1+as.numeric(unlist(strsplit(WealthLines[4]," ")))
 wealth.rWts <- as.numeric(unlist(strsplit(WealthLines[5]," ")))
 wealth.bIndx<- 1+as.numeric(unlist(strsplit(WealthLines[6]," ")))
 wealth.bWts <- as.numeric(unlist(strsplit(WealthLines[7]," ")))
+points(wealth.array, wealth.bids)
 
 # --- read arrays with optimal process means
 mean   <- read.table (paste(filename,"mean",sep="."))
@@ -40,42 +79,47 @@ nRounds <- nrow(mean)
 iZero <- 80
 wealth.array[iZero] # should be omega (or closest that is less)
 
-
-# --- simulation fills these vectors
-meanProcess <- rep(0, nRounds)
-indxProcess <- rep(0, nRounds)
-
-
-# --- initial conditions
-             k   <- iZero 
-  meanProcess[1] <-   mean[1,k]   # randomly chosen mean
-  indxProcess[1] <-        k      # position
-      p.reject   <-   prob[1,k]
-
-# --- need to random per round if reject
-unif <- runif(2*nRounds)
-
-# --- run simulation
-k <- iZero 
-for(round in 2:nRounds) {
-	cat("@ k=", k, " mean=", meanProcess[round-1]," p.reject=",p.reject,"\n");
-	if (unif[2*round-1] < p.reject) { # reject
-		k <- wealth.rIndx[k] + (wealth.rWts[k] < unif[2*round]) }
-	else {                            # did not reject
-		k <- wealth.bIndx[k] + (wealth.bWts[k] < unif[2*round]) }
-	indxProcess[round] <- k
-	meanProcess[round] <- mean[round,k]
-	p.reject           <- prob[round,k]
-	}    
+doit <- function(seed=sample.int(100000,1)) {
+	set.seed(seed)
+	meanProcess <- rep(0, nRounds)
+	indxProcess <- rep(0, nRounds)
+	riskProcess <- rep(0, nRounds)
+	k   <- iZero 
+	meanProcess[1] <-   mean[1,k]   # randomly chosen mean
+	indxProcess[1] <-        k      # wealth state (index)
+	p.reject   <-   prob[1,k]
+	# --- need to random per round if reject
+	unif <- runif(2*nRounds)
+	# --- run simulation
+	k <- iZero
+	for(round in 2:nRounds) {
+		cat("round ", round, "@ k=", k, " mean=", meanProcess[round-1]," p.reject=",p.reject,"\n");
+		if (unif[2*round-1] < p.reject) { # reject
+			k <- wealth.rIndx[k] + (wealth.rWts[k] < unif[2*round]);
+			riskProcess [round] <- 1; }
+		else {                            # did not reject
+			k <- wealth.bIndx[k] + (wealth.bWts[k] < unif[2*round]);
+			riskProcess[round] <- meanProcess[round-1]^2; }
+		indxProcess[round] <- k
+		meanProcess[round] <- mean[round,k]
+		p.reject           <- prob[round,k]
+	}   
+	list(seed=seed, risk=riskProcess, mean=meanProcess, index=indxProcess)
+}
 	
-	
-plot(meanProcess, main=paste("Angle",angle,"  Omega",omega, "  Oracle alpha",alpha,sep=" "),
-	xlab="Test Round", ylab="Mean(i)", col=indxProcess)
+simres <- doit()
 
-plot(indxProcess, main=paste("Angle",angle,"  Omega",omega, "  Oracle alpha",alpha,sep=" "),
-	xlab="Test Round", ylab="Wealth Index(i)", col=indxProcess)
+par(mfrow=c(2,1))
+	plot(simres$mean, 
+		main=paste("Angle",angle,"  Omega",omega, "  Scale",scale," Oracle alpha",alpha,sep=" "),
+		sub=paste("Dual universal bidder vs Bayesian oracle, seed=",simres$seed,sep=" "),
+		xlab="Round", ylab="Mean(i)", col=simres$index)
+	text(nRounds-50,1,paste("risk=",round(sum(simres$risk),digits=2)))
+	lines(max(1,max(simres$mean))*cumsum(simres$risk)/(max(1,sum(simres$risk))), col="gray")
 
-plot(wealth.array)
+	plot(wealth.array[simres$index], xlab="Round", ylab="Wealth [i]", col=simres$index)
+par(mfrow=c(1,1))
+
 
 #------------------------------------------------------------------
 #

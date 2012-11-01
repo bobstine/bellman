@@ -86,6 +86,7 @@ class UniversalBidder: public std::unary_function<double,double>
   UniversalBidder (double scale)    : mScale(scale)  { }
   
   std::string identifier()                const;
+  double      scale()                     const { return mScale; }
   double      operator()(double round)    const;
   
   double      total_wealth()              const;
@@ -103,6 +104,7 @@ class ScaledUniversalDist: public Distribution
   ScaledUniversalDist (double scale)    : mScale(scale)  { }
   
   std::string identifier()           const;
+  double scale()                     const { return mScale; }
   double operator()(int k)           const;
   
   int w0_index(double initialWealth) const;   // int such that scaled tail sum matches initial wealth

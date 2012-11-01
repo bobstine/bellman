@@ -25,6 +25,7 @@ level_1 = distribution.o
 level_2 = wealth.o
 level_3 = utility.o
 level_4 = bellman.o
+level_5 = bellman_main.o
 
 ############################################################################
 #
