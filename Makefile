@@ -25,7 +25,7 @@ level_1 = distribution.o
 level_2 = wealth.o
 level_3 = utility.o
 level_4 = bellman.o
-level_5 = bellman_main.o
+level_5 = bellman_main.o bellman_calculator.o
 
 ############################################################################
 #
@@ -53,13 +53,14 @@ compiler: bellman
 #
 # All symbols in this section have c_ prefix
 
-c_n         = 200
-c_scale     = 0.5  # small scale for small omega
-c_scale_txt = 05
+c_n         = 500
+c_scale     = 2     # use small scale for omega 0.05
+c_scale_txt = 2
 c_omega     = 0.5
+c_omega_txt = 50
 
 # define path within risk subdirectory
-c_path = risk/n$(c_n)_scale$(c_scale_txt)
+c_path = risk/omega$(c_omega_txt)_scale$(c_scale_txt)_n$(c_n)
 
 $(c_path)/.directory_built: 
 	echo "Building directory for risk output:" $(c_path)
@@ -74,7 +75,7 @@ calc_risk:  $(c_path)/.directory_built $(c_path)/m0.5 $(c_path)/m1.0 $(c_path)/m
 # actual run command for unconstrained solution needs m to keep unique
 $(c_path)/m%: calculate
 	echo $(c_path)
-	./calculate --signal $* --scale $(c_scale) --omega $(c_omega) --rounds $(c_n) > $@
+	./calculate --signal $* --omega $(c_omega) --scale $(c_scale) --rounds $(c_n) > $@
 
 
 # executable
@@ -89,7 +90,7 @@ sim_details/.directory_built:
 	touch $@
 
 sim_gen: bellman sim_details/.directory_built
-	./bellman --risk --omega 0.5 --angle 334 --rounds 200  --oracleprob 0.05 --bidderprob 0 --scale 2 --write   # unconstrained
+	./bellman --risk --omega 0.5 --angle 334 --rounds 500  --oracleprob 0.05 --bidderprob 0 --scale 2 --write   # unconstrained
 
 
 
@@ -117,20 +118,19 @@ reject_check: bellman
 #    make -j lots  -k runs/summary.reject_psi0090_n100
 # or
 #    make -k -j lots  runs/summary.risk_psi0010_n250
-#    make -k -j lots uruns/summary.risk_alpha0500_scale2_n200
+#    make -k -j lots uruns/summary.risk_alpha5_omega50_scale2_n200
 # with these values chosen to match (don't know how to pick them from make input
 # so you have to define the constants here and match them in the make command.
 # Builds a directory in runs for these results, then files for each.
 
-n = 200
+n = 500
 
-# define expert by uniform n (one more than n)
-# psi =   251
-# ptxt=   251
+omega = 0.50
+otxt  =   50
 
 # define uncontrained expert by alpha level
-alpha = 0.0500
-atxt=     0500
+alpha = 0.05
+atxt=      5
 
 # criterion should be risk or reject (and make it so in the C++ code)
 goal = risk
@@ -139,6 +139,10 @@ goal = risk
 scale = 2
 stxt  = 2
 
+# define expert by uniform n (one more than n)
+# psi =   251
+# ptxt=   251
+
 #--------------------------------------------------------------------------------------------
 #  below here is automagic, building output in runs/   
 #--------------------------------------------------------------------------------------------
@@ -146,7 +150,7 @@ stxt  = 2
 # -----  unconstrained -----
 
 # define path within uruns subdirectory for each alpha (oracle) and n combination
-up = uruns/$(goal)_alpha$(atxt)_scale$(stxt)_n$(n)
+up = uruns/$(goal)_alpha$(atxt)_omega$(otxt)_scale$(stxt)_n$(n)
 
 $(up)/.directory_built: 
 	echo "Building directory for unconstrained runs" $(up)
@@ -154,13 +158,13 @@ $(up)/.directory_built:
 	touch $@
 
 # main unconstrained target with parameters that identify angle over tasks
-uruns/summary.risk_alpha$(atxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/333 $(up)/334 $(up)/335 $(up)/336 $(up)/337 $(up)/345
+uruns/summary.risk_alpha$(atxt)_omega$(otxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/333 $(up)/334 $(up)/335 $(up)/336 $(up)/337 $(up)/345
 	rm -f $@
 	cat $(filter $(up)/%,$^) >> $@
 
 # actual run command for unconstrained solution
 $(up)/%: bellman bellman.sh  $(up)/.directory_built
-	./bellman --$(goal) --omega 0.5 --angle $* --oracleprob $(alpha) --bidderprob 0 --scale $(scale)  --rounds $(n) >  $@
+	./bellman --$(goal) --omega $(omega) --angle $* --oracleprob $(alpha) --bidderprob 0 --scale $(scale)  --rounds $(n) >  $@
 
 # -----  constrained -----
 

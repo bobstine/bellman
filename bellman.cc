@@ -18,7 +18,36 @@ imin(int a, int b)
 { if (a < b) return a; else return b; }
 
 
-//  Find the risk associated with a Bayesian spike model
+//  Find the risk associated with a Bayesian spike model; this is the code that generates the paths within feasible set
+
+std::pair<double,double>
+find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, DualWealthArray const& bidderWealth)
+{
+  const int nColumns (bidderWealth.number_wealth_positions());   
+  // pad arrays since need room to collect bid; initialize to zero; extra row for starting bottom up recursion
+  Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns+1);
+  Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns+1);
+  // store intermediates in rectangular array; fill from bottom up
+  for (int row = nRounds-1; row > -1; --row)
+  { for (int k=0; k<nColumns; ++k)
+    { double bid (bidderWealth.bid(k));
+      std::pair<int,double> rejectPos (bidderWealth.reject_position(k));          // where to go if reject (col, prob)
+      std::pair<int,double>    bidPos (bidderWealth.bid_position(k));             // where to go if dont reject
+      double bidderIfReject  = bidderMat(row+1,rejectPos.first)*rejectPos.second + bidderMat(row+1,rejectPos.first+1)*(1-rejectPos.second);
+      double oracleIfReject  = oracleMat(row+1,rejectPos.first)*rejectPos.second + oracleMat(row+1,rejectPos.first+1)*(1-rejectPos.second);
+      double bidderIfDont    = bidderMat(row+1,   bidPos.first)*   bidPos.second + bidderMat(row+1,   bidPos.first+1)*(1-   bidPos.second);
+      double oracleIfDont    = oracleMat(row+1,   bidPos.first)*   bidPos.second + oracleMat(row+1,   bidPos.first+1)*(1-   bidPos.second);
+      utility.set_constants(bid, 0.0, 0.0);
+      bidderMat (row,k) = pZero * utility.bidder_utility(0, bidderIfReject, bidderIfDont)
+	                  + (1-pZero) * utility.bidder_utility(mu, bidderIfReject, bidderIfDont);
+      oracleMat (row,k) = pZero * utility.oracle_utility(0, oracleIfReject, oracleIfDont)
+ 	                  + (1-pZero) * utility.oracle_utility(mu, oracleIfReject, oracleIfDont);
+    }
+  }
+  int iZero (bidderWealth.zero_index());
+  return std::make_pair(oracleMat(0,iZero), bidderMat(0,iZero));
+}
+  
 
 std::pair<double,double>
 find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, WealthArray const& bidderWealth)
@@ -113,7 +142,7 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, DualWealthArray con
       output.close();
     }
   }
-  // locate starting position in |\ array
+  // locate starting position in array
   int iZero = wealth.zero_index();
   std::cout << utility.angle() << " " << wealth.omega() << "   " << nRounds   << "   " << searchInterval.first << " " << searchInterval.second  << "     "
 	    << utilityMat(0,iZero) << " " << oracleMat(0,iZero) << " " << bidderMat(0,iZero) << std::endl;

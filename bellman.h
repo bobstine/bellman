@@ -16,6 +16,9 @@
 std::pair<double,double>
   find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, WealthArray const& bidderWealth);
 
+std::pair<double,double>
+  find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, DualWealthArray const& bidderWealth);
+
 
 //  These use a discrete wealth array to track the wealth of the bidder and (in constrained case) the oracle.
 //  Both use a convex mixture of states when new wealth is not element of the array
