@@ -121,7 +121,7 @@ int  main()
 
   if (true)
   { std::cout << "\n\nTEST: Testing dual wealth array." << std::endl;
-    DualWealthArray wealth("test", 0.5, 0.5, UniversalBidder(2.0), 20);
+    DualWealthArray wealth("test", 0.05, 0.05, UniversalBidder(.5), 200);
     std::cout << "TEST: Zero index is at " << wealth.zero_index() << std::endl;
     wealth.write_to(std::cout);
     std::cout << "\n\nTEST: Finished test of dual wealth array" << std::endl;
