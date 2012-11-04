@@ -34,19 +34,20 @@ bid <- function(w,scale) {
 	}
 
 # check: graph of bid(wealth) with integer version imposed
-n<-10;
-x <- 0:n
-scale <- 2
-wealth <- scale*sum.of.log.recip - c(0,cumsum(sapply(0:(n-1), function(x) bid.int(x,scale))))
-bids   <- sapply(x,function(x) bid.int(x,scale))
+check.wealth <- function() {
+	n<-10;
+	x <- 0:n
+	scale <- 2
+	wealth <- scale*sum.of.log.recip - c(0,cumsum(sapply(0:(n-1), function(x) bid.int(x,scale))))
+	bids   <- sapply(x,function(x) bid.int(x,scale))
 #    reference points at integers
-plot(wealth,bids)
+	plot(wealth,bids)
 #    add interpolator
-w <- seq(min(wealth),max(wealth),length.out=60)
-lines(w, sapply(w, function(x) bid(x,scale)))
+	w <- seq(min(wealth),max(wealth),length.out=60)
+	lines(w, sapply(w, function(x) bid(x,scale)))
 #    add into plot from below of the tables used in C++
-lines(wealth.array, wealth.bids, col="gray")
-
+	lines(wealth.array, wealth.bids, col="gray")
+}
 
 ####################################################################
 #
@@ -74,7 +75,7 @@ wealth.rIndx<- 1+as.numeric(unlist(strsplit(WealthLines[4]," ")))
 wealth.rWts <- as.numeric(unlist(strsplit(WealthLines[5]," ")))
 wealth.bIndx<- 1+as.numeric(unlist(strsplit(WealthLines[6]," ")))
 wealth.bWts <- as.numeric(unlist(strsplit(WealthLines[7]," ")))
-points(wealth.array, wealth.bids)
+plot(wealth.array, wealth.bids)
 
 # --- read arrays with optimal process means
 mean   <- read.table (paste(filename,"mean",sep="."))
@@ -96,45 +97,41 @@ wealth.array[iZero] # should be omega (or closest that is less)
 doit <- function(seed=sample.int(100000,1)) {
 	set.seed(seed)
 	meanProcess <-indxProcess <- reject.prob <- rep(0, nRounds); 
-	riskProcess <-oracleRisk <- rep(0, nRounds); 
-	# --- need to random per round if reject
-	pval <- runif(nRounds); randomize <- runif(nRounds)
+	pvals <- riskProcess <-oracleRisk <- rep(0, nRounds);
 	# --- run simulation
 	k <- iZero
-	meanProcess[1] <- mean[1,k]   # mean at state 0
-	indxProcess[1] <-        k      # wealth state (index)
-	reject.prob[1] <- p.reject <- prob[1,k]
-	for(round in 2:nRounds) {
-		cat("round ", round, "@ k=", k, " mean=", meanProcess[round-1]," p.reject=",p.reject,"\n");
+	for(round in 1:nRounds) {
+		meanProcess[round] <- mean[round,k]   # mean at initial state
+		indxProcess[round] <-        k        # wealth state (index)
+		p.reject <- reject.prob[round] <- prob[round,k]
+		pvals[round] <- 2*(1-pnorm(abs(rnorm(1,mean=meanProcess[round]))))
+		cat("round ", round, "@ k=", k, " mean=", meanProcess[round]," p.reject=",p.reject,"\n");
 		# oracle risk
-		if (pval[round] < 0.05) { oracleRisk[round] <- 1; }
-		else                    { oracleRisk[round] <- meanProcess[round-1]^2; }
+		if (pvals[round] < 0.05) { oracleRisk[round] <- 1; }
+		else                    { oracleRisk[round] <- meanProcess[round]^2; }
 		# bidder risk
-		w <- randomize[round];
-		if (pval[round] < p.reject) { k <- wealth.rIndx[k] + (wealth.rWts[k] < w); riskProcess[round] <- 1; }
-		else {                        k <- wealth.bIndx[k] + (wealth.bWts[k] < w); riskProcess[round] <- meanProcess[round-1]^2; }
-		indxProcess[round] <- k
-		meanProcess[round] <- mean[round,k]
-		p.reject           <- reject.prob[round] <- prob[round,k]
+		w <- runif(1);
+		if (runif(1) < p.reject){ k <- wealth.rIndx[k] + (wealth.rWts[k] < w); riskProcess[round] <- 1; }
+		else {                    k <- wealth.bIndx[k] + (wealth.bWts[k] < w); riskProcess[round] <- meanProcess[round]^2; }
 	}   
 	list(bidder.risk=riskProcess, bidder.prob = reject.prob, bidder.state=indxProcess,  
-			seed=seed, pval=pval, mean=meanProcess, oracle.risk=oracleRisk,
-			bidder.rejects = (pval<reject.prob), oracle.rejects = (pval<0.05))
+			seed=seed, pvals=pvals, mean=meanProcess, mean = meanProcess, oracle.risk=oracleRisk,
+			bidder.rejects = (pvals<reject.prob), oracle.rejects = (pvals<0.05))
 }
-	
+
 simres <- doit()
 
 set.par(mfrow=c(2,2))
 	plot(simres$mean, 
 		main=paste("Bidder: angle=",angle," al=",alpha," omega=",omega, " scl=",scale,sep=""),
 		sub=paste("Dual universal bidder vs Bayesian oracle, seed=",simres$seed,sep=" "),
-		xlab="Round", ylab="Mean(i)", pch=".", cex=3, col=c("black","red")[1+simres$bidder.rejects])
+		xlab="Round", ylab="Mean(i)", pch=".", cex=3, col=c("gray","red")[1+simres$bidder.rejects])
 	text(nRounds-50,1,paste("risk=",round(sum(simres$bidder.risk),digits=2)))
 	lines(max(1,max(simres$mean))*cumsum(simres$bidder.risk)/(max(1,sum(simres$bidder.risk))), col="gray")
 
 	plot(simres$mean, 
-		main=paste("Oracle"), col=c("black","red")[1+simres$oracle.rejects],
-		xlab="Round", ylab="Mean(i)", pch=".", cex=3,col=c("black","red")[1+simres$oracle.rejects]))
+		main=paste("Oracle"), col=c("gray","red")[1+simres$oracle.rejects],
+		xlab="Round", ylab="Mean(i)", pch=".", cex=3)
 	text(nRounds-50,1,paste("risk=",round(sum(simres$oracle.risk),digits=2)))
 	lines(max(1,max(simres$mean))*cumsum(simres$oracle.risk)/(max(1,sum(simres$oracle.risk))), col="gray")
 
@@ -144,6 +141,10 @@ set.par(mfrow=c(2,2))
 		pch=16,col=c("gray","pink","red")[1+simres$bidder.rejects+simres$oracle.rejects], 
 		xlab="Cumulative Oracle Risk", ylab="Bidder Risk")
 reset()
+
+r <- cbind(simres$mean, simres$pval, simres$bidder.prob, simres$oracle.rejects, simres$bidder.rejects)
+colnames(r)<-c("mean","pval","reject.prob", "oracle","bidder")
+plot(r[,1],r[,3], xlab="Mean", ylab="reject prob")
 
 # 54057 … one
 # 22077 … up for good
