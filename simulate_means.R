@@ -137,9 +137,10 @@ set.par(mfrow=c(2,2))
 
 	plot(wealth.array[simres$bidder.state], xlab="Round", ylab="Wealth [i]", pch=20, col=simres$bidder.state)
 	
-	plot(cumsum(simres$oracle.risk), cumsum(simres$bidder.risk), 
+	plot(cumsum(simres$oracle.risk),cumsum(simres$bidder.risk), 
 		pch=16,col=c("gray","pink","red")[1+simres$bidder.rejects+simres$oracle.rejects], 
 		xlab="Cumulative Oracle Risk", ylab="Bidder Risk")
+	abline(a=0,b=atan(2 * pi * (360-angle)/360))
 reset()
 
 r <- cbind(simres$mean, simres$pval, simres$bidder.prob, simres$oracle.rejects, simres$bidder.rejects)
