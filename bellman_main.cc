@@ -45,7 +45,7 @@ int  main(int argc, char** argv)
 
   /*
      Note that alpha (aka, the oracle probability for a Bayes oracle)
-     'lives' in the utility function object, and omega is embedding
+     'lives' in the utility function object, and omega is embedded
      into the wealth function for encoding the index position of the
      wealth when a rejection occurs.
   */
@@ -58,7 +58,7 @@ int  main(int argc, char** argv)
   DualWealthArray *pBidderWealth = new DualWealthArray(bidder.identifier(), omega, omega, bidder, nRounds);
   std::clog << "MAIN: Bidder wealth array... " << *pBidderWealth << std::endl;
   
-  if(!constrain)           // unconstrained oracle 
+  if(!constrain)           // unconstrained competitor
   { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskVectorUtility utility(angle, oracleProb);
@@ -69,7 +69,7 @@ int  main(int argc, char** argv)
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
   }
-  else                     // constrained oracle needs wealth to track
+  else                     // constrained competitor needs to track state as well
   { WealthArray* pOracleWealth = make_wealth_array(nRounds, omega, oracleProb, scale);
     std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     if (riskUtil)

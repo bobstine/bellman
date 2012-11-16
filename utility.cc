@@ -46,7 +46,7 @@ reject_value(WIndex const& ip, int k, Matrix const& value, bool show)
   return v;
 }
 
-double   reject_value(WIndex const& kp1, WIndex const& kp2, Matrix const& value,bool show)
+double   reject_value(WIndex const& kp1, WIndex const& kp2, Matrix const& value, bool show)
 {
   int    r  (kp1.first);
   double pr (kp1.second);
@@ -170,7 +170,7 @@ double
 RejectVectorUtility::oracle_utility (double mu, double rejectValue, double noRejectValue) const
 {
   std::pair<double,double>  rejectProbs  (reject_probabilities(mu));
-  double rb (rejectProbs.second);
+  double rb (rejectProbs.second);                                           // WHY always the second one???   Why have a first one that is nt used?
   return rejectProbs.first + rb * rejectValue + (1-rb) * noRejectValue;
 }
 

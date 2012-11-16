@@ -81,6 +81,7 @@ operator<< (std::ostream& os, WealthArray const& wa)
 
 
 
+// Dual wealth array randomizes when reject or accept H0
 // Discrete grid along wealth axis, with interpolation for reject and bid
 
 typedef double BidFunction(double);  // f: wealth to bid
