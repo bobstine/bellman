@@ -237,6 +237,9 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
 
 
 //    solve_bellman_utility matrix      solve_bellman_utility matrix     solve_bellman_utility matrix     solve_bellman_utility matrix
+//
+//  Dual randomized wealth version
+//
 
 void
 solve_bellman_utility  (int nRounds, MatrixUtility &utility, WealthArray const& rowWealth,  DualWealthArray const& colWealth, bool writeDetails)

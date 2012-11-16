@@ -170,7 +170,7 @@ double
 RejectVectorUtility::oracle_utility (double mu, double rejectValue, double noRejectValue) const
 {
   std::pair<double,double>  rejectProbs  (reject_probabilities(mu));
-  double rb (rejectProbs.second);                                           // WHY always the second one???   Why have a first one that is nt used?
+  double rb (rejectProbs.second);                                          
   return rejectProbs.first + rb * rejectValue + (1-rb) * noRejectValue;
 }
 
@@ -180,8 +180,7 @@ RejectVectorUtility::oracle_utility (double mu, double rejectValue, double noRej
 double
 RiskVectorUtility::operator()(double mu) const
 {
-  std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rb (rprob.second);
+  double rb (r_mu_beta(mu)); 
   return  mSin*neg_risk(mu,mAlpha) + mCos*neg_risk(mu,mBeta) + rb * mRejectValue + (1-rb) * mNoRejectValue;
 }
 
@@ -196,8 +195,7 @@ RiskVectorUtility::bidder_utility (double mu, double rejectValue, double noRejec
 double
 RiskVectorUtility::oracle_utility (double mu, double rejectValue, double noRejectValue) const 
 {
-  std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rb (rprob.second);
+  double rb (r_mu_beta(mu));
   return  neg_risk(mu,mAlpha) + rb * rejectValue + (1-rb) * noRejectValue;
 }
 
