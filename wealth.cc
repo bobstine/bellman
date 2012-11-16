@@ -13,7 +13,12 @@ double
 WealthArray::bid(int k)                const
 {
   assert ((0 <= k) && (k < size()-1));   // cannot find bid past end of array
-  return mWealth[k]-mWealth[k+1];
+  double b = mWealth[k]-mWealth[k+1];
+  if (1.0 < b)
+  { std::clog << messageTag << "Wealth array bid at k=" << k << " is larger than 1 (" << b << "; reduced to 1." << std::endl;
+    b = 1;
+  }
+  return b;
 }
 
 std::pair<int, double>
@@ -101,7 +106,7 @@ WealthArray::fill_array_top()
   double b (bid(mZeroIndex));       // incrementing initial bid
   double m (Line_Search::Bisection(0.00001,std::make_pair(1.000001,3))
 	    ([&w,&k,&b](double x){ double xk(x); for(int j=1;j<k;++j) xk *= x; return x*(1.0-xk)/(1-x) - w/b;}));
-  // std::cout << messageTag << "Geometric to top, b=" << b << " and growth factor m= " << m << " applied to " << mWealth[mZeroIndex] <<std::endl;
+  std::cout << messageTag << "Geometric to top, b=" << b << " and growth factor m= " << m << " applied to " << mWealth[mZeroIndex] <<std::endl;
   if (m < 1)
   { m = 1.0;
     std::cerr << messageTag << " *** Error ***  Wealth array cannot initialize upper wealth for inputs. Setting m = 1." << std::endl;
@@ -252,6 +257,7 @@ interpolate_round(double w, int i0, std::vector<double> const& wealthVec)
   return (i0-1)+(w-lo)/(hi-lo);
 }
 
+
 void
 DualWealthArray::initialize_wealth_bid_array(UniversalBidder f, int nRounds)
 {
@@ -317,6 +323,11 @@ DualWealthArray::initialize_wealth_bid_array(UniversalBidder f, int nRounds)
   { std::cerr << messageTag << " *** Error *** Omega position in the last element of wealth grid at " << mZeroIndex << std::endl;
     assert (false);
   }
+  for(int i=0; i < (int)mWealthBid.size(); ++i)
+    if (1.0 < mWealthBid[i].second)
+    { std::clog << messageTag << "Found dual wealth bid " << mWealthBid[i].second << " @ " << i << " larger than 1; reduced to 1." << std::endl;
+      mWealthBid[i].second = 1.0;
+    }
 }
 
   
