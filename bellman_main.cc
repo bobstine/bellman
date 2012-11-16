@@ -56,8 +56,9 @@ int  main(int argc, char** argv)
   // WealthArray *pBidderWealth = make_wealth_array(nRounds, omega, bidderProb, scale);
   UniversalBidder bidder(scale);
   DualWealthArray *pBidderWealth = new DualWealthArray(bidder.identifier(), omega, omega, bidder, nRounds);
-  std::clog << "MAIN: Bidder wealth array... " << *pBidderWealth << std::endl;
-  
+  std::clog << "MAIN: Column player (bidder) uses... " << *pBidderWealth << std::endl;
+  pBidderWealth->write_to(std::clog, true); // as lines
+  std::clog << std::endl;
   if(!constrain)           // unconstrained competitor
   { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
@@ -71,6 +72,9 @@ int  main(int argc, char** argv)
   }
   else                     // constrained competitor needs to track state as well
   { WealthArray* pOracleWealth = make_wealth_array(nRounds, omega, oracleProb, scale);
+    std::clog << "MAIN: Row player (oracle) uses wealth array " << *pOracleWealth << std::endl;
+    pOracleWealth->write_to(std::clog);
+    std::clog << std::endl;
     std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle, omega);

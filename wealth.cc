@@ -211,21 +211,22 @@ void
 DualWealthArray::print_arrays (std::ostream& os, bool asLines) const
 {
   if (asLines)
-  { for(int i=0; i<(int) mWealthBid.size(); ++i)          // wealths
+    { os << "Wealths:  ";
+      for(int i=0; i<(int) mWealthBid.size(); ++i)          // wealths
       os << mWealthBid[i].first << " ";
-    os << std::endl;
+      os << std::endl << "  Bids: " ;
     for(int i=0; i<(int) mWealthBid.size(); ++i)          // bids
       os << mWealthBid[i].second << " ";
-    os << std::endl;
+    os << std::endl << "Reject pos: ";
     for(int i=0; i<(int) mRejectPositions.size(); ++i)    // reject positions
       os << mRejectPositions[i].first << " ";
-    os << std::endl;
+    os << std::endl << "Reject wt : ";
     for(int i=0; i<(int) mRejectPositions.size(); ++i)
       os << mRejectPositions[i].second << " ";
-    os << std::endl;
+    os << std::endl << "   Bid pos: ";
     for(int i=0; i<(int) mBidPositions.size(); ++i)       // bid positions
       os << mBidPositions[i].first << " ";
-    os << std::endl;
+    os << std::endl << "   Bid wt : ";
     for(int i=0; i<(int) mBidPositions.size(); ++i)
       os << mBidPositions[i].second << " ";
     os << std::endl;

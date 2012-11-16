@@ -109,7 +109,7 @@ bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
 # uncon(0) Universal      153.435 0.5   70   0.05 20     104.155 -6.44542e-07 -116.449
 
 risk_check: bellman
-	./bellman --risk --omega 0.5 --angle 33   --rounds 7   --constrain --oracleprob 0.5         --bidderprob 0   
+	./bellman --risk --omega 0.5 --angle 33   --rounds 200   --constrain --oracleprob 0.1        --bidderprob 0   
 
 reject_check: bellman
 	./bellman --reject           --angle 0    --rounds 7  --constrain --oracleprob 0    --bidderprob 0.1 --write

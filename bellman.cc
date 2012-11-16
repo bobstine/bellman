@@ -238,9 +238,10 @@ void
 solve_bellman_utility  (int nRounds, MatrixUtility &utility, WealthArray const& rowWealth,  DualWealthArray const& colWealth, bool writeDetails)
 {
   const int nRows (rowWealth.number_of_bids());   
-  const int nCols (colWealth.number_wealth_positions());   
+  const int nCols (colWealth.number_wealth_positions());
+  const std::pair<int,int> zeroIndex(std::make_pair(rowWealth.zero_index(), colWealth.zero_index()));
+  std::cout << messageTag <<  "Final indices are " << zeroIndex.first << " & " << zeroIndex.second << std::endl;
   // code flips between these on read and write using use0
-  std::cout << messageTag <<  " Allocating space " << nRows << "   &   " << nCols << std::endl;
   bool use0 = true;
   Matrix  utilityMat0= Matrix::Zero (nRows, nCols);       // initialize with zero for risk, 1 for rejection
   Matrix  utilityMat1= Matrix::Zero (nRows, nCols);
@@ -256,8 +257,7 @@ solve_bellman_utility  (int nRounds, MatrixUtility &utility, WealthArray const& 
   bestMeanInterval = std::make_pair(10,0);
   auto search = make_search_engine();
   for (int round = nRounds; round > 0; --round)
-  { std::cout << messageTag << "\n Top of round " << round << std::endl;
-    if (use0)   // flip progress arrays
+  { if (use0)   // flip progress arrays
     { pUtilitySrc = &utilityMat0;    pRowSrc  = &rowMat0;   pColSrc  = &colMat0;
       pUtilityDest= &utilityMat1;    pRowDest = &rowMat1;   pColDest = &colMat1;
     } else
@@ -325,7 +325,9 @@ solve_bellman_utility  (int nRounds, MatrixUtility &utility, WealthArray const& 
   }
   // write summary of configuration and results to stdio
   std::cout << utility.angle() << " " << rowWealth.omega() << "   " << nRounds   << "   " 
-	    << (*pUtilityDest)(nRounds,nRounds) << " " << (*pRowDest)(nRounds,nRounds) << " " << (*pColDest)(nRounds,nRounds) << std::endl;
+	    << (*pUtilityDest)(zeroIndex.first,zeroIndex.second) << " "
+	    << (*pRowDest)(zeroIndex.first,zeroIndex.second) << " "
+	    << (*pColDest)(zeroIndex.first, zeroIndex.second) << std::endl;
 }
 
 
