@@ -1,4 +1,4 @@
-#include "wealth.h"
+#include "wealth.Template.h"
 
 #include <iostream>
 
@@ -120,10 +120,18 @@ int  main()
   } 
 
   if (true)
-  { std::cout << "\n\nTEST: Testing dual wealth array." << std::endl;
-    DualWealthArray wealth("test", 0.05, 0.05, UniversalBidder(.5), 200);
-    std::cout << "TEST: Zero index is at " << wealth.zero_index() << std::endl;
-    wealth.write_to(std::cout);
+  { double omega = 0.5;
+    double scl   = 1.0;
+    int rounds   = 20;
+    double rate = 0.1;
+    std::cout << "\n\nTEST: Testing dual wealth array." << std::endl;
+    UniversalBidder ub(scl);
+    DualWealthArray univWealth("univ", omega, omega, ub, rounds);
+    std::cout << "TEST: Zero index is at " << univWealth.zero_index() << std::endl;
+    univWealth.write_to(std::cout);
+    DualWealthArray geoWealth("geo", omega, omega, GeometricBidder(rate, ub.total_wealth()), rounds);
+    std::cout << "TEST: Zero index is at " << geoWealth.zero_index() << std::endl;
+    geoWealth.write_to(std::cout);
     std::cout << "\n\nTEST: Finished test of dual wealth array" << std::endl;
   }
   

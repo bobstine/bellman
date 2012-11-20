@@ -52,7 +52,7 @@ double   reject_value(WIndex const& kp1, WIndex const& kp2, Matrix const& value,
   double pr (kp1.second);
   int    c  (kp2.first);
   double pc (kp2.second);
-  const double v (pr * ( pc * value(r,c) + (1-pc) * value(r,c+1) ) + (1-pr) * ( pc * value(r+1,c) + (1-pc) * value(r+1,c+1) ));
+  double v  (pr * ( pc * value(r,c) + (1-pc) * value(r,c+1) ) + (1-pr) * ( pc * value(r+1,c) + (1-pc) * value(r+1,c+1) ));
   if (show)  std::cout << "   reject_value( (" << r << "," << pr << "),(" << c << "," << pc << ") ) = "
 		       << pr     << "*(" << pc << "*" << value(r  ,c) << "+" << 1-pc << "*" << value(r  ,c+1) << ")  +  "
 		       << (1-pr) << "*(" << pc << "*" << value(r+1,c) << "+" << 1-pc << "*" << value(r+1,c+1) << ") = " << v << std::endl;
@@ -269,7 +269,7 @@ RejectMatrixUtility::operator()(double mu) const
 
 
 double
-RejectMatrixUtility::oracle_utility (double mu, double v00, double v01, double v10, double v11) const
+RejectMatrixUtility::row_utility (double mu, double v00, double v01, double v10, double v11) const
 {
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rAlpha (rprob.first);
@@ -282,7 +282,7 @@ RejectMatrixUtility::oracle_utility (double mu, double v00, double v01, double v
 
 
 double
-RejectMatrixUtility::bidder_utility (double mu, double v00, double v01, double v10, double v11) const
+RejectMatrixUtility::col_utility (double mu, double v00, double v01, double v10, double v11) const
 {
   // same recursive structure as oracle_utility, just different recursive values appear in call
   std::pair<double,double>  rprob  (reject_probabilities(mu));
@@ -315,7 +315,7 @@ RiskMatrixUtility::operator()(double mu) const
 
 
 double
-RiskMatrixUtility::oracle_utility  (double mu, double v00, double v01, double v10, double v11) const
+RiskMatrixUtility::row_utility  (double mu, double v00, double v01, double v10, double v11) const
 {
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rAlpha (rprob.first);
@@ -328,7 +328,7 @@ RiskMatrixUtility::oracle_utility  (double mu, double v00, double v01, double v1
 
 
 double
-RiskMatrixUtility::bidder_utility (double mu, double v00, double v01, double v10, double v11) const
+RiskMatrixUtility::col_utility (double mu, double v00, double v01, double v10, double v11) const
 {
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rAlpha (rprob.first);

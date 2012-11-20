@@ -1,7 +1,8 @@
 #include "bellman.h"
 
-#include <math.h>
+#include "wealth.Template.h"
 
+#include <math.h>
 #include <iostream>
 #include <getopt.h>
 #include "read_utils.h"     
@@ -14,7 +15,7 @@ const int universalStart (1);
 // Need to use special order of calls to fill geometric
 // prob=0 signals universal, prob > 0 is geometric
 
-WealthArray*
+DualWealthArray*
 make_wealth_array(int nRounds, double omega, double prob, double scale);
 
 
@@ -53,12 +54,9 @@ int  main(int argc, char** argv)
   std::clog << "MAIN: Building wealth array for " << nRounds << " rounds with omega=" << omega
 	    << ", bidder prob=" << bidderProb << ", and scale=" << scale << std::endl;
 
-  // WealthArray *pBidderWealth = make_wealth_array(nRounds, omega, bidderProb, scale);
-  UniversalBidder bidder(scale);
-  DualWealthArray *pBidderWealth = new DualWealthArray(bidder.identifier(), omega, omega, bidder, nRounds);
+  DualWealthArray *pBidderWealth = make_wealth_array(nRounds, omega, bidderProb, scale);
   std::clog << "MAIN: Column player (bidder) uses... " << *pBidderWealth << std::endl;
-  pBidderWealth->write_to(std::clog, true); // as lines
-  std::clog << std::endl;
+  pBidderWealth->write_to(std::clog, true); std::clog << std::endl; // as lines
   if(!constrain)           // unconstrained competitor
   { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
@@ -71,10 +69,9 @@ int  main(int argc, char** argv)
     }
   }
   else                     // constrained competitor needs to track state as well
-  { WealthArray* pOracleWealth = make_wealth_array(nRounds, omega, oracleProb, scale);
+  { DualWealthArray *pOracleWealth = make_wealth_array(nRounds, omega, oracleProb, scale);
     std::clog << "MAIN: Row player (oracle) uses wealth array " << *pOracleWealth << std::endl;
-    pOracleWealth->write_to(std::clog);
-    std::clog << std::endl;
+    pOracleWealth->write_to(std::clog, true); std::clog << std::endl;
     std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle, omega);
@@ -177,19 +174,19 @@ parse_arguments(int argc, char** argv,
 }
 
 
-WealthArray*
+DualWealthArray*
 make_wealth_array(int nRounds, double omega, double prob, double scale)
 {
   if(0 == prob)         // universal
-  { std::clog << "MAIN: Making high-wealth universal array with scale=" << scale << " and omega=" << omega << std::endl;
-    return new WealthArray(omega, omega, nRounds, ScaledUniversalDist(scale));
+  { std::clog << "MAIN: Making universal array with scale=" << scale << " and omega=" << omega << std::endl;
+    UniversalBidder bidder(scale);
+    return new DualWealthArray(bidder.identifier(), omega, omega, bidder, nRounds);
+    // return new WealthArray(omega, omega, nRounds, ScaledUniversalDist(scale));
   }
-  // return new WealthArray(omega, iOmega,UniversalDist(universalStart));
   else
-  { int iZero (15);  // padding above initial wealth at omega
-    if (prob > 1)    // uniform
-      return new WealthArray(omega, iZero, nRounds, UniformDist( trunc(prob) ));
-    else                  // geometric
-      return new WealthArray(omega, iZero, nRounds, prob);
+  { std::clog << "MAIN: Making geometric array with prob=" << prob << ", scale=" << scale << " and omega=" << omega << std::endl;
+    UniversalBidder univ(scale);
+    GeometricBidder geoBidder(prob, univ.total_wealth());
+    return new DualWealthArray(geoBidder.identifier(), omega, omega, geoBidder, nRounds);
   }
 }

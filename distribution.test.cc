@@ -9,8 +9,18 @@ int  main()
 {
 
   const int univStart (1);
-  
+
   if (true)
+  {
+    std::cout << "\nTEST: bidder functions, starting with same total wealth..." << std::endl;
+    UniversalBidder univ(2.0);
+    GeometricBidder geo(0.5, univ.total_wealth());
+    std::cout << "     Starting with wealths " << univ.total_wealth() << " " << geo.total_wealth() << std::endl;
+    std::cout << "     Round    Univ Bid   Geometric" << std::endl;
+    for (int r=0; r<16; ++r)
+      std::cout << "     r=" << r << "  " << univ(r) << "     " << geo(r) << std::endl;
+  }
+  if (false)
   {
     std::cout << "\nTest that distributions sum to 1 on k = 0, ... " << std::endl;
     double sum;
@@ -32,7 +42,7 @@ int  main()
   }
 
 
-  if (true)
+  if (false)
   {
     std::cout << "\n\nInspect leading terms of distributions" << std::endl;
     ScaledUniversalDist scaledUniv(2);

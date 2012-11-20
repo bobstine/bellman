@@ -77,7 +77,7 @@ class UniversalDist: public Distribution
   as well since some of the bid amounts are larger than the payout.
 */
 
-class UniversalBidder: public std::unary_function<double,double>
+class UniversalBidder: public std::unary_function<int,double>
 {
   double const mScale;                        // k in dean's notes
   
@@ -85,13 +85,26 @@ class UniversalBidder: public std::unary_function<double,double>
   
   UniversalBidder (double scale)    : mScale(scale)  { }
   
-  std::string identifier()                const;
-  double      scale()                     const { return mScale; }
-  double      operator()(double round)    const;
-  
-  double      total_wealth()              const;
+  std::string identifier()              const;
+  double      scale()                   const { return mScale; }
+  double      operator()(int round)     const;   // these are the two used by external routines
+  double      total_wealth()            const;
 };
+
+class GeometricBidder: public std::unary_function<int,double>
+{
+  double const mTotal;
+  double const mSpendRate; 
   
+ public:
+  
+  GeometricBidder (double spendingRate, double totalWealth)    : mTotal(totalWealth), mSpendRate(spendingRate)  { }
+  
+  std::string identifier()              const;
+  double      spending_rate()           const { return mSpendRate; }
+  double      operator()(int round)     const;
+  double      total_wealth()            const { return mTotal; }
+};
 
 
 class ScaledUniversalDist: public Distribution

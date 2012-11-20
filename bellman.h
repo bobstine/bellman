@@ -32,9 +32,10 @@ solve_bellman_utility  (int nRounds, VectorUtility &util,                       
 void
 solve_bellman_utility  (int nRounds, VectorUtility &util,                             WealthArray const& bidderWealth, bool writeDetails);
 
-// constrained oracle which has standard wealth array
+// constrained oracle, two-player competition
+
 void
-solve_bellman_utility  (int nRounds, MatrixUtility & util, WealthArray const& oWealth,  DualWealthArray const& bidderWealth, bool writeDetails);
+solve_bellman_utility  (int nRounds, MatrixUtility & util, DualWealthArray const& oWealth,  DualWealthArray const& bidderWealth, bool writeDetails);
 
 void
 solve_bellman_utility  (int nRounds, MatrixUtility & util, WealthArray const& oracleWealth, WealthArray const& bidderWealth, bool writeDetails);

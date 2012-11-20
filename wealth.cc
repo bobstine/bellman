@@ -22,8 +22,9 @@ WealthArray::bid(int k)                const
 }
 
 std::pair<int, double>
-WealthArray::find_wealth_position (int k1, double increase)  const // k0 is current position denoting current wealth
+WealthArray::find_wealth_position (int k, double increase)  const // k0 is current position denoting current wealth
 {
+  int k1 (k);
   double target = mWealth[k1] + increase;       // 'wealth' is 'new wealth' > 'current wealth'
   int k0 (0);                            
   while (mWealth[k1] > target)                  // if bid > payoff
@@ -39,7 +40,7 @@ WealthArray::find_wealth_position (int k1, double increase)  const // k0 is curr
   }
   if (k0<k1)  // inside range
   { double p ( (mWealth[k0] - target) / (mWealth[k0] - mWealth[k1]) );
-    if (p < 0) std::cerr << messageTag << "*** Error ***  Wealth position is " << k0 << " " << p << std::endl;
+    if (p < 0) std::cerr << messageTag << "*** Error ***  At k=" << k << " for increment " << increase << "; share p=" << p << " to position k0=" << k0 << std::endl;
     return std::make_pair(k0,1-p);
   }
   else
@@ -243,98 +244,11 @@ DualWealthArray::print_arrays (std::ostream& os, bool asLines) const
   }
 }
 
-double
-interpolate_round(double w, int i0, std::vector<double> const& wealthVec)
-{
-  if ((wealthVec[0] < w) || (w < wealthVec[wealthVec.size()-1]))
-  { std::cerr << messageTag << "Wealth w=" << w << " out of bounds in interpolation "
-	      << wealthVec[0] << " to " << wealthVec[wealthVec.size()-1] << std::endl;
-    assert(false);
-  }
-  while (w <= wealthVec[i0])  // has to be an i0 which is eventually less
-    ++i0;
-  double lo (wealthVec[i0-1]);
-  double hi (wealthVec[i0  ]);
-  return (i0-1)+(w-lo)/(hi-lo);
-}
 
-
-void
-DualWealthArray::initialize_wealth_bid_array(UniversalBidder f, int nRounds)
-{
-  // build wealth table for later interpolation
-  std::vector< double > wealths, bids;
-  double       minW     (f.total_wealth());
-  double       i       (0);
-  while (mOmega <= minW)
-  { double b (f(i));
-    wealths.push_back(minW);
-    bids.push_back(b);
-    minW -= b;
-    ++i;
-  }
-  for (double j=0; j<=nRounds; ++j)   // extra round
-  { double b = f(i+j);
-    minW -= b;
-    wealths.push_back(minW);
-    bids.push_back(b);
-  }
-  i = (int) wealths.size();
-  while ((mOmega-0.001) < minW)
-  { double b = f(i++);
-    minW -= b;
-    wealths.push_back(minW);
-    bids.push_back(b);
-  }
-  std::clog << messageTag << "Wealth table uses " << wealths.size() << " elements, with min wealth/bid["
-	    << wealths.size()-1 << "] = " << minW << " " << bids[bids.size()-1] << std::endl;
-  // initial wealth grid spacing
-  double delta (0.1);
-  if (f.total_wealth() < 1)
-  { delta /= 10;
-    if (f.total_wealth() < 0.1)
-      delta /= 10;
-  }
-  // initialize wealth array, rounded to 1/100 to hit omega
-  double wealth     (0.01 * floor(100*f.total_wealth()));
-  double baseWealth (wealth);
-  int    iStart  (0);
-  int    limit (1000);
-  while ((minW < wealth) && limit--)  // ensure step past omega even if bids tiny
-  { 
-    double indx (interpolate_round(wealth, iStart, wealths));
-    iStart = floor(indx);
-    double shr (indx-iStart);
-    double bid (bids[iStart]*(1.0-shr) + bids[iStart+1]*shr);
-    mWealthBid.push_back( std::make_pair(wealth,bid) );
-    if (wealth < baseWealth/5)
-    { delta /= 10;
-      baseWealth /= 5;
-    }
-    // std::clog << messageTag << mWealthBid.size()-1
-    //	         << " pushing wealth=" << wealth << " with bid=" << bid << " ("<< indx << ")     delta = " << delta << std::endl;
-    wealth -= delta;
-  }
-  if (0 == limit) std::cerr << messageTag << std::endl << " *** ERROR *** Ran out of space for internal array.\n" << std::endl;
-  // find position with wealth equal to omega (up to rounding)
-  i = 0;
-  while ((0.000001 < (mWealthBid[i].first - mOmega)) && (i < mWealthBid.size())) ++i;
-  mZeroIndex = i;
-  if (((int)mWealthBid.size()-1) == mZeroIndex)
-  { std::cerr << messageTag << " *** Error *** Omega position in the last element of wealth grid at " << mZeroIndex << std::endl;
-    assert (false);
-  }
-  for(int i=0; i < (int)mWealthBid.size(); ++i)
-    if (1.0 < mWealthBid[i].second)
-    { std::clog << messageTag << "Found dual wealth bid " << mWealthBid[i].second << " @ " << i << " larger than 1; reduced to 1." << std::endl;
-      mWealthBid[i].second = 1.0;
-    }
-}
-
-  
 std::pair<int,double>
-DualWealthArray::find_wealth_position(int k0, int k1, double w) const
+DualWealthArray::find_wealth_position(int k, int k1, double w) const
 {
+  int k0 (k);
   while (k0+1 < k1)
   { int kk = floor((k0+k1)/2);
     //    std::cout << "DEBUG: init reject array   W[" << k1 << "]=" << wealth(k1)
@@ -345,7 +259,7 @@ DualWealthArray::find_wealth_position(int k0, int k1, double w) const
   }
   if (k0<k1)  // inside range
   { double p ( (wealth(k0) - w) / (wealth(k0) - wealth(k1)) );
-    if (p < 0) std::cerr << messageTag << "*** Error ***  Wealth position is " << k0 << " " << p << std::endl;
+    if (p < 0) std::clog << messageTag << "*** Error ***  At k=" << k << " for w=" << w << "; share p=" << p << " to position k0=" << k0 << std::endl;
     return (std::make_pair(k0,1-p));
   }
   else return (std::make_pair(k0,1));
@@ -355,14 +269,18 @@ DualWealthArray::find_wealth_position(int k0, int k1, double w) const
 void
 DualWealthArray::initialize_reject_array ()         
 {
-  // if reject from state 0, stay in state 0
-  mRejectPositions.push_back( std::make_pair(0,1) );
+  double maxWealth (mWealthBid[0].first);
+  mRejectPositions.push_back( std::make_pair(0,1) );                 // if reject from state 0, stay in state 0
   for (int k=1; k<(int)mWealthBid.size(); ++k)
   { double changeInWealth = mOmega - bid(k);
     double wealthAfterReject = wealth(k) + changeInWealth;
-    int k0 = (changeInWealth > 0) ? 0 : k;                           // W[k1] <= new wealth < W[k0]
-    int k1 = (changeInWealth > 0) ? k : mWealthBid.size()-1;         //      k0 <= k1
-    mRejectPositions.push_back( find_wealth_position(k0, k1, wealthAfterReject) );
+    if (maxWealth < wealthAfterReject)                               // truncate to top wealth
+      mRejectPositions.push_back( std::make_pair(0,1) );
+    else
+    { int k0 = (changeInWealth > 0) ? 0 : k;                         // W[k1] <= new wealth < W[k0]
+      int k1 = (changeInWealth > 0) ? k : mWealthBid.size()-1;       //      k0 <= k1
+      mRejectPositions.push_back( find_wealth_position(k0, k1, wealthAfterReject) );
+    }
   }
 }
 
@@ -377,4 +295,14 @@ DualWealthArray::initialize_bid_array ()
   mBidPositions.push_back( std::make_pair((int)mBidPositions.size(),1) );
 }
 
-
+// set spacing for grid
+double
+DualWealthArray::grid_delta (double wealth) const
+{
+  if      (2.0  < wealth) return 0.2;
+  else if (1.0  < wealth) return 0.1;
+  else if (0.5  < wealth) return 0.05;
+  else if (0.1  < wealth) return 0.01;
+  else if (0.02 < wealth) return 0.005;
+  else return 0.001;
+}

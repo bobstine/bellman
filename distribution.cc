@@ -65,12 +65,12 @@ UniversalBidder::identifier () const
 }
 
 double
-UniversalBidder::operator()(double x) const
+UniversalBidder::operator()(int i) const
 {
-  assert (0 <= x);
-  x += 1;
-  double ll = log(x+1);
-  return mScale/(x * ll * ll);
+  assert (0 <= i);
+  i += 1;
+  double ll = log(i+1);
+  return mScale/(i * ll * ll);
 }
 
 
@@ -80,6 +80,26 @@ UniversalBidder::total_wealth() const
   return mScale * sumOfLogRecip;
 }
 
+//     GeometricBidder     GeometricBidder     GeometricBidder     GeometricBidder     GeometricBidder     GeometricBidder     
+
+std::string
+GeometricBidder::identifier () const
+{
+  std::stringstream ss;
+  ss << "geo_bidder(" << mSpendRate << ")";
+  return ss.str();
+}
+
+double
+GeometricBidder::operator()(int i) const
+{
+  assert (0 <= i);
+  
+  double bid (mTotal * mSpendRate);
+  for (int j=0; j<i; ++j)
+    bid *= (1.0-mSpendRate);
+  return bid;
+}
 
 
 //     UniversalDist     UniversalDist     UniversalDist     UniversalDist     UniversalDist     UniversalDist     
