@@ -1,5 +1,6 @@
 #include "bellman.h"
 
+#include "line_search.Template.h"
 #include "wealth.Template.h"
 
 #include <math.h>

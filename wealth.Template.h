@@ -2,7 +2,6 @@
 #define WEALTH_TEMPLATE_H
 
 #include "wealth.h"
-
 #include "line_search.Template.h"
 #include <cassert>
 

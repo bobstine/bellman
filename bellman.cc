@@ -1,7 +1,7 @@
 #include "bellman.h"
 #include "random.h"
 #include "line_search.Template.h"
-#include "wealth.Template.h"
+#include "wealth.h"
 #include "eigen_utils.h"
 
 
