@@ -236,7 +236,7 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
 //
 
 void
-solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray const& rowWealth,  DualWealthArray const& colWealth, bool writeDetails)
+solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray const& rowWealth,  DualWealthArray const& colWealth, std::string config, bool writeTable)
 {
   const int nRows (1+rowWealth.number_wealth_positions());                // extra 1 for padding; allow 0 * 0
   const int nCols (1+colWealth.number_wealth_positions());
@@ -305,17 +305,13 @@ solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray con
     }
   }
   std::cout << std::setprecision(6);
-  if(writeDetails)
-  { std::ostringstream ss;
-    int angle (utility.angle());
-    ss << "runs/bellmandual.a" << angle << ".n" << nRounds << ".";
-    { write_matrix_to_file(ss.str() + "utility", *pUtilityDest);
-      write_matrix_to_file(ss.str() + "row" ,  *pRowDest);
-      write_matrix_to_file(ss.str() + "col" ,  *pColDest);
-    }
+  if(writeTable)
+  { write_matrix_to_file(config + ".utility", *pUtilityDest);
+    write_matrix_to_file(config + ".row" ,  *pRowDest);
+    write_matrix_to_file(config + ".col" ,  *pColDest);
   }
   // write summary of configuration and results to stdio
-  std::cout << utility.angle() << " " << rowWealth.omega() << "   " << nRounds   << "   " 
+  std::cout << config << " "  
 	    << (*pUtilityDest)(zeroIndex.first, zeroIndex.second) << " "
 	    << (*pRowDest    )(zeroIndex.first, zeroIndex.second) << " "
 	    << (*pColDest    )(zeroIndex.first, zeroIndex.second) << std::endl;

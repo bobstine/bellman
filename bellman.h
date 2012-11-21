@@ -32,10 +32,10 @@ solve_bellman_utility  (int nRounds, VectorUtility &util,                       
 void
 solve_bellman_utility  (int nRounds, VectorUtility &util,                             WealthArray const& bidderWealth, bool writeDetails);
 
-// constrained oracle, two-player competition
+// constrained oracle, two-player competition  (empty prefix means don't write)
 
 void
-solve_bellman_utility  (int nRounds, MatrixUtility & util, DualWealthArray const& oWealth,  DualWealthArray const& bidderWealth, bool writeDetails);
+solve_bellman_utility  (int nRounds, MatrixUtility & util, DualWealthArray const& oWealth,  DualWealthArray const& bidderWealth, std::string config, bool writeDetails);
 
 void
 solve_bellman_utility  (int nRounds, MatrixUtility & util, WealthArray const& oracleWealth, WealthArray const& bidderWealth, bool writeDetails);

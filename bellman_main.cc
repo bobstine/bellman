@@ -19,6 +19,11 @@ const int universalStart (1);
 DualWealthArray*
 make_wealth_array(int nRounds, double omega, double prob, double scale);
 
+int
+round_parm(double x)
+{
+  return floor(100 * x);
+}
 
 //  prob character indicates the distribution, u for universal and g for geometric
 
@@ -73,13 +78,17 @@ int  main(int argc, char** argv)
   { DualWealthArray *pOracleWealth = make_wealth_array(nRounds, omega, oracleProb, scale);
     std::clog << "MAIN: Row player (oracle) uses wealth array " << *pOracleWealth << std::endl;
     std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
+    std::ostringstream ss;
+    ss << "druns/bellman.a" << angle << ".s" << round_parm(scale) <<".o" << round_parm(omega) << ".rp" << round_parm(oracleProb) << ".cp" << round_parm(bidderProb);
     if (riskUtil)
     { RiskMatrixUtility utility(angle, omega);
-      solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, writeTable);
+      ss << ".risk";
+      solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, ss.str(), writeTable);
     }
     else
-    { RejectMatrixUtility utility(angle, omega); 
-      solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, writeTable);
+    { RejectMatrixUtility utility(angle, omega);
+      ss << ".reject";
+      solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, ss.str(), writeTable);
     }
   }
   return 0;
