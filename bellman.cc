@@ -238,8 +238,8 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
 void
 solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray const& rowWealth,  DualWealthArray const& colWealth, bool writeDetails)
 {
-  const int nRows (rowWealth.number_wealth_positions());
-  const int nCols (colWealth.number_wealth_positions());
+  const int nRows (1+rowWealth.number_wealth_positions());
+  const int nCols (1+colWealth.number_wealth_positions());
   const std::pair<int,int> zeroIndex(std::make_pair(rowWealth.zero_index(), colWealth.zero_index()));
   std::clog << messageTag <<  "Zero indices are " << zeroIndex.first << " & " << zeroIndex.second << std::endl;
   // code flips between these on read and write using use0
@@ -266,7 +266,7 @@ solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray con
       pUtilityDest= &utilityMat0;    pRowDest = &rowMat0;   pColDest = &colMat0;
     }
     use0 = !use0;
-    for (int r=0; r<nRows-1; ++r) 
+    for (int r=0; r<nRows-1; ++r)   // zero padding... zero weight on zero value
     { double rowBid = rowWealth.bid(r);
       std::pair<int, double> rowBidPos    = rowWealth.bid_position(r);    // if does not reject
       std::pair<int, double> rowRejectPos = rowWealth.reject_position(r); // if rejects
