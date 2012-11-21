@@ -119,16 +119,17 @@ reject_check: bellman
 # or
 #    make -k -j lots  runs/summary.risk_psi0010_n250
 #    make -k -j lots uruns/summary.risk_alpha5_omega50_scale2_n200
+#    make -k -j lots druns/summary.risk_omega50_scale2_psi10_n50
 # with these values chosen to match (don't know how to pick them from make input
 # so you have to define the constants here and match them in the make command.
 # Builds a directory in runs for these results, then files for each.
 
-n = 500
+n = 200
 
 omega = 0.50
 otxt  =   50
 
-# define uncontrained expert by alpha level
+# define unconstrained expert by alpha level
 alpha = 0.05
 atxt=      5
 
@@ -140,8 +141,8 @@ scale = 2
 stxt  = 2
 
 # define expert by uniform n (one more than n)
-# psi =   251
-# ptxt=   251
+psi = 0.05
+ptxt=    5
 
 #--------------------------------------------------------------------------------------------
 #  below here is automagic, building output in runs/   
@@ -168,22 +169,22 @@ $(up)/%: bellman bellman.sh  $(up)/.directory_built
 
 # -----  constrained -----
 
-# define path within runs subdirectory for each psi (oracle) and n combination; 0 ids universal
-pp = runs/$(goal)_psi$(ptxt)_n$(n)
+# define path within druns subdirectory for each psi (oracle) and n combination; 0 ids universal
+pp = druns/$(goal)_omega$(otxt)_scale$(stxt)_psi$(ptxt)_n$(n)
 
 $(pp)/.directory_built: 
-	echo Building directory for contrained runs $(pp)
+	echo Building directory for constrained runs $(pp)
 	mkdir $(pp)
 	touch $@
 
 # main constrained target
-runs/summary.risk_psi$(ptxt)_n$(n): bellman bellman.sh $(pp)/0 $(pp)/15 $(pp)/30 $(pp)/45 $(pp)/60 $(pp)/75 $(pp)/90 $(pp)/105 $(pp)/120 $(pp)/135 $(pp)/150 $(pp)/165 $(pp)/180 $(pp)/195 $(pp)/210 $(pp)/225 $(pp)/240 $(pp)/255 $(pp)/270 $(pp)/285 $(pp)/300 $(pp)/315 $(pp)/330 $(pp)/345
+druns/summary.risk_omega$(otxt)_scale$(stxt)_psi$(ptxt)_n$(n): bellman bellman.sh $(pp)/0 $(pp)/15 $(pp)/30 $(pp)/45 $(pp)/60 $(pp)/75 $(pp)/90 $(pp)/105 $(pp)/120 $(pp)/135 $(pp)/150 $(pp)/165 $(pp)/180 $(pp)/195 $(pp)/210 $(pp)/225 $(pp)/240 $(pp)/255 $(pp)/270 $(pp)/285 $(pp)/300 $(pp)/315 $(pp)/330 $(pp)/345
 	rm -f $@
 	cat $(filter $(pp)/%,$^) >> $@
 
 # actual run command for constrained solution, with univ and geometric
-$(pp)/%: bellman bellman.sh # $(pp)/.directory_built
-	./bellman --$(goal) --angle $* --constrain --oracleprob $(psi) --bidderprob 0      --rounds $(n) >  $@
+$(pp)/%: bellman bellman.sh  $(pp)/.directory_built
+	./bellman --$(goal) --angle $* --scale $(scale) --omega $(omega) --constrain --oracleprob $(psi) --bidderprob 0      --rounds $(n) >  $@
 
 
 

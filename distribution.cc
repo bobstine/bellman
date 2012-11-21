@@ -14,7 +14,7 @@ std::string
 GeometricDist::identifier() const
 {
   std::stringstream ss;
-  ss << "g" << mPsi;
+  ss << "Geom" << mPsi;
   return ss.str();
 }
 
@@ -60,7 +60,7 @@ std::string
 UniversalBidder::identifier () const
 {
   std::stringstream ss;
-  ss << "univ_bidder(" << mScale << ")";
+  ss << "Univ(" << mScale << ")";
   return ss.str();
 }
 
@@ -86,7 +86,7 @@ std::string
 GeometricBidder::identifier () const
 {
   std::stringstream ss;
-  ss << "geo_bidder(" << mSpendRate << ")";
+  ss << "Geom(" << mSpendRate << ")";
   return ss.str();
 }
 
