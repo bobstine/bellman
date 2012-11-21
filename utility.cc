@@ -211,30 +211,30 @@ RiskVectorUtility::oracle_utility (double mu, double rejectValue, double noRejec
 
 
 double
-MatrixUtility::r_mu_beta (double mu) const
+r_mu(double mu, double p)
 {
   if (0.0 == mu)
-    return mBeta;
+    return p;
   else
-  { if (0.0 == mBeta)
+  { if (0.0 == p)
       return 0.0;
     else
-      return reject_prob(mu, mBeta);
+      return reject_prob(mu, p);
   }
 }
 
 double
 MatrixUtility::r_mu_alpha (double mu) const
 {
-  if (0.0 == mu)
-    return mAlpha;
-  else
-  { if (0.0 == mAlpha)
-      return 0.0;
-    else
-      return reject_prob(mu, mAlpha);
-  }
+  return r_mu(mu, mAlpha);
 }
+
+double
+MatrixUtility::r_mu_beta (double mu) const
+{
+  return r_mu(mu, mBeta);
+}
+
 
 std::pair<double,double>
 MatrixUtility::reject_probabilities (double mu) const
@@ -303,9 +303,9 @@ double
 RiskMatrixUtility::operator()(double mu) const
 {
   std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rAlpha (rprob.first);
-  double rBeta (rprob.second);
-  double util (mSin*neg_risk(mu,mAlpha) + mCos*neg_risk(mu,mBeta));  
+  double rAlpha (rprob.first );
+  double rBeta  (rprob.second);
+  double util (mSin*neg_risk(mu,mAlpha) + mCos*neg_risk(mu,mBeta));
   if (rAlpha > rBeta)
     return  util + mV00 * (1-rAlpha) + mV10 * (rAlpha-rBeta) +  mV11 * rBeta;
   else
@@ -318,12 +318,13 @@ double
 RiskMatrixUtility::row_utility  (double mu, double v00, double v01, double v10, double v11) const
 {
   std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rAlpha (rprob.first);
-  double rBeta (rprob.second);
+  double rAlpha (rprob.first );
+  double rBeta  (rprob.second);
+  double util (neg_risk(mu,mAlpha));
   if (rAlpha > rBeta)
-    return  neg_risk(mu,mAlpha)  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
+    return  util  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
   else
-    return  neg_risk(mu,mAlpha)  + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
+    return  util  + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
 }
 
 
@@ -333,9 +334,10 @@ RiskMatrixUtility::col_utility (double mu, double v00, double v01, double v10, d
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rAlpha (rprob.first);
   double rBeta (rprob.second);
+  double util  (neg_risk(mu,mBeta));
   if (rAlpha > rBeta)
-    return  neg_risk(mu,mBeta)  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
+    return  util  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
   else
-    return  neg_risk(mu,mBeta)  + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
+    return  util  + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
 }
 

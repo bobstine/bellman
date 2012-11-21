@@ -238,13 +238,13 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
 void
 solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray const& rowWealth,  DualWealthArray const& colWealth, bool writeDetails)
 {
-  const int nRows (1+rowWealth.number_wealth_positions());
+  const int nRows (1+rowWealth.number_wealth_positions());                // extra 1 for padding; allow 0 * 0
   const int nCols (1+colWealth.number_wealth_positions());
   const std::pair<int,int> zeroIndex(std::make_pair(rowWealth.zero_index(), colWealth.zero_index()));
   std::clog << messageTag <<  "Zero indices are " << zeroIndex.first << " & " << zeroIndex.second << std::endl;
   // code flips between these on read and write using use0
   bool use0 = true;
-  Matrix  utilityMat0= Matrix::Zero (nRows, nCols);                      // initialize with zero for risk, 1 for rejection
+  Matrix  utilityMat0= Matrix::Zero (nRows, nCols);                       // initialize with zero for risk, 1 for rejection
   Matrix  utilityMat1= Matrix::Zero (nRows, nCols);
   Matrix* pUtilitySrc(&utilityMat0), *pUtilityDest(&utilityMat1);
   Matrix  rowMat0    = Matrix::Zero (nRows, nCols);
@@ -254,7 +254,7 @@ solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray con
   Matrix  colMat1    = Matrix::Zero (nRows, nCols);
   Matrix* pColSrc(&colMat0 ), *pColDest(&colMat1);
   // iteration vars
-  std::pair<double,double> maxPair;                                      // x,f(x)
+  std::pair<double,double> maxPair;                                       // x,f(x)
   std::pair<double,double> bestMeanInterval = std::make_pair(10,0);
   auto search = make_search_engine();
   for (int round = nRounds; 0 < round; --round)
@@ -266,7 +266,7 @@ solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray con
       pUtilityDest= &utilityMat0;    pRowDest = &rowMat0;   pColDest = &colMat0;
     }
     use0 = !use0;
-    for (int r=0; r<nRows-1; ++r)   // zero padding... zero weight on zero value
+    for (int r=0; r<nRows-1; ++r)                                         //  padding... allows zero weight on zero value without if/else
     { double rowBid = rowWealth.bid(r);
       std::pair<int, double> rowBidPos    = rowWealth.bid_position(r);    // if does not reject
       std::pair<int, double> rowRejectPos = rowWealth.reject_position(r); // if rejects
@@ -286,12 +286,11 @@ solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray con
 	if(maxPair.first < bestMeanInterval.first)
 	  bestMeanInterval.first = maxPair.first;
 	else if (maxPair.first > bestMeanInterval.second)
-	  bestMeanInterval.second = maxPair.first;
+	  bestMeanInterval.second = maxPair.first;	
 	double utilAtMuEqualZero = utility(0.0);
 	if (maxPair.second < utilAtMuEqualZero)
 	  maxPair = std::make_pair(0.0,utilAtMuEqualZero);
-	// std::cout << messageTag << "Utility at (" << r << "," << c << ")= = " << maxPair.first << "  " << maxPair.second << std::endl;
-	(*pUtilityDest)(r, c) = maxPair.second;
+	(*pUtilityDest)(r,c) = maxPair.second;
 	(* pRowDest)(r,c) = utility.row_utility(maxPair.first,                                            // opt mu
 						   reject_value (rowBidPos   ,  colBidPos  , *pRowSrc),   // v00  neither rejects
 						   reject_value (rowBidPos   , colRejectPos, *pRowSrc),   // v01  only column player rejects
@@ -309,7 +308,7 @@ solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray con
   if(writeDetails)
   { std::ostringstream ss;
     int angle (utility.angle());
-    ss << "runs/bellmandual.g" << angle << ".n" << nRounds << ".";
+    ss << "runs/bellmandual.a" << angle << ".n" << nRounds << ".";
     { write_matrix_to_file(ss.str() + "utility", *pUtilityDest);
       write_matrix_to_file(ss.str() + "row" ,  *pRowDest);
       write_matrix_to_file(ss.str() + "col" ,  *pColDest);
