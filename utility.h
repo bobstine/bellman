@@ -98,12 +98,16 @@ class RiskVectorUtility: public VectorUtility
  public:
 
  RiskVectorUtility(double angle, double omega)
-   : VectorUtility(angle, omega) { }
+   : VectorUtility(angle, omega) { print_type(); }
   
   double operator()(double mu) const;
   
   double bidder_utility (double mu, double rejectValue, double noRejectValue) const;
   double oracle_utility (double mu, double rejectValue, double noRejectValue) const;
+
+ private:
+  void print_type() const;
+  
 }; 
 
 
