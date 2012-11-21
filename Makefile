@@ -170,7 +170,7 @@ uruns/summary.risk_alpha$(atxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $
 
 # actual run command for unconstrained solution
 $(up)/%: bellman bellman.sh  $(up)/.directory_built
-	./bellman --$(goal) --omega 0.5 --angle $* --oracleprob $(alpha) --bidderprob 0 --scale $(scale)  --rounds $(n) >  $@
+	./bellman --$(goal) --omega 0.05 --angle $* --oracleprob $(alpha) --bidderprob 0 --scale $(scale)  --rounds $(n) >  $@
 
 # -----  constrained -----
 
