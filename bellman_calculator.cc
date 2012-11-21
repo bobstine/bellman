@@ -8,7 +8,7 @@
 
 
 inline std::ostream&
-operator<<(std::ostream &output, const std::pair<double,double> pair)
+operator<<(std::ostream &output,  std::pair<double,double> const& pair)
 { output << " < " << pair.first << " , " << pair.second << " > "; return output; }
 
 
@@ -25,8 +25,8 @@ int  main(int argc, char** argv)
 {
   // set default control values
   int    nRounds (100   );
-  double omega   (  0.5 );
   double alpha   (  0.05);
+  double omega   (  0.5 );
   double scale   (  2.0 );
   double signal  (  2.5 );
   parse_arguments(argc, argv, nRounds, alpha, scale, omega, signal);
@@ -34,14 +34,16 @@ int  main(int argc, char** argv)
   std::clog << "MAIN: settings are n=" << nRounds << " scale=" << scale << " omega=" << omega << " mu=" << signal << std::endl;
     
   // set up utility and wealth; angle 0.0 is not used
-  WealthArray bidderWealth(omega, omega, nRounds, ScaledUniversalDist(scale));
+  // this was the version for the |\ wealth array
+  //   WealthArray bidderWealth(omega, omega, nRounds, ScaledUniversalDist(scale));
+  DualWealthArray bidderWealth("univ", omega, omega, UniversalBidder(scale), nRounds);
   std::clog << "MAIN: Wealth array... " << bidderWealth << std::endl;
   RiskVectorUtility utility(0.0, alpha);
 
   // open output file if want further output, otherwise direct to stdio
   if (false) {
     std::ostringstream ss;
-    ss << "calc_risk_" << nRounds << "_" << signal << "_" << scale << "_" << omega ;
+    ss << "calc_risk_" << omega << "_" << signal << "_" << scale << "_" << nRounds;
     std::ios_base::openmode mode = std::ios_base::trunc;
     std::ofstream output (ss.str(), mode);
   }
@@ -57,8 +59,6 @@ int  main(int argc, char** argv)
 
 
 ///////////////////
-
-
 
 void
 parse_arguments(int argc, char** argv,

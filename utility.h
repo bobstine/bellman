@@ -123,10 +123,9 @@ class MatrixUtility: public std::unary_function<double,double>
  public:
 
  MatrixUtility(double angle, double omega)
-   //   : mAngle(angle), mSin(sin(angle * 3.1415926536/180)), mCos(cos(angle * 3.1415926536/180)),
-   : mAngle(angle), mSin(1), mCos(-2),
+   : mAngle(angle), mSin(sin(angle * 3.1415926536/180)), mCos(cos(angle * 3.1415926536/180)),
      mOmega(omega), mAlpha(omega), mBeta(0.0), mV00(0.0), mV01(0.0), mV10(0.0), mV11(0.0)
-    { std::cout << mSin << " " << mCos << " "; }
+    { std::clog << "UTIL: s=" << mSin << "   c=" << mCos << " " << std::endl; }
 
   double alpha      () const { return mAlpha; }
   double beta       () const { return mBeta;  }
@@ -150,10 +149,10 @@ class MatrixUtility: public std::unary_function<double,double>
     double operator()(double mu) const  { std::cout << "UTIL:  Call to operator of matrix base class." << std::endl; return 0*mu; }
 
   virtual
-    double bidder_utility (double mu, double v00, double v01, double v10, double v11) const = 0;
+    double row_utility (double mu, double v00, double v01, double v10, double v11) const = 0;
   
   virtual
-    double oracle_utility (double mu, double v00, double v01, double v10, double v11) const = 0;
+    double  col_utility (double mu, double v00, double v01, double v10, double v11) const = 0;
   
 }; 
 
@@ -170,8 +169,8 @@ class RejectMatrixUtility: public MatrixUtility
 
   double operator()(double mu) const;
 
-  double bidder_utility (double mu, double v00, double v01, double v10, double v11) const;
-  double oracle_utility (double mu, double v00, double v01, double v10, double v11) const;
+  double row_utility (double mu, double v00, double v01, double v10, double v11) const;
+  double col_utility (double mu, double v00, double v01, double v10, double v11) const;
   
 }; 
 
@@ -189,8 +188,8 @@ class RiskMatrixUtility: public MatrixUtility
   
   double negative_risk(double mu, double alpha) const;
 
-  double bidder_utility (double mu, double v00, double v01, double v10, double v11) const;
-  double oracle_utility (double mu, double v00, double v01, double v10, double v11) const;
+  double row_utility (double mu, double v00, double v01, double v10, double v11) const;
+  double col_utility (double mu, double v00, double v01, double v10, double v11) const;
 }; 
 
 

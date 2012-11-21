@@ -1,4 +1,4 @@
-#include "wealth.h"
+#include "wealth.Template.h"
 
 #include <iostream>
 
@@ -6,12 +6,23 @@
 #include <Eigen/Core>
  
 
+// output pair ... why is this wrong?
+/*
+  inline
+  std::ostream&
+  std::operator<<(std::ostream& os, std::pair<double,double> const& p)
+  { os << "<" << p.first << "," << p.second << ">";
+  return os;
+  }
+*/
+
+
 int  main()
 {
   const int univStart (1);
 
       
-  if (true)
+  if (false)
   { double   W0  = 0.05;
     double omega = 0.05;
     double scale =  0.5;   // wealth array gets very large as the scale increases (about 3000 for scale=4, w=0.5; 22000 for scale=0.5,w=0.05)
@@ -22,7 +33,7 @@ int  main()
     WealthArray wealth(W0, omega, nRounds, u);
     int iZ (wealth.zero_index());
     std::cout << "   Wealth at position iZero=" << iZ << " is " << wealth.wealth(iZ) << " with next bid to be " << wealth.bid(iZ) << std::endl;
-    std::cout << "    : " << wealth << std::endl;
+    // std::cout << "    : " << wealth << std::endl;
     for(int i=0; i<10; ++i)
       std::cout << "W[" << i << "] = " << wealth[i] << "  with bid " << wealth.bid(i) << std::endl;
   }
@@ -53,7 +64,7 @@ int  main()
   }
 
   
-  if (true)
+  if (false)
   {
     std::cout << "\n\nTEST: Test bracketing search in wealth." << std::endl;
     double omega (  0.05);
@@ -108,6 +119,21 @@ int  main()
     std::cout << "TEST:   uniform wealth array  \n" << uniformWealth << std::endl;
   } 
 
-
+  if (true)
+  { double omega = 0.5;
+    double scl   = 1.0;
+    int rounds   = 20;
+    double rate = 0.1;
+    std::cout << "\n\nTEST: Testing dual wealth array." << std::endl;
+    UniversalBidder ub(scl);
+    DualWealthArray univWealth("univ", omega, omega, ub, rounds);
+    std::cout << "TEST: Zero index is at " << univWealth.zero_index() << std::endl;
+    univWealth.write_to(std::cout);
+    DualWealthArray geoWealth("geo", omega, omega, GeometricBidder(rate, ub.total_wealth()), rounds);
+    std::cout << "TEST: Zero index is at " << geoWealth.zero_index() << std::endl;
+    geoWealth.write_to(std::cout);
+    std::cout << "\n\nTEST: Finished test of dual wealth array" << std::endl;
+  }
+  
   return 0;
 }

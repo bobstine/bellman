@@ -1,6 +1,7 @@
 #include "bellman.h"
 #include "random.h"
 #include "line_search.Template.h"
+#include "wealth.Template.h"
 #include "eigen_utils.h"
 
 
@@ -13,12 +14,54 @@
 
 // #define SHOW_PROGRESS
 
+const std::string messageTag = "BELL: ";
+
 int
 imin(int a, int b)
 { if (a < b) return a; else return b; }
 
 
+Line_Search::GoldenSection
+make_search_engine(void)
+{
+  const int                      maxIterations   (200);   
+  const double                   tolerance       (0.0001);
+  const double                   initialGrid     (0.5);
+  const std::pair<double,double> searchInterval  (std::make_pair(0.05,10.0));
+  return Line_Search::GoldenSection(tolerance, searchInterval, initialGrid, maxIterations);
+}
 
+
+//  Find the risk associated with a Bayesian spike model; this is the code that generates the paths within feasible set
+
+std::pair<double,double>
+find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, DualWealthArray const& bidderWealth)
+{
+  const int nColumns (bidderWealth.number_wealth_positions());   
+  // pad arrays since need room to collect bid; initialize to zero; extra row for starting bottom up recursion
+  Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns+1);
+  Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns+1);
+  // store intermediates in rectangular array; fill from bottom up
+  for (int row = nRounds-1; row > -1; --row)
+  { for (int k=0; k<nColumns; ++k)
+    { double bid (bidderWealth.bid(k));
+      std::pair<int,double> rejectPos (bidderWealth.reject_position(k));          // where to go if reject (col, prob)
+      std::pair<int,double>    bidPos (bidderWealth.bid_position(k));             // where to go if dont reject
+      double bidderIfReject  = bidderMat(row+1,rejectPos.first)*rejectPos.second + bidderMat(row+1,rejectPos.first+1)*(1-rejectPos.second);
+      double oracleIfReject  = oracleMat(row+1,rejectPos.first)*rejectPos.second + oracleMat(row+1,rejectPos.first+1)*(1-rejectPos.second);
+      double bidderIfDont    = bidderMat(row+1,   bidPos.first)*   bidPos.second + bidderMat(row+1,   bidPos.first+1)*(1-   bidPos.second);
+      double oracleIfDont    = oracleMat(row+1,   bidPos.first)*   bidPos.second + oracleMat(row+1,   bidPos.first+1)*(1-   bidPos.second);
+      utility.set_constants(bid, 0.0, 0.0);
+      bidderMat (row,k) = pZero * utility.bidder_utility(0, bidderIfReject, bidderIfDont)
+	                  + (1-pZero) * utility.bidder_utility(mu, bidderIfReject, bidderIfDont);
+      oracleMat (row,k) = pZero * utility.oracle_utility(0, oracleIfReject, oracleIfDont)
+ 	                  + (1-pZero) * utility.oracle_utility(mu, oracleIfReject, oracleIfDont);
+    }
+  }
+  int iZero (bidderWealth.zero_index());
+  return std::make_pair(oracleMat(0,iZero), bidderMat(0,iZero));
+}
+  
 
 std::pair<double,double>
 find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, WealthArray const& bidderWealth)
@@ -50,19 +93,82 @@ find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility
 //
 //    Unconstrained   Unconstrained   Unconstrained   Unconstrained   Unconstrained   Unconstrained
 //
+//    solve_bellman_utility dual_wealth     solve_bellman_utility dual_wealth     solve_bellman_utility dual_wealth     solve_bellman_utility dual_wealth
+//
+//       Version uses wealth sliced on y-axis, Lebesgue style
+//
+
+void
+solve_bellman_utility  (int nRounds, VectorUtility &utility, DualWealthArray const& wealth, bool writeDetails)
+{
+  const int nColumns (wealth.number_wealth_positions());   
+  auto search = make_search_engine();
+  // pad arrays since need room to collect bid; initialize to zero; extra row for starting bottom up recursion
+  Matrix utilityMat= Matrix::Zero(nRounds+1, nColumns+1);  // +1 for initializing
+  Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns+1);
+  Matrix bidderMat = Matrix::Zero(nRounds+1, nColumns+1);
+  // save for recreating mean stochastic process
+  Matrix meanMat       = Matrix::Zero(nRounds  , nColumns);
+  Matrix rejectProbMat = Matrix::Zero(nRounds  , nColumns);    // rejection prob
+  // store intermediates in rectangular array; fill from bottom up (don't get trapezoid with dual wealth)
+  for (int row = nRounds-1; row > -1; --row)
+  { for (int k=0; k<nColumns; ++k)
+    { double bid (wealth.bid(k));
+      std::pair<int,double> rejectPos (wealth.reject_position(k));                 // where to go if reject (col, prob)
+      std::pair<int,double> bidPos    (wealth.bid_position(k));                    // did not reject
+      double utilityIfReject = utilityMat(row+1,rejectPos.first)*rejectPos.second + utilityMat(row+1,rejectPos.first+1)*(1-rejectPos.second);
+      double utilityIfBid    = utilityMat(row+1,   bidPos.first)*   bidPos.second + utilityMat(row+1,   bidPos.first+1)*(1-   bidPos.second);
+      double bidderIfReject  =  bidderMat(row+1,rejectPos.first)*rejectPos.second +  bidderMat(row+1,rejectPos.first+1)*(1-rejectPos.second);
+      double bidderIfBid     =  bidderMat(row+1,   bidPos.first)*   bidPos.second +  bidderMat(row+1,   bidPos.first+1)*(1-   bidPos.second);
+      double oracleIfReject  =  oracleMat(row+1,rejectPos.first)*rejectPos.second +  oracleMat(row+1,rejectPos.first+1)*(1-rejectPos.second);
+      double oracleIfBid     =  oracleMat(row+1,   bidPos.first)*   bidPos.second +  oracleMat(row+1,   bidPos.first+1)*(1-   bidPos.second);
+      utility.set_constants(bid, utilityIfReject, utilityIfBid);          
+      std::pair<double,double> maxPair (search.find_maximum(utility));            // mean and maximal utility
+      double utilAtMuEqualZero (utility(0.0));
+      if (maxPair.second < utilAtMuEqualZero)
+	maxPair = std::make_pair(0.0,utilAtMuEqualZero);
+      meanMat       (row,k) = maxPair.first;
+      rejectProbMat (row,k) = reject_prob(meanMat(row,k), (bid < 0.99) ? bid : 0.99); // insure prob less than 1
+      utilityMat    (row,k) = maxPair.second;
+      bidderMat     (row,k) = utility.bidder_utility(maxPair.first, bidderIfReject, bidderIfBid);
+      oracleMat     (row,k) = utility.oracle_utility(maxPair.first, oracleIfReject, oracleIfBid);
+    }
+  }
+  // write solution (without boundary row) to file
+  if(writeDetails)
+  { std::ostringstream ss;
+    int angle (trunc(utility.angle()));
+    ss << "sim_details/dual_bellman.a" << angle << ".n" << nRounds
+       << ".o" << round(100*wealth.omega()) << ".al" << round(100*utility.alpha()) << ".";
+    write_matrix_to_file(ss.str() + "utility",    utilityMat.topLeftCorner(nRounds+1,    utilityMat.cols()-1));  // omit boundary row, col
+    write_matrix_to_file(ss.str() + "oracle" ,     oracleMat.topLeftCorner(nRounds+1,     oracleMat.cols()-1));
+    write_matrix_to_file(ss.str() + "bidder" ,     bidderMat.topLeftCorner(nRounds+1,     bidderMat.cols()-1));
+    write_matrix_to_file(ss.str() + "mean"   ,       meanMat.topLeftCorner(nRounds  ,       meanMat.cols()));
+    write_matrix_to_file(ss.str() + "prob"   , rejectProbMat.topLeftCorner(nRounds  , rejectProbMat.cols()));
+    { std::ios_base::openmode mode = std::ios_base::trunc;
+      std::ofstream output (ss.str() + "wealth", mode);
+      wealth.write_to(output, true);  // true = as lines
+      output.close();
+    }
+  }
+  // locate starting position in array
+  int iZero = wealth.zero_index();
+  std::cout << utility.angle() << " " << wealth.omega() << "   " << nRounds   << "   " 
+	    << utilityMat(0,iZero) << " " << oracleMat(0,iZero) << " " << bidderMat(0,iZero) << std::endl;
+}
+
+
+
 //    solve_bellman_utility     solve_bellman_utility     solve_bellman_utility     solve_bellman_utility     
+//
+//    This version has the 'Riemann' style bidding function
 //
 
 void
 solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& bidderWealth, bool writeDetails)
 {
   const int nColumns (bidderWealth.number_of_bids());   
-  // line search to max utility (or min risk)
-  const int                      maxIterations   (200);   
-  const double                   tolerance       (0.001);
-  const double                   initialGrid     (0.5);
-  const std::pair<double,double> searchInterval  (std::make_pair(0.05,20.0));
-  Line_Search::GoldenSection     search(tolerance, searchInterval, initialGrid, maxIterations);
+  auto search = make_search_engine();
   // pad arrays since need room to collect bid; initialize to zero; extra row for starting bottom up recursion
   Matrix utilityMat= Matrix::Zero(nRounds+1, nColumns+1);  // +1 for initializing
   Matrix oracleMat = Matrix::Zero(nRounds+1, nColumns+1);
@@ -101,7 +207,8 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
   if(writeDetails)
   { std::ostringstream ss;
     int angle (trunc(utility.angle()));
-    ss << "bellman.a" << angle << ".n" << nRounds << ".";
+    ss << "sim_details/bellman.a" << angle << ".n" << nRounds
+       << ".o" << round(100*bidderWealth.omega()) << ".al" << round(100*utility.alpha()) << ".";
     write_matrix_to_file(ss.str() + "utility", utilityMat.topLeftCorner(nRounds+1, utilityMat.cols()-1));  // omit boundary row, col
     write_matrix_to_file(ss.str() + "oracle" ,  oracleMat.topLeftCorner(nRounds+1, oracleMat.cols()-1));
     write_matrix_to_file(ss.str() + "bidder" ,  bidderMat.topLeftCorner(nRounds+1, bidderMat.cols()-1));
@@ -117,13 +224,103 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, WealthArray const& 
   }
   // locate starting position in |\ array
   int iZero = bidderWealth.number_of_bids() - nRounds;
-  std::cout << utility.angle() << " " << bidderWealth.omega() << "   " << nRounds   << "   " << searchInterval.first << " " << searchInterval.second  << "     "
+  std::cout << utility.angle() << " " << bidderWealth.omega() << "   " << nRounds   << "   "
 	    << utilityMat(0,iZero) << " " << oracleMat(0,iZero) << " " << bidderMat(0,iZero) << std::endl;
 }
 
 
 
-//    solve_bellman_utility  2  solve_bellman_utility  2  solve_bellman_utility  2  solve_bellman_utility  2
+//    solve_bellman_utility matrix      solve_bellman_utility matrix     solve_bellman_utility matrix     solve_bellman_utility matrix
+//
+//  Dual randomized wealth version
+//
+
+void
+solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray const& rowWealth,  DualWealthArray const& colWealth, bool writeDetails)
+{
+  const int nRows (1+rowWealth.number_wealth_positions());                // extra 1 for padding; allow 0 * 0
+  const int nCols (1+colWealth.number_wealth_positions());
+  const std::pair<int,int> zeroIndex(std::make_pair(rowWealth.zero_index(), colWealth.zero_index()));
+  std::clog << messageTag <<  "Zero indices are " << zeroIndex.first << " & " << zeroIndex.second << std::endl;
+  // code flips between these on read and write using use0
+  bool use0 = true;
+  Matrix  utilityMat0= Matrix::Zero (nRows, nCols);                       // initialize with zero for risk, 1 for rejection
+  Matrix  utilityMat1= Matrix::Zero (nRows, nCols);
+  Matrix* pUtilitySrc(&utilityMat0), *pUtilityDest(&utilityMat1);
+  Matrix  rowMat0    = Matrix::Zero (nRows, nCols);
+  Matrix  rowMat1    = Matrix::Zero (nRows, nCols);
+  Matrix* pRowSrc(&rowMat0), *pRowDest(&rowMat1);
+  Matrix  colMat0    = Matrix::Zero (nRows, nCols);
+  Matrix  colMat1    = Matrix::Zero (nRows, nCols);
+  Matrix* pColSrc(&colMat0 ), *pColDest(&colMat1);
+  // iteration vars
+  std::pair<double,double> maxPair;                                       // x,f(x)
+  std::pair<double,double> bestMeanInterval = std::make_pair(10,0);
+  auto search = make_search_engine();
+  for (int round = nRounds; 0 < round; --round)
+  { if (use0)   // flip progress arrays
+    { pUtilitySrc = &utilityMat0;    pRowSrc  = &rowMat0;   pColSrc  = &colMat0;
+      pUtilityDest= &utilityMat1;    pRowDest = &rowMat1;   pColDest = &colMat1;
+    } else
+    { pUtilitySrc = &utilityMat1;    pRowSrc  = &rowMat1;   pColSrc  = &colMat1;
+      pUtilityDest= &utilityMat0;    pRowDest = &rowMat0;   pColDest = &colMat0;
+    }
+    use0 = !use0;
+    for (int r=0; r<nRows-1; ++r)                                         //  padding... allows zero weight on zero value without if/else
+    { double rowBid = rowWealth.bid(r);
+      std::pair<int, double> rowBidPos    = rowWealth.bid_position(r);    // if does not reject
+      std::pair<int, double> rowRejectPos = rowWealth.reject_position(r); // if rejects
+      // std::cout << messageTag << "Filling row " << r << " with bid=" << rowBidPos << " and reject position (prob)" << rowPos.first << " " << rowPos.second << std::endl;
+      for (int c=0; c<nCols-1; ++c) 
+      { double colBid = colWealth.bid(c);
+	std::pair<int, double>  colBidPos   (colWealth.bid_position(c));
+	std::pair<int, double> colRejectPos (colWealth.reject_position(c));
+	// std::cout << messageTag << "Filling col " << c << " and col bid=" << colBid << " with positions " << colBidPos.first << " " << colRejectPos.first << std::endl;
+	utility.set_constants(rowBid, colBid,
+			      reject_value ( rowBidPos  ,  colBidPos  , *pUtilitySrc),   // v00  neither rejects; wealth function is decreasing
+			      reject_value ( rowBidPos  , colRejectPos, *pUtilitySrc),   // v01  only column player rejects
+			      reject_value (rowRejectPos,  colBidPos  , *pUtilitySrc),   // v10  only row rejects
+			      reject_value (rowRejectPos, colRejectPos, *pUtilitySrc));  // v11  both reject
+	maxPair = search.find_maximum(utility);       // returns opt, f(opt)
+	// monitor range of optimal means
+	if(maxPair.first < bestMeanInterval.first)
+	  bestMeanInterval.first = maxPair.first;
+	else if (maxPair.first > bestMeanInterval.second)
+	  bestMeanInterval.second = maxPair.first;	
+	double utilAtMuEqualZero = utility(0.0);
+	if (maxPair.second < utilAtMuEqualZero)
+	  maxPair = std::make_pair(0.0,utilAtMuEqualZero);
+	(*pUtilityDest)(r,c) = maxPair.second;
+	(* pRowDest)(r,c) = utility.row_utility(maxPair.first,                                            // opt mu
+						   reject_value (rowBidPos   ,  colBidPos  , *pRowSrc),   // v00  neither rejects
+						   reject_value (rowBidPos   , colRejectPos, *pRowSrc),   // v01  only column player rejects
+						   reject_value (rowRejectPos,  colBidPos  , *pRowSrc),   // v10  only row rejects
+						   reject_value (rowRejectPos, colRejectPos, *pRowSrc));  // v11  both reject
+        (* pColDest)(r,c) = utility.col_utility(maxPair.first,
+						   reject_value (rowBidPos   ,  colBidPos  , *pColSrc),   // v00  neither rejects
+						   reject_value (rowBidPos   , colRejectPos, *pColSrc),   // v01  only column player rejects
+						   reject_value (rowRejectPos,  colBidPos  , *pColSrc),   // v10  only row rejects
+						   reject_value (rowRejectPos, colRejectPos, *pColSrc));  // v11  both reject
+      }
+    }
+  }
+  std::cout << std::setprecision(6);
+  if(writeDetails)
+  { std::ostringstream ss;
+    int angle (utility.angle());
+    ss << "runs/bellmandual.a" << angle << ".n" << nRounds << ".";
+    { write_matrix_to_file(ss.str() + "utility", *pUtilityDest);
+      write_matrix_to_file(ss.str() + "row" ,  *pRowDest);
+      write_matrix_to_file(ss.str() + "col" ,  *pColDest);
+    }
+  }
+  // write summary of configuration and results to stdio
+  std::cout << utility.angle() << " " << rowWealth.omega() << "   " << nRounds   << "   " 
+	    << (*pUtilityDest)(zeroIndex.first, zeroIndex.second) << " "
+	    << (*pRowDest    )(zeroIndex.first, zeroIndex.second) << " "
+	    << (*pColDest    )(zeroIndex.first, zeroIndex.second) << std::endl;
+}
+
 
 void
 solve_bellman_utility  (int nRounds, MatrixUtility & utility, WealthArray const& oracleWealth, WealthArray const& bidderWealth, bool writeDetails)
@@ -131,12 +328,6 @@ solve_bellman_utility  (int nRounds, MatrixUtility & utility, WealthArray const&
   // initialize: omega location, size includes padding for wealth above omega
   const int iOmega   (nRounds + 1);   
   const int nColumns (bidderWealth.number_of_bids());   
-  // line search to find max utility
-  const int                      maxIterations   (200);   
-  const double                   tolerance       (0.0001);
-  const double                   initialGrid     (0.5);
-  const std::pair<double,double> searchInterval  (std::make_pair(0.05,10.0));
-  Line_Search::GoldenSection search(tolerance, searchInterval, initialGrid, maxIterations);
   // pad arrays since need room to collect bid; initialize to zero
   // code flips between these on read and write using use0
   bool use0 = true;
@@ -167,6 +358,7 @@ solve_bellman_utility  (int nRounds, MatrixUtility & utility, WealthArray const&
   Matrix* pOracleSrc  (&oracleMat0 ), * pOracleDest  (&oracleMat1);
   Matrix* pBidderSrc  (&bidderMat0 ), * pBidderDest  (&bidderMat1);
   // iteration vars
+  auto search = make_search_engine();
   std::pair<double,double> maxPair, bestMeanInterval;
   std::pair<int, double> bidderKP, oracleKP;
   double oracleBid,bidderBid;
@@ -216,12 +408,12 @@ solve_bellman_utility  (int nRounds, MatrixUtility & utility, WealthArray const&
 	else if (mIndexB == ko) meanMatB(round+1,kb) = maxPair.first; 
 	(*pUtilityDest)(ko,kb) = maxPair.second;
 	// oracle on rows of outcome, bidder on columns, fill nests down to lower right corner _|
-	(* pOracleDest)(ko,kb) = utility.oracle_utility(maxPair.first,
+	(* pOracleDest)(ko,kb) = utility.row_utility(maxPair.first,
 							(*pOracleSrc)(ko-1    , kb-1   ),
 							reject_value (ko-1    , bidderKP, *pOracleSrc, show_progress),
 							reject_value (oracleKP, kb-1    , *pOracleSrc, show_progress),
 							reject_value (oracleKP, bidderKP, *pOracleSrc, show_progress));  
-        (* pBidderDest)(ko,kb) = utility.bidder_utility(maxPair.first,
+        (* pBidderDest)(ko,kb) = utility.col_utility(maxPair.first,
 							(*pBidderSrc)(ko-1    , kb-1   ),
 							reject_value (ko-1    , bidderKP, *pBidderSrc),
 							reject_value (oracleKP, kb-1    , *pBidderSrc),
@@ -283,7 +475,7 @@ solve_bellman_utility  (int nRounds, MatrixUtility & utility, WealthArray const&
     }
   }
   // write summary of configuration and results to stdio
-  std::cout << utility.angle() << " " << bidderWealth.omega() << "   " << nRounds   << "   " << searchInterval.first << " " << searchInterval.second  << "     "
+  std::cout << utility.angle() << " " << bidderWealth.omega() << "   " << nRounds   << "   "
 	    << (*pUtilityDest)(nRounds,nRounds) << " " << (*pOracleDest)(nRounds,nRounds) << " " << (*pBidderDest)(nRounds,nRounds) << std::endl;
 }
 

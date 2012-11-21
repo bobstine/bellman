@@ -2,7 +2,9 @@ include ../c_flags
 
 ###########################################################################
 #
-#        Options
+#   Note on special forms
+#      $^ are prereq    $@ is target    $* is stem
+#
 #   Examples of depending on libaries
 #        LDLIBS =  -lthing -lregression 
 #        libs_used =  ../lib/libthing.a ../lib/libregression.a 
@@ -23,6 +25,7 @@ level_1 = distribution.o
 level_2 = wealth.o
 level_3 = utility.o
 level_4 = bellman.o
+level_5 = bellman_main.o bellman_calculator.o
 
 ############################################################################
 #
@@ -41,7 +44,7 @@ compiler: bellman
 
 
 
-# -------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------------------
 # Find risk for specific mixture of signal and probabilities
 # Need to prefix variables like 'n' to avoid conflicts
 #
@@ -50,13 +53,14 @@ compiler: bellman
 #
 # All symbols in this section have c_ prefix
 
-c_n         = 200
-c_scale     = 0.5  # small scale for small omega
-c_scale_txt = 05
+c_n         = 500
+c_scale     = 2     # use small scale for omega 0.05
+c_scale_txt = 2
 c_omega     = 0.5
+c_omega_txt = 50
 
 # define path within risk subdirectory
-c_path = risk/n$(c_n)_scale$(c_scale_txt)
+c_path = risk/omega$(c_omega_txt)_scale$(c_scale_txt)_n$(c_n)
 
 $(c_path)/.directory_built: 
 	echo "Building directory for risk output:" $(c_path)
@@ -71,7 +75,7 @@ calc_risk:  $(c_path)/.directory_built $(c_path)/m0.5 $(c_path)/m1.0 $(c_path)/m
 # actual run command for unconstrained solution needs m to keep unique
 $(c_path)/m%: calculate
 	echo $(c_path)
-	./calculate --signal $* --scale $(c_scale) --omega $(c_omega) --rounds $(c_n) > $@
+	./calculate --signal $* --omega $(c_omega) --scale $(c_scale) --rounds $(c_n) > $@
 
 
 # executable
@@ -79,75 +83,65 @@ calculate: bellman.o wealth.o utility.o distribution.o bellman_calculator.o
 	$(GCC) $^ $(LDLIBS) -o  $@
 
 
+# use these to write means, probs to file for simulation (which is done in simulate_means.R)
+sim_details/.directory_built: 
+	echo "Building directory for holding simulation details."
+	mkdir sim_details
+	touch $@
 
-# -------------------------------------------------------------------
+sim_gen: bellman sim_details/.directory_built
+	./bellman --risk --omega 0.5 --angle 334 --rounds 500  --oracleprob 0.05 --bidderprob 0 --scale 2 --write   # unconstrained
+
+
+
+# -------------------------------------------------------------------------------------------------------------
 # bellman recursion for competitive value
 #
-# constrained:  univ univ 2 0.05   50   0.5 7     -0.015669 0.015669 0.015669
-# uncons      uncon g50 2 0.05   50   0.05 7     37.1289 37.7115 0.291287
-# -------------------------------------------------------------------
-
-constrained_test: bellman
-	./bellman --gamma 2 --rounds 50 --constrain --oracleprob 0.5 --bidderprob 0.0 --write    # geometric oracle
-	./bellman --gamma 2 --rounds 50 --constrain --oracleprob 0.0 --bidderprob 0.5 --write    # univ oracle
-	./bellman --gamma 2 --rounds 50             --oracleprob 0.5 --bidderprob 0.0 --write    # warning message
-
-unconstrained_test: bellman
-	./bellman --gamma 2 --rounds 50                              --bidderprob 0.5 --write   
-
-
 
 bellman_main.o: bellman_main.cc
 
 bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
 	$(GCC) $^ $(LDLIBS) -o  $@
 
-# --- using latest code, angular style with sine and cosine
-# g01000 univ(1) 1 2       153.435 0.05   200   0.05 10     -1.35152 -0.622174 -0.364673                                                                                   
-bellman_test: bellman 
-	./bellman --risk --omega 0.5 --angle 90 --rounds 200  --oracleprob 0.05 --bidderprob 0 --scale 1 --write   # unconstrained
-
-# uncon(0.05) scaled_univ(1) UTIL: * Warning *  Bid beta too large; reduced to 0.99 UTIL: Message limit reached. 
-# 210 0.5   200   0.05 20     427.449 -488.064 -211.792
+# Wealth array scaled_univ(1)[dim=78] with wealth vector beginning W[0]=3.38774 and at zero index W[7]=0.482787
+# uncon(0) scaled_univ(1) 153.435 0.5   70   0.05 20     103.028 -2.2802e-07 -115.189
+# Dual Wealth Array 'Universal'[dim=37] with wealth W[0]=<3.38774,2.08137> and at zero index W[29]=<0.487736,0.0292789>
+# uncon(0) Universal      153.435 0.5   70   0.05 20     104.155 -6.44542e-07 -116.449
 
 risk_check: bellman
-	./bellman --risk --omega 0.5 --angle 153.434949  --rounds 7  --constrain --oracleprob 0.01 --bidderprob 0 --write
-
-risk_test: bellman
-	./bellman --gamma 100  --rounds 100  --constrain --oracleprob 0 --bidderprob 0.05
+	./bellman --risk --omega 0.5 --scale 0.5 --angle 330 --rounds 200 --constrain --oracleprob 0.1 --bidderprob 0 --write
 
 reject_check: bellman
-	./bellman --reject  --angle 0  --rounds 7  --constrain --oracleprob 0 --bidderprob 0.1 --write
-
-# ---  $^ are prereq    $@ is target    $* is stem
-#      change n to change path, file names, and the length of run;  gp is path
-#      Once run, cat combines these lines to show all of the results.
+	./bellman --reject           --angle 0  --rounds 7     --constrain --oracleprob 0    --bidderprob 0.1 --write
 
 # define these constants, then use a command like  (use uruns for unconstrained)
 #    make -j lots  -k runs/summary.reject_psi0090_n100
 # or
 #    make -k -j lots  runs/summary.risk_psi0010_n250
-#    make -k -j lots uruns/summary.risk_alpha0500_scale2_n200
+#    make -k -j lots uruns/summary.risk_alpha5_omega50_scale2_n200
 # with these values chosen to match (don't know how to pick them from make input
 # so you have to define the constants here and match them in the make command.
 # Builds a directory in runs for these results, then files for each.
 
-n = 200
+n = 500
 
-# define expert by uniform n (one more than n)
-# psi =   251
-# ptxt=   251
+omega = 0.50
+otxt  =   50
 
 # define uncontrained expert by alpha level
-alpha = 0.0500
-atxt=     0500
+alpha = 0.05
+atxt=      5
 
 # criterion should be risk or reject (and make it so in the C++ code)
 goal = risk
 
 # multiplier for unconstrained universal code
-scale = 0.5
-stxt  = 05
+scale = 2
+stxt  = 2
+
+# define expert by uniform n (one more than n)
+# psi =   251
+# ptxt=   251
 
 #--------------------------------------------------------------------------------------------
 #  below here is automagic, building output in runs/   
@@ -156,7 +150,7 @@ stxt  = 05
 # -----  unconstrained -----
 
 # define path within uruns subdirectory for each alpha (oracle) and n combination
-up = uruns/$(goal)_alpha$(atxt)_scale$(stxt)_n$(n)
+up = uruns/$(goal)_alpha$(atxt)_omega$(otxt)_scale$(stxt)_n$(n)
 
 $(up)/.directory_built: 
 	echo "Building directory for unconstrained runs" $(up)
@@ -164,13 +158,13 @@ $(up)/.directory_built:
 	touch $@
 
 # main unconstrained target with parameters that identify angle over tasks
-uruns/summary.risk_alpha$(atxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/345
+uruns/summary.risk_alpha$(atxt)_omega$(otxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/333 $(up)/334 $(up)/335 $(up)/336 $(up)/337 $(up)/345
 	rm -f $@
 	cat $(filter $(up)/%,$^) >> $@
 
 # actual run command for unconstrained solution
 $(up)/%: bellman bellman.sh  $(up)/.directory_built
-	./bellman --$(goal) --omega 0.05 --angle $* --oracleprob $(alpha) --bidderprob 0 --scale $(scale)  --rounds $(n) >  $@
+	./bellman --$(goal) --omega $(omega) --angle $* --oracleprob $(alpha) --bidderprob 0 --scale $(scale)  --rounds $(n) >  $@
 
 # -----  constrained -----
 

@@ -16,19 +16,29 @@
 std::pair<double,double>
   find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, WealthArray const& bidderWealth);
 
+std::pair<double,double>
+  find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, DualWealthArray const& bidderWealth);
+
 
 //  These use a discrete wealth array to track the wealth of the bidder and (in constrained case) the oracle.
 //  Both use a convex mixture of states when new wealth is not element of the array
 //  Note: It's evil to pass in the reference,  but we don't care that the utility is modifiable; its there to be used.
 
-// all powerful oracle
-void
-solve_bellman_utility  (int nRounds, VectorUtility & util,                                  WealthArray const& bidderWealth, bool writeDetails);
 
-// constrained oracle
+// oracle with no wealth constraint
+void
+solve_bellman_utility  (int nRounds, VectorUtility &util,                               DualWealthArray const& wealth, bool writeDetails);
+
+void
+solve_bellman_utility  (int nRounds, VectorUtility &util,                             WealthArray const& bidderWealth, bool writeDetails);
+
+// constrained oracle, two-player competition
+
+void
+solve_bellman_utility  (int nRounds, MatrixUtility & util, DualWealthArray const& oWealth,  DualWealthArray const& bidderWealth, bool writeDetails);
+
 void
 solve_bellman_utility  (int nRounds, MatrixUtility & util, WealthArray const& oracleWealth, WealthArray const& bidderWealth, bool writeDetails);
-
 
 
 

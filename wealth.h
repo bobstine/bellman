@@ -69,9 +69,84 @@ class WealthArray
 
 };
 
+
 inline
 std::ostream&
 operator<< (std::ostream& os, WealthArray const& wa)
+{
+  wa.print_to(os);
+  return os;
+}
+
+
+
+
+// Dual wealth array randomizes when reject or accept H0
+// Discrete grid along wealth axis, with interpolation for reject and bid
+
+
+class DualWealthArray
+{
+  typedef std::pair<int, double>  Position;
+  typedef std::vector< Position > PositionVector;
+  
+  const std::string     mName;
+  const double          mW0;               // initial wealth
+  double const          mOmega;            // defines wealth at zeroIndex and determines change when reject
+  int                   mZeroIndex;        // position of W_0, the place used for locating initial wealth W0
+  std::vector< std::pair<double,double> > mWealthBid;     
+  PositionVector        mRejectPositions;  // cache new <index,prob> positions when increment wealth by rejection
+  PositionVector        mBidPositions;     //       new positions when decrement wealth by bid
+
+ public:
+
+  DualWealthArray ()
+    : mName("empty"), mW0(0), mOmega(0), mZeroIndex(0), mWealthBid(), mRejectPositions(), mBidPositions() { }
+  
+  template <class Bidder>
+    DualWealthArray(std::string name, double w0, double omega, Bidder const& f, int nRounds)
+    : mName(name), mW0(w0), mOmega(omega), mZeroIndex(0), mWealthBid(), mRejectPositions(), mBidPositions()
+    { initialize_wealth_bid_array(f, nRounds); initialize_reject_array(); initialize_bid_array(); }
+
+  std::string name()               const { return mName; }
+  double      initial_wealth()     const { return mW0; }
+  double      omega ()             const { return mOmega; }
+  int         zero_index ()        const { return mZeroIndex ; }
+  int  number_wealth_positions()   const { return (int) mWealthBid.size(); }
+  
+  double wealth(int k)             const { return mWealthBid.at(k).first; }
+  double bid (int k)               const { return mWealthBid.at(k).second; }
+
+  Position reject_position(int k)  const { return mRejectPositions.at(k); }
+  int      reject_index (int k)    const { return mRejectPositions.at(k).first; }
+  double   reject_prob (int k)     const { return mRejectPositions.at(k).second; }
+
+  Position bid_position (int k)    const { return mBidPositions.at(k); }
+  int    bid_jumps_to(int k)       const { return mBidPositions.at(k).first; }
+  double bid_jump_share(int k)     const { return mBidPositions.at(k).second; }
+  
+  std::pair<double,double> operator[](int k)  const { return mWealthBid.at(k); }
+  
+
+  void print_to (std::ostream& os) const;
+  void write_to (std::ostream& os, bool asLines=false) const;   // more details
+  
+ private:
+  template <class Bidder>
+  void initialize_wealth_bid_array (Bidder const& f, int nRounds);
+  std::pair<int,double> find_wealth_position(int loIndex, int hiIndex, double w) const;
+  double grid_delta (double wealth) const;
+  void initialize_reject_array ();
+  void initialize_bid_array    ();
+  void print_arrays   (std::ostream& os, bool asLines=false) const;
+};
+
+
+
+
+inline
+std::ostream&
+operator<< (std::ostream& os, DualWealthArray const& wa)
 {
   wa.print_to(os);
   return os;

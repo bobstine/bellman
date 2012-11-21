@@ -48,10 +48,61 @@ UniformDist::operator() (int k) const
 //     universal     universal     universal     universal     universal     universal     
 
 // constants to make universal into density depending on starting index (from MMa)
-double normalizingConstants[21]={0,3.3877355 , 1.3063666 , 0.8920988 , 0.7186514 , 0.6221371,
-				   0.5598396 , 0.51582439, 0.48278679, 0.45689505, 0.4359382,
-				   0.4185466 , 0.40382391, 0.39115728, 0.38011245, 0.37037246,
- 				   0.36170009, 0.35391396, 0.34687281, 0.34046481, 0.33460018};
+double const normalizingConstants[21]={0,3.3877355 , 1.3063666 , 0.8920988 , 0.7186514 , 0.6221371,
+				       0.5598396 , 0.51582439, 0.48278679, 0.45689505, 0.4359382,
+				       0.4185466 , 0.40382391, 0.39115728, 0.38011245, 0.37037246,
+				       0.36170009, 0.35391396, 0.34687281, 0.34046481, 0.33460018};
+double const sumOfLogRecip = 3.387735532;
+
+//     UniversalBidder     UniversalBidder     UniversalBidder     UniversalBidder     UniversalBidder
+
+std::string
+UniversalBidder::identifier () const
+{
+  std::stringstream ss;
+  ss << "univ_bidder(" << mScale << ")";
+  return ss.str();
+}
+
+double
+UniversalBidder::operator()(int i) const
+{
+  assert (0 <= i);
+  i += 1;
+  double ll = log(i+1);
+  return mScale/(i * ll * ll);
+}
+
+
+double
+UniversalBidder::total_wealth() const
+{
+  return mScale * sumOfLogRecip;
+}
+
+//     GeometricBidder     GeometricBidder     GeometricBidder     GeometricBidder     GeometricBidder     GeometricBidder     
+
+std::string
+GeometricBidder::identifier () const
+{
+  std::stringstream ss;
+  ss << "geo_bidder(" << mSpendRate << ")";
+  return ss.str();
+}
+
+double
+GeometricBidder::operator()(int i) const
+{
+  assert (0 <= i);
+  
+  double bid (mTotal * mSpendRate);
+  for (int j=0; j<i; ++j)
+    bid *= (1.0-mSpendRate);
+  return bid;
+}
+
+
+//     UniversalDist     UniversalDist     UniversalDist     UniversalDist     UniversalDist     UniversalDist     
 
 std::string
 UniversalDist::identifier() const
@@ -68,7 +119,6 @@ UniversalDist::operator() (int k) const
   double ll = log(k+1+mStart);
   return 1.0/( (k+mStart) * ll * ll * normalizingConstants[mStart]);
 }
-
 
 
 //     scaled universal     scaled universal     scaled universal     scaled universal     scaled universal     scaled universal
@@ -108,7 +158,7 @@ ScaledUniversalDist::w0_index(double w0) const
   return j;
 }
 
-
+  
 //     uniform to end     uniform to end     uniform to end     uniform to end         
 
 double uniform_to_end (int k, int left)         // equal spread over possible locations

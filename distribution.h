@@ -77,24 +77,56 @@ class UniversalDist: public Distribution
   as well since some of the bid amounts are larger than the payout.
 */
 
+class UniversalBidder: public std::unary_function<int,double>
+{
+  double const mScale;                        // k in dean's notes
+  
+ public:
+  
+  UniversalBidder (double scale)    : mScale(scale)  { }
+  
+  std::string identifier()              const;
+  double      scale()                   const { return mScale; }
+  double      operator()(int round)     const;   // these are the two used by external routines
+  double      total_wealth()            const;
+};
+
+class GeometricBidder: public std::unary_function<int,double>
+{
+  double const mTotal;
+  double const mSpendRate; 
+  
+ public:
+  
+  GeometricBidder (double spendingRate, double totalWealth)    : mTotal(totalWealth), mSpendRate(spendingRate)  { }
+  
+  std::string identifier()              const;
+  double      spending_rate()           const { return mSpendRate; }
+  double      operator()(int round)     const;
+  double      total_wealth()            const { return mTotal; }
+};
+
+
 class ScaledUniversalDist: public Distribution
 {
   static const double mSumOfRecipLog;
-  const double mScale;          // k in dean's notes
+  const double mScale;                        // k in dean's notes
   
  public:
   
   ScaledUniversalDist (double scale)    : mScale(scale)  { }
   
-  std::string identifier() const;
-  double operator()(int k) const;
+  std::string identifier()           const;
+  double scale()                     const { return mScale; }
+  double operator()(int k)           const;
   
   int w0_index(double initialWealth) const;   // int such that scaled tail sum matches initial wealth
-  double max_wealth()                const  { return mScale * mSumOfRecipLog; }
+  double   max_wealth()              const  { return mScale * mSumOfRecipLog; }
 
  private:  
-  double g(int k)          const; // the log recip with scaling factor
+  double g(int k)                    const;   // the log recip with scaling factor
 };
+
 
 // double uniform_to_end (int k, int left);
 

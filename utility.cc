@@ -46,13 +46,13 @@ reject_value(WIndex const& ip, int k, Matrix const& value, bool show)
   return v;
 }
 
-double   reject_value(WIndex const& kp1, WIndex const& kp2, Matrix const& value,bool show)
+double   reject_value(WIndex const& kp1, WIndex const& kp2, Matrix const& value, bool show)
 {
   int    r  (kp1.first);
   double pr (kp1.second);
   int    c  (kp2.first);
   double pc (kp2.second);
-  const double v (pr * ( pc * value(r,c) + (1-pc) * value(r,c+1) ) + (1-pr) * ( pc * value(r+1,c) + (1-pc) * value(r+1,c+1) ));
+  double v  (pr * ( pc * value(r,c) + (1-pc) * value(r,c+1) ) + (1-pr) * ( pc * value(r+1,c) + (1-pc) * value(r+1,c+1) ));
   if (show)  std::cout << "   reject_value( (" << r << "," << pr << "),(" << c << "," << pc << ") ) = "
 		       << pr     << "*(" << pc << "*" << value(r  ,c) << "+" << 1-pc << "*" << value(r  ,c+1) << ")  +  "
 		       << (1-pr) << "*(" << pc << "*" << value(r+1,c) << "+" << 1-pc << "*" << value(r+1,c+1) << ") = " << v << std::endl;
@@ -170,7 +170,7 @@ double
 RejectVectorUtility::oracle_utility (double mu, double rejectValue, double noRejectValue) const
 {
   std::pair<double,double>  rejectProbs  (reject_probabilities(mu));
-  double rb (rejectProbs.second);
+  double rb (rejectProbs.second);                                          
   return rejectProbs.first + rb * rejectValue + (1-rb) * noRejectValue;
 }
 
@@ -180,8 +180,7 @@ RejectVectorUtility::oracle_utility (double mu, double rejectValue, double noRej
 double
 RiskVectorUtility::operator()(double mu) const
 {
-  std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rb (rprob.second);
+  double rb (r_mu_beta(mu)); 
   return  mSin*neg_risk(mu,mAlpha) + mCos*neg_risk(mu,mBeta) + rb * mRejectValue + (1-rb) * mNoRejectValue;
 }
 
@@ -196,8 +195,7 @@ RiskVectorUtility::bidder_utility (double mu, double rejectValue, double noRejec
 double
 RiskVectorUtility::oracle_utility (double mu, double rejectValue, double noRejectValue) const 
 {
-  std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rb (rprob.second);
+  double rb (r_mu_beta(mu));
   return  neg_risk(mu,mAlpha) + rb * rejectValue + (1-rb) * noRejectValue;
 }
 
@@ -213,30 +211,30 @@ RiskVectorUtility::oracle_utility (double mu, double rejectValue, double noRejec
 
 
 double
-MatrixUtility::r_mu_beta (double mu) const
+r_mu(double mu, double p)
 {
   if (0.0 == mu)
-    return mBeta;
+    return p;
   else
-  { if (0.0 == mBeta)
+  { if (0.0 == p)
       return 0.0;
     else
-      return reject_prob(mu, mBeta);
+      return reject_prob(mu, p);
   }
 }
 
 double
 MatrixUtility::r_mu_alpha (double mu) const
 {
-  if (0.0 == mu)
-    return mAlpha;
-  else
-  { if (0.0 == mAlpha)
-      return 0.0;
-    else
-      return reject_prob(mu, mAlpha);
-  }
+  return r_mu(mu, mAlpha);
 }
+
+double
+MatrixUtility::r_mu_beta (double mu) const
+{
+  return r_mu(mu, mBeta);
+}
+
 
 std::pair<double,double>
 MatrixUtility::reject_probabilities (double mu) const
@@ -271,7 +269,7 @@ RejectMatrixUtility::operator()(double mu) const
 
 
 double
-RejectMatrixUtility::oracle_utility (double mu, double v00, double v01, double v10, double v11) const
+RejectMatrixUtility::row_utility (double mu, double v00, double v01, double v10, double v11) const
 {
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rAlpha (rprob.first);
@@ -284,7 +282,7 @@ RejectMatrixUtility::oracle_utility (double mu, double v00, double v01, double v
 
 
 double
-RejectMatrixUtility::bidder_utility (double mu, double v00, double v01, double v10, double v11) const
+RejectMatrixUtility::col_utility (double mu, double v00, double v01, double v10, double v11) const
 {
   // same recursive structure as oracle_utility, just different recursive values appear in call
   std::pair<double,double>  rprob  (reject_probabilities(mu));
@@ -305,9 +303,9 @@ double
 RiskMatrixUtility::operator()(double mu) const
 {
   std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rAlpha (rprob.first);
-  double rBeta (rprob.second);
-  double util (mSin*neg_risk(mu,mAlpha) + mCos*neg_risk(mu,mBeta));  
+  double rAlpha (rprob.first );
+  double rBeta  (rprob.second);
+  double util (mSin*neg_risk(mu,mAlpha) + mCos*neg_risk(mu,mBeta));
   if (rAlpha > rBeta)
     return  util + mV00 * (1-rAlpha) + mV10 * (rAlpha-rBeta) +  mV11 * rBeta;
   else
@@ -317,27 +315,29 @@ RiskMatrixUtility::operator()(double mu) const
 
 
 double
-RiskMatrixUtility::oracle_utility  (double mu, double v00, double v01, double v10, double v11) const
+RiskMatrixUtility::row_utility  (double mu, double v00, double v01, double v10, double v11) const
 {
   std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rAlpha (rprob.first);
-  double rBeta (rprob.second);
+  double rAlpha (rprob.first );
+  double rBeta  (rprob.second);
+  double util (neg_risk(mu,mAlpha));
   if (rAlpha > rBeta)
-    return  neg_risk(mu,mAlpha)  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
+    return  util  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
   else
-    return  neg_risk(mu,mAlpha)  + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
+    return  util  + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
 }
 
 
 double
-RiskMatrixUtility::bidder_utility (double mu, double v00, double v01, double v10, double v11) const
+RiskMatrixUtility::col_utility (double mu, double v00, double v01, double v10, double v11) const
 {
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rAlpha (rprob.first);
   double rBeta (rprob.second);
+  double util  (neg_risk(mu,mBeta));
   if (rAlpha > rBeta)
-    return  neg_risk(mu,mBeta)  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
+    return  util  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
   else
-    return  neg_risk(mu,mBeta)  + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
+    return  util  + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
 }
 
