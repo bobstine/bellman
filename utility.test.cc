@@ -11,7 +11,7 @@
 int  main()
 {
 
-  if (true)
+  if (false)
   { std::cout << "\nTEST: risk calculations." << std::endl;
     std::cout << "   risk(0,0)   = " << risk(0,0)     << std::endl;  // mu, alpha
     std::cout << "   risk(0,.05) = " << risk(0,0.05)   << std::endl;
@@ -35,7 +35,8 @@ int  main()
     double mu (1.8);
     RiskVectorUtility riskU (angle, alpha); 
     riskU.set_constants(beta, 0,0);
-    std::cout << "TEST: additivity...   net " << riskU(mu) << " = " << riskU.oracle_utility(mu, 0,0) << " - " << angle << "*" << riskU.bidder_utility(mu,0,0) << std::endl;
+    std::cout << "TEST: risk additivity...   net " << riskU(mu) << " = " << riskU.oracle_utility(mu, 0,0)
+	      << " - " << angle << "*" << riskU.bidder_utility(mu,0,0) << std::endl;
   }
     
   if (false)
@@ -48,16 +49,16 @@ int  main()
     double alpha (0.000643 );
     double beta  (0.000691 );
     rejectU.set_constants(alpha, beta, 0,0,0,0);
-    std::cout << "TEST: additivity...   net " << rejectU(mu) << " = " << rejectU.oracle_utility(mu, 0,0,0,0) << " - " << angle << "*" << rejectU.bidder_utility(mu,0,0,0,0) << std::endl;
+    std::cout << "TEST: additivity...   net " << rejectU(mu) << " = " << rejectU.row_utility(mu, 0,0,0,0) << " - " << angle << "*" << rejectU.col_utility(mu,0,0,0,0) << std::endl;
     // risk utility,  check additive
     RiskMatrixUtility riskU (angle, omega); 
     riskU.set_constants(alpha, beta, 0,0,0,0);
     std::cout << "TEST: risk   util at mu=0 " << riskU(0) << "   and at mu=1 " << riskU(1) << std::endl;
-    std::cout << "TEST: additivity...   net " << riskU(mu) << " = " << riskU.oracle_utility(mu, 0,0,0,0) << " - " << angle << "*" << riskU.bidder_utility(mu,0,0,0,0) << std::endl;
+    std::cout << "TEST: additivity...   net " << riskU(mu) << " = " << riskU.row_utility(mu, 0,0,0,0) << " - " << angle << "*" << riskU.col_utility(mu,0,0,0,0) << std::endl;
   }
   
 
-  if (true)
+  if (false)
   { std::cout << "\nTEST: test reject matrix utility, and test maximizer with alpha=beta." << std::endl;
     double angle ( 45 );
     double omega (0.05);
@@ -79,7 +80,7 @@ int  main()
 	maxPair = std::make_pair(0.0,utilAtMuEqualZero);
       double mu (maxPair.first);
       std::cout << "TEST:                      max on [0.5,7] is " << maxPair.second << " @ " << mu << std::endl;
-      std::cout << "TEST:                      bidder utility = " << rejectU.bidder_utility(mu, 0,0,0,0) << "   oracle utility = " << rejectU.oracle_utility(mu, 0,0,0,0) << std::endl;
+      std::cout << "TEST:                      row utility = " << rejectU.row_utility(mu, 0,0,0,0) << "   col utility = " << rejectU.col_utility(mu, 0,0,0,0) << std::endl;
     }
   }
 
@@ -92,7 +93,7 @@ int  main()
     int    iZero (10);
     UniversalDist univ(univStart);
     Distribution *p = &univ;
-    WealthArray wealth(omega, iZero, *p);
+    WealthArray wealth(omega, iZero, 5, *p);
     RejectVectorUtility utility (angle, omega);
     
     double gridSize (0.25);

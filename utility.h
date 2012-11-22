@@ -48,8 +48,9 @@ class VectorUtility: public std::unary_function<double,double>
 
  VectorUtility(double angle, double alphaLevel)
    : mAngle(angle), mSin(sin(angle * 3.1415926536/180)), mCos(cos(angle * 3.1415926536/180)),
-     mAlpha(alphaLevel), mBeta(0.0), mRejectValue(0.0), mNoRejectValue(0.0) { }
+    mAlpha(alphaLevel),  mBeta(0.0), mRejectValue(0.0), mNoRejectValue(0.0) { }
 
+  
   double alpha      () const { return mAlpha; }
   double beta       () const { return mBeta;  }
   double angle      () const { return mAngle; }
@@ -95,10 +96,12 @@ class RejectVectorUtility: public VectorUtility
 
 class RiskVectorUtility: public VectorUtility
 {
+  double (*mOracleRisk)(double);
+  
  public:
-
- RiskVectorUtility(double angle, double omega)
-   : VectorUtility(angle, omega) { print_type(); }
+  
+ RiskVectorUtility(double angle, double alpha)
+   : VectorUtility(angle, alpha) { set_oracle_risk(); print_type(); }
   
   double operator()(double mu) const;
   
@@ -106,6 +109,7 @@ class RiskVectorUtility: public VectorUtility
   double oracle_utility (double mu, double rejectValue, double noRejectValue) const;
 
  private:
+  void set_oracle_risk();
   void print_type() const;
   
 }; 

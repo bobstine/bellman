@@ -177,6 +177,35 @@ RejectVectorUtility::oracle_utility (double mu, double rejectValue, double noRej
 
 //    RiskUtility      RiskUtility      RiskUtility      RiskUtility      RiskUtility      RiskUtility      RiskUtility
 
+
+double
+test_oracle_risk(double mu)            { return (mu == 0.0)?     0.0  : -1.0; }
+
+double
+risk_inflation_oracle_risk(double mu)  { return (mu  < 1.0)? -(mu*mu) : -1.0; }
+
+double _testimatorAlphaLevel_ = 0.05;
+
+double
+testimator_risk(double mu)             { return neg_risk(mu,_testimatorAlphaLevel_); }
+
+
+
+////
+
+void
+RiskVectorUtility::set_oracle_risk ()
+{
+  if (0 == mAlpha)
+    mOracleRisk = test_oracle_risk;
+  else if (1 == mAlpha)
+    mOracleRisk = risk_inflation_oracle_risk;
+  else
+  { _testimatorAlphaLevel_ = mAlpha;
+    mOracleRisk = testimator_risk;
+  }
+}
+
 void
 RiskVectorUtility::print_type() const
 {
@@ -185,37 +214,22 @@ RiskVectorUtility::print_type() const
   else if (1 == mAlpha)
     std::clog << "UTIL: Risk-inflation oracle" << std::endl;
   else
-    std::clog << "UTIL: Constant prob= " << mAlpha << " oracle." << std::endl;
+    std::clog << "UTIL: Testimator oracle with alpha= " << mAlpha << std::endl;
 }
-
-
-inline double        testing_oracle (double mu) { return (mu == 0.0)?     0.0  : -1.0; }  // neg risk if testing
-inline double risk_inflation_oracle (double mu) { return (mu  < 1.0)? -(mu*mu) : -1.0; }  // neg risk for RI oracle
 
 double
 RiskVectorUtility::operator()(double mu) const
 {
-  double rb (r_mu_beta(mu)); 
-  if (0.0 == mAlpha)
-    return  mSin*       testing_oracle(mu) + mCos*neg_risk(mu,mBeta) + rb * mRejectValue + (1-rb) * mNoRejectValue;
-  else if (1.0 == mAlpha)
-    return  mSin*risk_inflation_oracle(mu) + mCos*neg_risk(mu,mBeta) + rb * mRejectValue + (1-rb) * mNoRejectValue;
-  else
-    return  mSin*      neg_risk(mu,mAlpha) + mCos*neg_risk(mu,mBeta) + rb * mRejectValue + (1-rb) * mNoRejectValue;
+  double rb    (r_mu_beta(mu));
+  return  mSin*mOracleRisk(mu) + mCos*neg_risk(mu,mBeta) + rb * mRejectValue + (1-rb) * mNoRejectValue;
 }
 
 double
 RiskVectorUtility::oracle_utility (double mu, double rejectValue, double noRejectValue) const 
 {
   double rb (r_mu_beta(mu));
-  if (0.0 == mAlpha)
-    return     testing_oracle(mu)    + rb * rejectValue + (1-rb) * noRejectValue;
-  else if (1.0 == mAlpha)
-    return risk_inflation_oracle(mu) + rb * rejectValue + (1-rb) * noRejectValue;
-  else
-    return neg_risk(mu,mAlpha)       + rb * rejectValue + (1-rb) * noRejectValue;
+  return  mOracleRisk(mu) + rb * rejectValue + (1-rb) * noRejectValue;
 }
-
 
 double
 RiskVectorUtility::bidder_utility (double mu, double rejectValue, double noRejectValue) const
