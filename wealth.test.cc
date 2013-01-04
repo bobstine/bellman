@@ -125,6 +125,9 @@ int  main()
     int rounds   = 20;
     double rate = 0.1;
     std::cout << "\n\nTEST: Testing dual wealth array." << std::endl;
+    DualWealthArray bonferroni(0.001);
+    std::cout << "TEST: Bonferroni wealth array: \n ";
+    bonferroni.write_to(std::cout); 
     UniversalBidder ub(scl);
     DualWealthArray univWealth("univ", omega, omega, ub, rounds);
     std::cout << "TEST: Zero index is at " << univWealth.zero_index() << std::endl;

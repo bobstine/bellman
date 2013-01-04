@@ -78,6 +78,7 @@ class VectorUtility: public std::unary_function<double,double>
 ////  RejectVectorUtility     Rejects     Rejects     Rejects     Rejects     Rejects     Rejects     
 
 class RejectVectorUtility: public VectorUtility
+
 {
  public:
 

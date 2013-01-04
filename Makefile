@@ -109,8 +109,9 @@ bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
 # uncon(0) Universal      153.435 0.5   70   0.05 20     104.155 -6.44542e-07 -116.449
 
 risk_check: bellman
-	./bellman --risk --omega 0.5 --scale 0.5 --angle 150 --rounds 200              --oracleprob 1   --bidderprob 0 --write
+	 ./bellman --risk --omega 0 --scale 0.5 --angle 150 --rounds 200              --oracleprob 1   --bidderprob 1 --write   # fixed wealth bidder
 
+#	./bellman --risk --omega 0.5 --scale 0.5 --angle 150 --rounds 200              --oracleprob 1   --bidderprob 0 --write
 #	./bellman --risk --omega 0.5 --scale 0.5 --angle 330 --rounds 200 --constrain --oracleprob 0.1 --bidderprob 0 --write
 
 reject_check: bellman
@@ -120,20 +121,24 @@ reject_check: bellman
 #    make -j lots  -k runs/summary.reject_psi0090_n100
 # or
 #    make -k -j lots  runs/summary.risk_psi0010_n250
-#    make -k -j lots uruns/summary.risk_alpha5_omega50_scale2_n200
-#    make -k -j lots druns/summary.risk_omega50_scale2_psi10_n50
+#    make -k -j lots uruns/summary.risk_alpha5_beta100_omega50_scale2_n200
 # with these values chosen to match (don't know how to pick them from make input
 # so you have to define the constants here and match them in the make command.
 # Builds a directory in runs for these results, then files for each.
 
-n = 10000
+n = 100
 
-omega = 0.50
-otxt  =   50
+# zero for omega indicates a fixed wealth bonferroni bidder
+omega = 0
+otxt  = 0
 
-# define unconstrained expert by alpha level
+# define unconstrained expert by alpha level (0 is ls, 1 is risk inf)
 alpha =  1
 atxt=  100
+
+# define the bidder by beta (divided by n for bonferroni; rate in geometric)
+beta = 1
+btxt = 100
 
 # criterion should be risk or reject (and make it so in the C++ code)
 goal = risk
@@ -153,7 +158,7 @@ ptxt=    5
 # -----  unconstrained -----
 
 # define path within uruns subdirectory for each alpha (oracle) and n combination
-up = uruns/$(goal)_alpha$(atxt)_omega$(otxt)_scale$(stxt)_n$(n)
+up = uruns/$(goal)_alpha$(atxt)_beta$(btxt)_omega$(otxt)_scale$(stxt)_n$(n)
 
 $(up)/.directory_built: 
 	echo "Building directory for unconstrained runs" $(up)
@@ -161,13 +166,13 @@ $(up)/.directory_built:
 	touch $@
 
 # main unconstrained target with parameters that identify angle over tasks
-uruns/summary.risk_alpha$(atxt)_omega$(otxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/65 $(up)/70 $(up)/75 $(up)/80 $(up)/85 $(up)/90 $(up)/91 $(up)/92 $(up)/93 $(up)/93.1 $(up)/93.2 $(up)/93.3 $(up)/93.4 $(up)/93.5 $(up)/93.7 $(up)/93.8 $(up)/93.9 $(up)/94 $(up)/94.1 $(up)/94.2 $(up)/94.3 $(up)/94.4 $(up)/94.5 $(up)/94.6 $(up)/94.7 $(up)/94.8 $(up)/94.9 $(up)/95 $(up)/95.1 $(up)/95.2 $(up)/95.3 $(up)/95.4 $(up)/95.5 $(up)/95.6 $(up)/95.7 $(up)/95.8 $(up)/95.9 $(up)/95.95 $(up)/96 $(up)/96.1 $(up)/96.2  $(up)/96.5 $(up)/97 $(up)/97.5 $(up)/98 $(up)/98.5 $(up)/99 $(up)/100 $(up)/100 $(up)/102 $(up)/104 $(up)/106 $(up)/108 $(up)/110 $(up)/115 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/345
+uruns/summary.risk_alpha$(atxt)_beta$(btxt)_omega$(otxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/65 $(up)/70 $(up)/75 $(up)/80 $(up)/85 $(up)/90 $(up)/91 $(up)/92 $(up)/93 $(up)/93.1 $(up)/93.2 $(up)/93.3 $(up)/93.4 $(up)/93.5 $(up)/93.7 $(up)/93.8 $(up)/93.9 $(up)/94 $(up)/94.1 $(up)/94.2 $(up)/94.3 $(up)/94.4 $(up)/94.5 $(up)/94.6 $(up)/94.7 $(up)/94.8 $(up)/94.9 $(up)/95 $(up)/95.1 $(up)/95.2 $(up)/95.3 $(up)/95.4 $(up)/95.5 $(up)/95.6 $(up)/95.7 $(up)/95.8 $(up)/95.9 $(up)/95.95 $(up)/96 $(up)/96.1 $(up)/96.2  $(up)/96.5 $(up)/97 $(up)/97.5 $(up)/98 $(up)/98.5 $(up)/99 $(up)/100 $(up)/100 $(up)/102 $(up)/104 $(up)/106 $(up)/108 $(up)/110 $(up)/115 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/345
 	rm -f $@
 	cat $(filter $(up)/%,$^) >> $@
 
 # actual run command for unconstrained solution
 $(up)/%: bellman bellman.sh  $(up)/.directory_built
-	./bellman --$(goal) --omega $(omega) --angle $* --oracleprob $(alpha) --bidderprob 0 --scale $(scale)  --rounds $(n) >  $@
+	./bellman --$(goal) --omega $(omega) --angle $* --oracleprob $(alpha) --bidderprob $(beta) --scale $(scale)  --rounds $(n) >  $@
 
 # coarse spacing
 uruns/summary.risk_alpha$(atxt)_omega$(otxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/75 $(up)/90 $(up)/105 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/345

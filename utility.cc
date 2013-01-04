@@ -179,7 +179,7 @@ RejectVectorUtility::oracle_utility (double mu, double rejectValue, double noRej
 
 
 double
-test_oracle_risk(double mu)            { return (mu == 0.0)?     0.0  : -1.0; }
+least_squares_oracle_risk(double mu)   { return (mu == 0.0)?     0.0  : -1.0; }
 
 double
 risk_inflation_oracle_risk(double mu)  { return (mu  < 1.0)? -(mu*mu) : -1.0; }
@@ -197,7 +197,7 @@ void
 RiskVectorUtility::set_oracle_risk ()
 {
   if (0 == mAlpha)
-    mOracleRisk = test_oracle_risk;
+    mOracleRisk = least_squares_oracle_risk;
   else if (1 == mAlpha)
     mOracleRisk = risk_inflation_oracle_risk;
   else
@@ -210,7 +210,7 @@ void
 RiskVectorUtility::print_type() const
 {
   if (0 == mAlpha)
-    std::clog << "UTIL: Testing oracle" << std::endl;
+    std::clog << "UTIL: Least squares oracle" << std::endl;
   else if (1 == mAlpha)
     std::clog << "UTIL: Risk-inflation oracle" << std::endl;
   else

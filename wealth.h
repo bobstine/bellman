@@ -102,6 +102,10 @@ class DualWealthArray
 
   DualWealthArray ()
     : mName("empty"), mW0(0), mOmega(0), mZeroIndex(0), mWealthBid(), mRejectPositions(), mBidPositions() { }
+
+  DualWealthArray (double w0)      // constant alpha bidder
+    : mName("fixed"), mW0(w0), mOmega(0), mZeroIndex(0), mWealthBid(1), mRejectPositions(1), mBidPositions(1)
+    { mWealthBid[0] = std::make_pair(w0,w0); mRejectPositions[0] = std::make_pair(0,1); mBidPositions[0]=std::make_pair(0,1); }
   
   template <class Bidder>
     DualWealthArray(std::string name, double w0, double omega, Bidder const& f, int nRounds)

@@ -24,8 +24,8 @@ WealthArray::bid(int k)                const
 std::pair<int, double>
 WealthArray::find_wealth_position (int k, double increase)  const // k0 is current position denoting current wealth
 {
+  double target = mWealth[k] + increase;        // 'wealth' is 'new wealth' > 'current wealth'
   int k1 (k);
-  double target = mWealth[k1] + increase;       // 'wealth' is 'new wealth' > 'current wealth'
   int k0 (0);                            
   while (mWealth[k1] > target)                  // if bid > payoff
     ++k1;

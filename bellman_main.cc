@@ -59,9 +59,9 @@ int  main(int argc, char** argv)
   
   std::clog << "MAIN: Building wealth array for " << nRounds << " rounds with omega=" << omega
 	    << ", bidder prob=" << bidderProb << ", and scale=" << scale << std::endl;
-
   DualWealthArray *pBidderWealth = make_wealth_array(nRounds, omega, bidderProb, scale);
   // pBidderWealth->write_to(std::clog, true); std::clog << std::endl; // as lines
+  
   if(!constrain)           // unconstrained competitor
   { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
@@ -186,13 +186,18 @@ parse_arguments(int argc, char** argv,
 DualWealthArray*
 make_wealth_array(int nRounds, double omega, double prob, double scale)
 {
-  if(0 == prob)         // universal
+  if (0 == omega)             // fixed alpha bidder
+  { prob = prob/nRounds;
+    std::clog << "MAIN: Fixed alpha bidder with constant bid alpha=" << prob << std::endl;
+    return new DualWealthArray(prob);
+  }
+  else if(0 == prob)          // universal
   { std::clog << "MAIN: Making universal array with scale=" << scale << " and omega=" << omega << std::endl;
     UniversalBidder bidder(scale);
     return new DualWealthArray(bidder.identifier(), omega, omega, bidder, nRounds);
-    // return new WealthArray(omega, omega, nRounds, ScaledUniversalDist(scale));
+    //  return new WealthArray(omega, omega, nRounds, ScaledUniversalDist(scale));
   }
-  else
+  else 
   { std::clog << "MAIN: Making geometric array with prob=" << prob << ", scale=" << scale << " and omega=" << omega << std::endl;
     UniversalBidder univ(scale);
     GeometricBidder geoBidder(prob, univ.total_wealth());
