@@ -109,9 +109,10 @@ bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
 # uncon(0) Universal      153.435 0.5   70   0.05 20     104.155 -6.44542e-07 -116.449
 
 risk_check: bellman
-	 ./bellman --risk --omega 0 --scale 0.5 --angle 150 --rounds 200              --oracleprob 1   --bidderprob 1 --write   # fixed wealth bidder
+	./bellman --risk --omega 0.05 --angle 0 --oracleprob 1 --bidderprob 0.05  --rounds 200
 
-#	./bellman --risk --omega 0.5 --scale 0.5 --angle 150 --rounds 200              --oracleprob 1   --bidderprob 0 --write
+#	./bellman --risk --omega 0   --scale 0.5 --angle 150 --rounds 200             --oracleprob 1   --bidderprob 1 --write   # fixed wealth bidder
+#	./bellman --risk --omega 0.5 --scale 0.5 --angle 150 --rounds 200             --oracleprob 1   --bidderprob 0 --write
 #	./bellman --risk --omega 0.5 --scale 0.5 --angle 330 --rounds 200 --constrain --oracleprob 0.1 --bidderprob 0 --write
 
 reject_check: bellman
@@ -126,19 +127,19 @@ reject_check: bellman
 # so you have to define the constants here and match them in the make command.
 # Builds a directory in runs for these results, then files for each.
 
-n = 100
+n = 200
 
-# zero for omega indicates a fixed wealth bonferroni bidder
-omega = 0
-otxt  = 0
+# omega=0 indicates a fixed wealth bonferroni bidder
+omega = 0.75
+otxt  =   75
 
 # define unconstrained expert by alpha level (0 is ls, 1 is risk inf)
-alpha =  1
-atxt=  100
+alpha =   1
+atxt=     100
 
-# define the bidder by beta (divided by n for bonferroni; rate in geometric)
-beta = 1
-btxt = 100
+# define the bidder by beta (0 for universal or rate for geometric; if omega=0, divided by n for bonferroni)
+beta = 0.10
+btxt =   10
 
 # criterion should be risk or reject (and make it so in the C++ code)
 goal = risk
@@ -147,12 +148,9 @@ goal = risk
 scale = 2
 stxt  = 2
 
-# define expert by uniform n (one more than n)
-psi = 0.05
-ptxt=    5
 
 #--------------------------------------------------------------------------------------------
-#  below here is automagic, building output in runs/   
+#  below here is automagic, building output in uruns/  and runs/
 #--------------------------------------------------------------------------------------------
 
 # -----  unconstrained -----

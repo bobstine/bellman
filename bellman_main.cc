@@ -63,7 +63,7 @@ int  main(int argc, char** argv)
   // pBidderWealth->write_to(std::clog, true); std::clog << std::endl; // as lines
   
   if(!constrain)           // unconstrained competitor
-  { std::cout << "uncon(" << oracleProb << ") " << pBidderWealth->name() << " ";
+  { std::cout << "Oracle(" << oracleProb << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskVectorUtility utility(angle, oracleProb);
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);

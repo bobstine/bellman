@@ -12,12 +12,17 @@ DualWealthArray::initialize_wealth_bid_array(Bidder const& f, int nRounds)
   std::vector< double > wealths, bids;
   int          i        (0);
   double       minW     (f.total_wealth());   // minW is wealth as we subtract away bids
+  int          checkPt  (20000);
   while (mOmega <= minW)                      // spend down wealth until reach starting wealth omega
   { double b (f(i));
     wealths.push_back(minW);
     bids.push_back(b);
     minW -= b;
     ++i;
+    if(i == checkPt)
+    { std::clog << "WLTH: At " << i << " positions with minW " << minW << " > omega." << std::endl;
+      checkPt += 50000;
+    }
   }
   for (double j=0; j<=nRounds; ++j)           // spend down from omega by number of rounds as if lose each, with an added extra round
   { double b = f(i+j);

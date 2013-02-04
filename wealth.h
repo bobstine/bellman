@@ -138,10 +138,10 @@ class DualWealthArray
  private:
   template <class Bidder>
   void initialize_wealth_bid_array (Bidder const& f, int nRounds);
-  std::pair<int,double> find_wealth_position(int loIndex, int hiIndex, double w) const;
-  double grid_delta (double wealth) const;
   void initialize_reject_array ();
   void initialize_bid_array    ();
+  std::pair<int,double> find_wealth_position(int loIndex, int hiIndex, double w) const;
+  double grid_delta (double wealth) const;
   void print_arrays   (std::ostream& os, bool asLines=false) const;
 };
 
