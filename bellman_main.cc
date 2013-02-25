@@ -79,7 +79,7 @@ int  main(int argc, char** argv)
     std::clog << "MAIN: Row player (oracle) uses wealth array " << *pOracleWealth << std::endl;
     std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     std::ostringstream ss;
-    ss << "druns/bellman.a" << angle << ".s" << round_parm(scale) <<".o" << round_parm(omega) << ".rp" << round_parm(oracleProb) << ".cp" << round_parm(bidderProb);
+    ss << "druns/bellman.a" << angle << ".s" << round_parm(scale) <<".o" << round_parm(omega) << ".op" << round_parm(oracleProb) << ".bp" << round_parm(bidderProb);
     if (riskUtil)
     { RiskMatrixUtility utility(angle, omega);
       ss << ".risk";
