@@ -151,81 +151,6 @@ goal = risk
 
 
 #--------------------------------------------------------------------------------------------
-#  setup for paper figures as simple targets with one command
-#--------------------------------------------------------------------------------------------
-
-# Figure 1: comparisons to risk inflation oracle (make directory
-
-f1a = figures/f1/risk_alpha100_beta10_omega05_scale2_n200
-f1b = figures/f1/risk_alpha100_beta10_omega25_scale2_n200
-f1c = figures/f1/risk_alpha100_beta10_omega50_scale2_n200
-f1d = figures/f1/risk_alpha100_beta10_omega75_scale2_n200
-
-figure1: figures/f1/.directory_built figures/f1/summary.$(f1a) figures/f1/summary.$(f1b) figures/f1/summary.$(f1c)
-	echo "Making Figure 1..."
-	ls figures/f1
-
-figures/f1/.directory_built:
-	echo "Making Figure 1..."
-	mkdir figures/f1
-	touch $@
-
-
-# -- F1A
-$(f1a)/.directory_built: 
-	echo "Building directory for Figure 1 runs" $(f1a)
-	mkdir $(f1a)
-	touch $@
-
-$(f1a)/%: bellman bellman.sh  $(f1a)/.directory_built
-	./bellman --risk --oracleprob 1 --bidderprob 0.1 --omega 0.50 --angle $*  --scale 2  --rounds 200 >  $@
-
-figures/f1/summary.$(f1a): bellman bellman.sh $(f1a)/0 $(f1a)/15 $(f1a)/30 $(f1a)/45 $(f1a)/60 $(f1a)/75 $(f1a)/90 $(f1a)/105 $(f1a)/120 $(f1a)/135 $(f1a)/150 $(f1a)/165 $(f1a)/180 $(f1a)/195 $(f1a)/210 $(f1a)/225 $(f1a)/240 $(f1a)/255 $(f1a)/270 $(f1a)/285 $(f1a)/290 $(f1a)/295  $(f1a)/300 $(f1a)/315 $(f1a)/330 $(f1a)/345
-	rm -f $@
-	cat $(filter $(f1a)/%,$^) >> $@
-
-# -- F1B
-$(f1a)/.directory_built: 
-	echo "Building directory for Figure 1 runs" $(f1a)
-	mkdir $(f1a)
-	touch $@
-
-$(f1a)/%: bellman bellman.sh  $(f1a)/.directory_built
-	./bellman --risk --oracleprob 1 --bidderprob 0.1 --omega 0.50 --angle $*  --scale 2  --rounds 200 >  $@
-
-figures/f1/summary.$(f1a): bellman bellman.sh $(f1a)/0 $(f1a)/15 $(f1a)/30 $(f1a)/45 $(f1a)/60 $(f1a)/75 $(f1a)/90 $(f1a)/105 $(f1a)/120 $(f1a)/135 $(f1a)/150 $(f1a)/165 $(f1a)/180 $(f1a)/195 $(f1a)/210 $(f1a)/225 $(f1a)/240 $(f1a)/255 $(f1a)/270 $(f1a)/285 $(f1a)/290 $(f1a)/295  $(f1a)/300 $(f1a)/315 $(f1a)/330 $(f1a)/345
-	rm -f $@
-	cat $(filter $(f1a)/%,$^) >> $@
-
-# -- F1C
-$(f1b)/.directory_built: 
-	echo "Building directory for Figure 1 runs" $(f1b)
-	mkdir $(f1b)
-	touch $@
-
-$(f1b)/%: bellman bellman.sh  $(f1b)/.directory_built
-	./bellman --risk --oracleprob 1 --bidderprob 0.1 --omega 0.50 --angle $*  --scale 2  --rounds 200 >  $@
-
-figures/f1/summary.$(f1b): bellman bellman.sh $(f1b)/0 $(f1b)/15 $(f1b)/30 $(f1b)/45 $(f1b)/60 $(f1b)/75 $(f1b)/90 $(f1b)/105 $(f1b)/120 $(f1b)/135 $(f1b)/150 $(f1b)/165 $(f1b)/180 $(f1b)/195 $(f1b)/210 $(f1b)/225 $(f1b)/240 $(f1b)/255 $(f1b)/270 $(f1b)/285 $(f1b)/290 $(f1b)/295  $(f1b)/300 $(f1b)/315 $(f1b)/330 $(f1b)/345
-	rm -f $@
-	cat $(filter $(f1b)/%,$^) >> $@
-
-# -- F1D
-$(f1c)/.directory_built: 
-	echo "Building directory for Figure 1 runs" $(f1c)
-	mkdir $(f1c)
-	touch $@
-
-$(f1c)/%: bellman bellman.sh  $(f1c)/.directory_built
-	./bellman --risk --oracleprob 1 --bidderprob 0.1 --omega 0.50 --angle $*  --scale 2  --rounds 200 >  $@
-
-figures/f1/summary.$(f1c): bellman bellman.sh $(f1c)/0 $(f1c)/15 $(f1c)/30 $(f1c)/45 $(f1c)/60 $(f1c)/75 $(f1c)/90 $(f1c)/105 $(f1c)/120 $(f1c)/135 $(f1c)/150 $(f1c)/165 $(f1c)/180 $(f1c)/195 $(f1c)/210 $(f1c)/225 $(f1c)/240 $(f1c)/255 $(f1c)/270 $(f1c)/285 $(f1c)/290 $(f1c)/295  $(f1c)/300 $(f1c)/315 $(f1c)/330 $(f1c)/345
-	rm -f $@
-	cat $(filter $(f1c)/%,$^) >> $@
-
-
-
-#--------------------------------------------------------------------------------------------
 #  below here is automagic, building output in uruns/  and runs/
 #--------------------------------------------------------------------------------------------
 
@@ -249,7 +174,7 @@ uruns/summary.risk_alpha$(atxt)_beta$(btxt)_omega$(otxt)_scale$(stxt)_n$(n): bel
 	rm -f $@
 	cat $(filter $(up)/%,$^) >> $@
 
-# fine spacing  [change name for each version]
+# fine spacing
 fine_uruns/summary.risk_alpha$(atxt)_beta$(btxt)_omega$(otxt)_scale$(stxt)_n$(n): bellman bellman.sh $(up)/0 $(up)/15 $(up)/30 $(up)/45 $(up)/60 $(up)/65 $(up)/70 $(up)/75 $(up)/80 $(up)/85 $(up)/90 $(up)/91 $(up)/92 $(up)/93 $(up)/93.1 $(up)/93.2 $(up)/93.3 $(up)/93.4 $(up)/93.5 $(up)/93.7 $(up)/93.8 $(up)/93.9 $(up)/94 $(up)/94.1 $(up)/94.2 $(up)/94.3 $(up)/94.4 $(up)/94.5 $(up)/94.6 $(up)/94.7 $(up)/94.8 $(up)/94.9 $(up)/95 $(up)/95.1 $(up)/95.2 $(up)/95.3 $(up)/95.4 $(up)/95.5 $(up)/95.6 $(up)/95.7 $(up)/95.8 $(up)/95.9 $(up)/95.95 $(up)/96 $(up)/96.1 $(up)/96.2  $(up)/96.5 $(up)/97 $(up)/97.5 $(up)/98 $(up)/98.5 $(up)/99 $(up)/100 $(up)/100 $(up)/102 $(up)/104 $(up)/106 $(up)/108 $(up)/110 $(up)/115 $(up)/120 $(up)/135 $(up)/150 $(up)/165 $(up)/180 $(up)/195 $(up)/210 $(up)/225 $(up)/240 $(up)/255 $(up)/270 $(up)/285 $(up)/290 $(up)/295  $(up)/300 $(up)/315 $(up)/330 $(up)/345
 	rm -f $@
 	cat $(filter $(up)/%,$^) >> $@
@@ -275,6 +200,104 @@ $(pp)/%: bellman bellman.sh  $(pp)/.directory_built
 	./bellman --$(goal) --angle $* --scale $(scale) --omega $(omega) --constrain --oracleprob $(psi) --bidderprob 0      --rounds $(n) >  $@
 
 
+#--------------------------------------------------------------------------------------------
+#  include file that defines rules for making the data for paper figures
+#--------------------------------------------------------------------------------------------
+
+
+#--------------------------------------------------------------------------------------------
+#  setup for paper figures as simple targets with one command (files in figures directory)
+#--------------------------------------------------------------------------------------------
+
+# Figure 1: comparisons of geometric spending testimator to risk inflation oracle, with varying payouts
+
+f1a = risk_alpha100_beta10_omega05_scale2_n100
+f1b = risk_alpha100_beta10_omega25_scale2_n100
+f1c = risk_alpha100_beta10_omega50_scale2_n100
+f1d = risk_alpha100_beta10_omega75_scale2_n100
+
+# --- F1A
+
+f1a_dir := figures/f1/$(f1a)
+
+f1a_obj := $(addprefix $(f1a_dir)/, 0 15 30 45 60 65 70 75 80 85 90 95 100 105 110 115 120 125 135 150 165 180 195 210 225 240 255 270 285 300 315 330)
+
+f1a_sum := figures/f1/summary_$(f1a)
+
+$(f1a_sum): $(f1a_obj)
+	rm -f $@
+	cat $(f1a_obj) > $@
+
+$(f1a_dir)/%: bellman bellman.sh $(f1a_dir)/.dir_created 
+	./bellman --risk --angle $*  --oracleprob 1 --bidderprob 0.1 --omega 0.05 --scale 2  --rounds 100  >  $@
+
+$(f1a_dir)/.dir_created :
+	mkdir $(f1a_dir)
+	touch $@
+
+
+# --- F1B
+
+f1b_dir := figures/f1/$(f1b)
+
+f1b_obj := $(addprefix $(f1b_dir)/,  0 15 30 45 60 65 70 75 80 85 90 95 100 105 110 115 120 125 135 150 165 180 195 210 225 240 255 270 285 300 315 330)
+
+f1b_sum := figures/f1/summary_$(f1b)
+
+$(f1b_sum): $(f1b_obj)
+	rm -f $@
+	cat $(f1b_obj) > $@
+
+$(f1b_dir)/%: bellman bellman.sh $(f1b_dir)/.dir_created 
+	./bellman --risk --angle $*  --oracleprob 1 --bidderprob 0.1 --omega 0.25 --scale 2  --rounds 100  >  $@
+
+$(f1b_dir)/.dir_created :
+	mkdir $(f1b_dir)
+	touch $@
+
+
+# --- F1C
+
+f1c_dir := figures/f1/$(f1c)
+
+f1c_obj := $(addprefix $(f1c_dir)/,  0 15 30 45 60 65 70 75 80 85 90 95 100 105 110 115 120 125 135 150 165 180 195 210 225 240 255 270 285 300 315 330)
+
+f1c_sum := figures/f1/summary_$(f1c)
+
+$(f1c_sum): $(f1c_obj)
+	rm -f $@
+	cat $(f1c_obj) > $@
+
+$(f1c_dir)/%: bellman bellman.sh $(f1c_dir)/.dir_created 
+	./bellman --risk --angle $*  --oracleprob 1 --bidderprob 0.1 --omega 0.50 --scale 2  --rounds 100  >  $@
+
+$(f1c_dir)/.dir_created :
+	mkdir $(f1c_dir)
+	touch $@
+
+
+# --- F1D
+
+f1d_dir := figures/f1/$(f1d)
+
+f1d_obj := $(addprefix $(f1d_dir)/,  0 15 30 45 60 65 70 75 80 85 90 95 100 105 110 115 120 125 135 150 165 180 195 210 225 240 255 270 285 300 315 330)
+
+f1d_sum := figures/f1/summary_$(f1d)
+
+$(f1d_sum): $(f1d_obj)
+	rm -f $@
+	cat $(f1d_obj) > $@
+
+$(f1d_dir)/%: bellman bellman.sh $(f1d_dir)/.dir_created 
+	./bellman --risk --angle $*  --oracleprob 1 --bidderprob 0.1 --omega 0.75 --scale 2  --rounds 100  >  $@
+
+$(f1d_dir)/.dir_created:
+	mkdir $(f1d_dir)
+	touch $@
+
+
+
+figure1: $(f1a_sum) $(f1b_sum) $(f1c_sum) $(f1d_sum)
 
 ###########################################################################
 include ../rules_for_makefiles
