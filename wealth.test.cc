@@ -41,19 +41,19 @@ int  main()
   if (false)
   {
     std::cout << "\n\nTEST: Test bidding from wealth array." << std::endl;
-    double omega (  0.05);
+    double omega (  0.5);
     int  nRounds ( 20   );
-    int    iZero ( 10   );
+    int    iZero ( 10   );   // determines max possible wealth since wealth is omega at this location
     
     Distribution *p;
     UniversalDist univ(univStart);
     p = &univ;
     WealthArray uWealth(omega, iZero, nRounds, *p);
-    GeometricDist geo(0.005);
+    GeometricDist geo(0.01);
     p = &geo;
     WealthArray gWealth(omega, iZero, nRounds, *p);
-    std::cout << "TEST: wealth array  \n" << uWealth << std::endl;
-    std::cout << "TEST: wealth array  \n" << gWealth << std::endl;
+    std::cout << "TEST: wealth array  \n" << uWealth; uWealth.write_to(std::cout); std::cout << std::endl;
+    std::cout << "TEST: wealth array  \n" << gWealth; gWealth.write_to(std::cout); std::cout << std::endl;
     std::cout << "TEST: high wealth bids, then those starting from iZero" << std::endl;
     for(int k=0; k<5; ++k)
       std::cout << "  bid at k " << k << " geo bid=" <<  gWealth.bid(k) << " out of " << gWealth[k]
@@ -101,7 +101,6 @@ int  main()
     std::cout << "TEST: init universal wealths \n" ;  WealthArray uWealth(omega, iZero, steps, univ);
     std::cout << "TEST: init geometric wealths \n" ;  WealthArray uniformWealth(omega, iZero, steps, uni);
     std::cout << "TEST: init uniform   wealths \n" ;  WealthArray gWealth(omega, iZero, steps, psi );  // better geometric
-    
     std::cout << "TEST: geometric name for psi=" << psi << " is " << gWealth.name() << std::endl;
 
     // wealth at 0 should be 1 step from zero for uniform
@@ -126,16 +125,18 @@ int  main()
     double rate = 0.1;
     std::cout << "\n\nTEST: Testing dual wealth array." << std::endl;
     DualWealthArray bonferroni(0.001);
-    std::cout << "TEST: Bonferroni wealth array: \n ";
-    bonferroni.write_to(std::cout); 
+    std::cout << "\nTEST: Bonferroni wealth array: \n ";
+    bonferroni.write_to(std::cout);
+    std::cout << "\nTEST: Universal wealth array: \n";
     UniversalBidder ub(scl);
     DualWealthArray univWealth("univ", omega, omega, ub, rounds);
     std::cout << "TEST: Zero index is at " << univWealth.zero_index() << std::endl;
     univWealth.write_to(std::cout);
+    std::cout << "TEST: Geometric wealth array: \n";
     DualWealthArray geoWealth("geo", omega, omega, GeometricBidder(rate, ub.total_wealth()), rounds);
     std::cout << "TEST: Zero index is at " << geoWealth.zero_index() << std::endl;
     geoWealth.write_to(std::cout);
-    std::cout << "\n\nTEST: Finished test of dual wealth array" << std::endl;
+    std::cout << "------------- " << std::cout << "TEST: Finished test of dual wealth array" << std::endl;
   }
   
   return 0;

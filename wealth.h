@@ -10,7 +10,8 @@
 
    Wealth array maps from integers that follow the tests to the wealth
    of the expert or bidder.  The wealth is monotone *decreasing* in the
-   index/position k.
+   index/position k.  Bid is difference in wealths.  This code mostly replaced
+   by the DualWealthArray below.
 
    Normalized to have wealth omega at index mZeroIndex.
 
@@ -20,7 +21,7 @@ class WealthArray
 {
   const std::string     mName;
   const int             mZeroIndex;  // position of W_0, the place used for locating initial wealth W0
-  const double          mOmega;      // defines wealth at zeroIndex and determines how far increases
+  const double          mOmega;      // defines wealth at zeroIndex; max wealth is set by zero index in fill_array_top
   std::vector<double>   mWealth;     
   std::vector< std::pair<int,double> > mPositions;  // cache new positions when increment wealth by rejection
 
@@ -91,12 +92,12 @@ class DualWealthArray
   typedef std::vector< Position > PositionVector;
   
   const std::string     mName;
-  const double          mW0;               // initial wealth
-  double const          mOmega;            // defines wealth at zeroIndex and determines change when reject
-  int                   mZeroIndex;        // position of W_0, the place used for locating initial wealth W0
+  const double          mW0;                          // initial wealth
+  double const          mOmega;                       // defines wealth at zeroIndex and determines change when reject
+  int                   mZeroIndex;                   // position of W_0, the place used for locating initial wealth W0
   std::vector< std::pair<double,double> > mWealthBid;     
-  PositionVector        mRejectPositions;  // cache new <index,prob> positions when increment wealth by rejection
-  PositionVector        mBidPositions;     //       new positions when decrement wealth by bid
+  PositionVector        mRejectPositions;             // cache new <index,prob> positions when increment wealth by rejection
+  PositionVector        mBidPositions;                //       new positions when decrement wealth by bid
 
  public:
 

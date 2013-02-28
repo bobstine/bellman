@@ -151,8 +151,11 @@ WealthArray::print_to (std::ostream& os) const
 void
 WealthArray::write_to(std::ostream& os) const
 {
+  os << "   mWealth    : ";
   for (int i=0; i<size(); ++i)               os << mWealth[i]           << " ";    os << std::endl;
+  os << "  reject jumps: ";
   for (int i=0; i<number_of_bids(); ++i)     os << reject_jumps_to(i)   << " ";    os << std::endl;
+  os << "  reject share: ";
   for (int i=0; i<number_of_bids(); ++i)     os << reject_jump_share(i) << " ";    os << std::endl;
 }
 
@@ -212,10 +215,10 @@ void
 DualWealthArray::print_arrays (std::ostream& os, bool asLines) const
 {
   if (asLines)
-    { os << "Wealths:  ";
-      for(int i=0; i<(int) mWealthBid.size(); ++i)          // wealths
+  { os << "Wealths:  ";
+    for(int i=0; i<(int) mWealthBid.size(); ++i)          // wealths
       os << mWealthBid[i].first << " ";
-      os << std::endl << "  Bids: " ;
+    os << std::endl << "  Bids: " ;
     for(int i=0; i<(int) mWealthBid.size(); ++i)          // bids
       os << mWealthBid[i].second << " ";
     os << std::endl << "Reject pos: ";
@@ -232,7 +235,8 @@ DualWealthArray::print_arrays (std::ostream& os, bool asLines) const
       os << mBidPositions[i].second << " ";
     os << std::endl;
   } else
-  { for (int i=0; i<(int)mRejectPositions.size(); ++i)
+  { os << "      <Wth,Bid>    <Rej i, p>   <Bid i, p> \n";
+    for (int i=0; i<(int)mRejectPositions.size(); ++i)
     { os << " i=" << i << "   ";
       print_pair_to_os(os, mWealthBid[i]);
       os << "    ";

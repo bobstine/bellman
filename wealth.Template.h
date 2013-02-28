@@ -12,7 +12,7 @@ DualWealthArray::initialize_wealth_bid_array(Bidder const& f, int nRounds)
   std::vector< double > wealths, bids;
   int          i        (0);
   double       minW     (f.total_wealth());   // minW is wealth as we subtract away bids
-  int          checkPt  (20000);
+  int          checkPt  (10000);
   while (mOmega <= minW)                      // spend down wealth until reach starting wealth omega
   { double b (f(i));
     wealths.push_back(minW);
@@ -20,22 +20,22 @@ DualWealthArray::initialize_wealth_bid_array(Bidder const& f, int nRounds)
     minW -= b;
     ++i;
     if(i == checkPt)
-    { std::clog << "WLTH: At " << i << " positions with minW " << minW << " > omega." << std::endl;
+    { std::clog << "WLTH: Warning. Spending down slowly. At " << i << " with minW " << minW << " > omega." << std::endl;
       checkPt += 50000;
     }
   }
   for (double j=0; j<=nRounds; ++j)           // spend down from omega by number of rounds as if lose each, with an added extra round
   { double b = f(i+j);
-    minW -= b;
     wealths.push_back(minW);
     bids.push_back(b);
+    minW -= b;
   }
   i = (int) wealths.size();
   while ((mOmega-grid_delta(mOmega)) < minW)               // make sure spend enough to get below omega (univ is slow)
   { double b = f(i++);
-    minW -= b;
     wealths.push_back(minW);
     bids.push_back(b);
+    minW -= b;
   }
   std::clog << "WLTH: Wealth table uses " << wealths.size() << " elements, with min wealth at position "
 	    << wealths.size()-1 << "=" << minW << " and bid=" << bids[bids.size()-1] << std::endl;
