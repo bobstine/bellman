@@ -136,7 +136,7 @@ int  main()
     DualWealthArray geoWealth("geo", omega, omega, GeometricBidder(rate, ub.total_wealth()), rounds);
     std::cout << "TEST: Zero index is at " << geoWealth.zero_index() << std::endl;
     geoWealth.write_to(std::cout);
-    std::cout << "------------- " << std::cout << "TEST: Finished test of dual wealth array" << std::endl;
+    std::cout << "------------- " << std::endl << "TEST: Finished test of dual wealth array" << std::endl;
   }
   
   return 0;

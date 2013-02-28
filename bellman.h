@@ -11,7 +11,7 @@
 
 ***********************************************************************************/
 
-//  Finds the expected risk for the give list of means, such as those from a simulation
+//  Finds the expected risk for process with probability p_0 for 0 and 1-p_0 for the given mean
 
 std::pair<double,double>
   find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility, WealthArray const& bidderWealth);

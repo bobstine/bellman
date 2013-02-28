@@ -43,46 +43,7 @@ compiler: bellman
 	gcc --version
 
 
-
 # -------------------------------------------------------------------------------------------------------------
-# Find risk for specific mixture of signal and probabilities
-# Need to prefix variables like 'n' to avoid conflicts
-#
-#    Needs to have subdirectory 'risk' created
-#    then run <c><c> calc_risk
-#
-# All symbols in this section have c_ prefix
-
-c_n         = 500
-c_scale     = 2     # use small scale for omega 0.05
-c_scale_txt = 2
-c_omega     = 0.5
-c_omega_txt = 50
-
-# define path within risk subdirectory
-c_path = risk/omega$(c_omega_txt)_scale$(c_scale_txt)_n$(c_n)
-
-$(c_path)/.directory_built: 
-	echo "Building directory for risk output:" $(c_path)
-	mkdir $(c_path)
-	touch $@
-
-
-# main command to run
-calc_risk:  $(c_path)/.directory_built $(c_path)/m0.5 $(c_path)/m1.0 $(c_path)/m1.5 $(c_path)/m2.0 $(c_path)/m2.5 $(c_path)/m3.0 $(c_path)/m3.5 $(c_path)/m4.0
-	echo "Computed risks in directory: " $(c_path)
-
-# actual run command for unconstrained solution needs m to keep unique
-$(c_path)/m%: calculate
-	echo $(c_path)
-	./calculate --signal $* --omega $(c_omega) --scale $(c_scale) --rounds $(c_n) > $@
-
-
-# executable
-calculate: bellman.o wealth.o utility.o distribution.o bellman_calculator.o
-	$(GCC) $^ $(LDLIBS) -o  $@
-
-
 # use these to write means, probs to file for simulation (which is done in simulate_means.R)
 sim_details/.directory_built: 
 	echo "Building directory for holding simulation details."
@@ -211,8 +172,7 @@ $(pp)/%: bellman bellman.sh  $(pp)/.directory_built
 
 base_angles = 0 15 30 45 60 65 70 75 80 85 90 95 100 105 110 115 120 125 135 150 165 180 195 210 225 240 255 270 285 300 315 330 345 359
 
-extra_angles_n100 = 93 94 96 97 98 99
-extra_angles_n500 = 93 94 96 97 98 99
+extra_angles = 91 92 93 94 96 97 98 99
 
 ############################################################################################################
 #
@@ -221,7 +181,7 @@ extra_angles_n500 = 93 94 96 97 98 99
 ############################################################################################################
 
 f1_n = 500
-f1_angles := $(base_angles) $(extra_angles_n500) 93.2 93.4 93.6 93.8 94.2 94.4 94.6 94.8 95.2 95.4 95.6 95.8 96.2 96.4 96.6 96.8
+f1_angles := $(base_angles) $(extra_angles) 93.2 93.4 93.6 93.8 94.2 94.4 94.6 94.8 95.2 95.4 95.6 95.8 96.2 96.4 96.6 96.8
 
 f1a := risk_alpha100_beta10_omega05_scale2_n$(f1_n)
 f1b := risk_alpha100_beta10_omega25_scale2_n$(f1_n)
@@ -319,8 +279,8 @@ figure1: $(f1a_sum) $(f1b_sum) $(f1c_sum) $(f1d_sum)
 ############################################################################################################
 
 
-f2_n = 100
-f2_angles := $(base_angles)
+f2_n = 500
+f2_angles := $(base_angles) $(extra_angles)
 
 f2a := risk_alpha10_beta10_omega05_scale2_n$(f2_n)
 f2b := risk_alpha10_beta10_omega25_scale2_n$(f2_n)
@@ -405,6 +365,58 @@ $(f2d_dir)/.dir_created :
 	touch $@
 
 figure2: $(f2a_sum) $(f2b_sum) $(f2c_sum) $(f2d_sum)
+
+
+############################################################################################################
+#
+# Figure 3: risks of paths within the feasible set for geometric vs testimator oracle
+#
+############################################################################################################
+
+
+
+# -------------------------------------------------------------------------------------------------------------
+# Find risk for specific mixture of signal and probabilities
+# Need to prefix variables like 'n' to avoid conflicts
+#
+#    then run <c><c> calc_risk
+#
+
+
+f3_alpha     = 0.1
+f3_atxt      = 10
+f3_beta      = 0.1
+f3_btxt      = 10
+f3_omega     = 0.5
+f3_omega_txt = 50
+f3_scale     = 2     # use small scale for omega 0.05
+f3_scale_txt = 2
+f3_n         = 500
+
+# define dir within risk subdirectory
+f3_dir = figures/f3/risk_alpha$(f3_atxt)_beta$(f3_btxt)_omega$(f3_omega_txt)_scale$(f3_scale_txt)_n$(f3_n)
+
+$(f3_dir)/.directory_built: 
+	echo "Building directory for risk output:" $(f3_dir)
+	mkdir $(f3_dir)
+	touch $@
+
+# main command to run
+f3_mu := 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+
+f3_obj := $(addprefix $(f3_dir)/m, $(f3_mu))
+
+figure3:  $(f3_dir)/.directory_built $(f3_obj)
+	echo $(f3_obj)
+	echo "Computed risks in directory: " $(f3_dir)
+
+$(f3_dir)/m%: calculate
+	./calculate --signal $* --alpha $(f3_alpha) --beta $(f3_beta) --omega $(f3_omega) --scale $(f3_scale) --rounds $(f3_n) > $@
+
+# executable
+calculate: bellman.o wealth.o utility.o distribution.o bellman_calculator.o
+	$(GCC) $^ $(LDLIBS) -o  $@
+
 
 ###########################################################################
 include ../rules_for_makefiles
