@@ -20,18 +20,16 @@ typedef std::pair<int,double> WIndex;
 
 double   reject_prob(double mu, double level);
 
-
 double   reject_value(   int i         , WIndex const& kp , Matrix const& value, bool show = false);
 double   reject_value(WIndex const& kp ,       int j      , Matrix const& value, bool show = false);
 double   reject_value(WIndex const& kp1, WIndex const& kp2, Matrix const& value, bool show = false);
 
-
 double   z_alpha       (double a);
 
-double   optimal_alpha (double mu, double omega);
-
 double   risk          (double mu, double alpha); 
-double   neg_risk      (double mu, double alpha); 
+double   neg_risk      (double mu, double alpha);
+
+double   optimal_alpha (double mu, double omega);
 
 
 ////   Vector utility trades off between two possible values
@@ -49,7 +47,6 @@ class VectorUtility: public std::unary_function<double,double>
  VectorUtility(double angle, double alphaLevel)
    : mAngle(angle), mSin(sin(angle * 3.1415926536/180)), mCos(cos(angle * 3.1415926536/180)),
     mAlpha(alphaLevel),  mBeta(0.0), mRejectValue(0.0), mNoRejectValue(0.0) { }
-
   
   double alpha      () const { return mAlpha; }
   double beta       () const { return mBeta;  }
@@ -82,8 +79,8 @@ class RejectVectorUtility: public VectorUtility
 {
  public:
 
- RejectVectorUtility(double angle, double omega)
-   : VectorUtility(angle, omega) { }
+ RejectVectorUtility(double angle, double alpha)
+   : VectorUtility(angle, alpha) { }
 
   double operator()(double mu) const;
 
@@ -125,21 +122,19 @@ class MatrixUtility: public std::unary_function<double,double>
 {
  protected:
   const double mAngle, mSin, mCos;
-  const double mOmega;
   double mAlpha, mBeta;
   double mV00, mV01, mV10, mV11;  // 0 for not reject, 1 for reject
   
  public:
 
- MatrixUtility(double angle, double omega)
+ MatrixUtility(double angle)
    : mAngle(angle), mSin(sin(angle * 3.1415926536/180)), mCos(cos(angle * 3.1415926536/180)),
-     mOmega(omega), mAlpha(omega), mBeta(0.0), mV00(0.0), mV01(0.0), mV10(0.0), mV11(0.0)
+    mAlpha(0.0), mBeta(0.0), mV00(0.0), mV01(0.0), mV10(0.0), mV11(0.0)
     { std::clog << "UTIL: s=" << mSin << "   c=" << mCos << " " << std::endl; }
 
   double alpha      () const { return mAlpha; }
   double beta       () const { return mBeta;  }
   double angle      () const { return mAngle; }
-  double omega      () const { return mOmega; }   // is alpha unless otherwise set
   
   void set_constants (double alpha, double beta, double v00, double v01, double v10, double v11)
   { assert((0 <= alpha) && (alpha <= 1.0));
@@ -173,8 +168,8 @@ class RejectMatrixUtility: public MatrixUtility
 {
  public:
 
- RejectMatrixUtility(double angle, double omega)
-   : MatrixUtility(angle, omega) { }
+ RejectMatrixUtility(double angle)
+   : MatrixUtility(angle) { }
 
   double operator()(double mu) const;
 
@@ -190,8 +185,8 @@ class RiskMatrixUtility: public MatrixUtility
 {
  public:
 
- RiskMatrixUtility(double angle, double omega)
-   : MatrixUtility(angle,omega) { }
+ RiskMatrixUtility(double angle)
+   : MatrixUtility(angle) { }
   
   double operator()(double mu) const;
   

@@ -161,10 +161,6 @@ $(pp)/%: bellman bellman.sh  $(pp)/.directory_built
 	./bellman --$(goal) --angle $* --scale $(scale) --omega $(omega) --constrain --oracleprob $(psi) --bidderprob 0      --rounds $(n) >  $@
 
 
-#--------------------------------------------------------------------------------------------
-#  include file that defines rules for making the data for paper figures
-#--------------------------------------------------------------------------------------------
-
 
 #--------------------------------------------------------------------------------------------
 #  setup for paper figures as simple targets with one command (files in figures directory)
@@ -373,16 +369,6 @@ figure2: $(f2a_sum) $(f2b_sum) $(f2c_sum) $(f2d_sum)
 #
 ############################################################################################################
 
-
-
-# -------------------------------------------------------------------------------------------------------------
-# Find risk for specific mixture of signal and probabilities
-# Need to prefix variables like 'n' to avoid conflicts
-#
-#    then run <c><c> calc_risk
-#
-
-
 f3_alpha     = 0.1
 f3_atxt      = 10
 f3_beta      = 0.1
@@ -416,6 +402,102 @@ $(f3_dir)/m%: calculate
 # executable
 calculate: bellman.o wealth.o utility.o distribution.o bellman_calculator.o
 	$(GCC) $^ $(LDLIBS) -o  $@
+
+
+############################################################################################################
+#
+# Figure 4: Comparison of geometric bidders with different omega payouts
+#
+############################################################################################################
+
+f4_n = 40
+f4_angles := $(base_angles) # $(extra_angles)
+
+f4a := risk_alpha10_beta10_omega05_scale2_n$(f4_n)
+f4b := risk_alpha10_beta10_omega25_scale2_n$(f4_n)
+f4c := risk_alpha10_beta10_omega50_scale2_n$(f4_n)
+f4d := risk_alpha10_beta10_omega75_scale2_n$(f4_n)
+
+# --- F4A
+
+f4a_dir := figures/f4/$(f4a)
+
+f4a_obj := $(addprefix $(f4a_dir)/, $(f4_angles))
+
+f4a_sum := figures/f4/summary_$(f4a)
+
+$(f4a_sum): $(f4a_obj)
+	rm -f $@
+	cat $(f4a_obj) > $@
+
+$(f4a_dir)/%: bellman bellman.sh $(f4a_dir)/.dir_created 
+	./bellman --risk --angle $*  --oracleprob 0.1 --bidderprob 0.1 --omega 0.05 --scale 2  --rounds $(f4_n)  >  $@
+
+$(f4a_dir)/.dir_created :
+	mkdir $(f4a_dir)
+	touch $@
+
+
+# --- F4B
+
+f4b_dir := figures/f4/$(f4b)
+
+f4b_obj := $(addprefix $(f4b_dir)/, $(f4_angles))
+
+f4b_sum := figures/f4/summary_$(f4b)
+
+$(f4b_sum): $(f4b_obj)
+	rm -f $@
+	cat $(f4b_obj) > $@
+
+$(f4b_dir)/%: bellman bellman.sh $(f4b_dir)/.dir_created 
+	./bellman --risk --angle $*  --oracleprob 0.1 --bidderprob 0.1 --omega 0.25 --scale 2  --rounds $(f4_n)  >  $@
+
+$(f4b_dir)/.dir_created :
+	mkdir $(f4b_dir)
+	touch $@
+
+# --- F4C
+
+f4c_dir := figures/f4/$(f4c)
+
+f4c_obj := $(addprefix $(f4c_dir)/, $(f4_angles))
+
+f4c_sum := figures/f4/summary_$(f4c)
+
+$(f4c_sum): $(f4c_obj)
+	rm -f $@
+	cat $(f4c_obj) > $@
+
+$(f4c_dir)/%: bellman bellman.sh $(f4c_dir)/.dir_created 
+	./bellman --risk --angle $*  --oracleprob 0.1 --bidderprob 0.1 --omega 0.50 --scale 2  --rounds $(f4_n)  >  $@
+
+$(f4c_dir)/.dir_created :
+	mkdir $(f4c_dir)
+	touch $@
+
+# --- F4D
+
+f4d_dir := figures/f4/$(f4d)
+
+f4d_obj := $(addprefix $(f4d_dir)/, $(f4_angles))
+
+f4d_sum := figures/f4/summary_$(f4d)
+
+$(f4d_sum): $(f4d_obj)
+	rm -f $@
+	cat $(f4d_obj) > $@
+
+$(f4d_dir)/%: bellman bellman.sh $(f4d_dir)/.dir_created 
+	./bellman --risk --angle $*  --oracleprob 0.1 --bidderprob 0.1 --omega 0.75 --scale 2  --rounds $(f4_n)  >  $@
+
+$(f4d_dir)/.dir_created :
+	mkdir $(f4d_dir)
+	touch $@
+
+figure2: $(f4a_sum) # $(f4b_sum) $(f4c_sum) $(f4d_sum)
+
+
 
 
 ###########################################################################

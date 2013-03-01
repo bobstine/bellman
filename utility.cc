@@ -68,15 +68,17 @@ z_alpha (double alpha)
     return normal_quantile(1-alpha);
 }
 
+// used in expert competitive alpha
 double
 optimal_alpha (double mu, double omega) 
 { if (mu < .001)
     return 0.0;
   else
-  { double z = (mu * mu + 2 * log(1.0/omega))/(2 * mu);
-    return 1.0 - normal_cdf(z);
-  }
+    { double z = (mu * mu + 2 * log(1.0/omega))/(2 * mu);
+      return 1.0 - normal_cdf(z);
+    }
 }
+
 
 double
 neg_risk(double mu, double alpha)
@@ -243,12 +245,6 @@ RiskVectorUtility::bidder_utility (double mu, double rejectValue, double noRejec
 
 // -------------------------------------------------------------------------------------------------------------
 // -----  MatrixUtility  -----  MatrixUtility  -----  MatrixUtility  -----  MatrixUtility  -----  MatrixUtility
-
-
-//
-//   Note:  alpha is the first, beta is the second bid in the order supplied (not the math notation)
-// 
-
 
 double
 r_mu(double mu, double p)

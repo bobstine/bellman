@@ -81,12 +81,12 @@ int  main(int argc, char** argv)
     std::ostringstream ss;
     ss << "druns/bellman.a" << angle << ".s" << round_parm(scale) <<".o" << round_parm(omega) << ".op" << round_parm(oracleProb) << ".bp" << round_parm(bidderProb);
     if (riskUtil)
-    { RiskMatrixUtility utility(angle, omega);
+    { RiskMatrixUtility utility(angle);
       ss << ".risk";
       solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, ss.str(), writeTable);
     }
     else
-    { RejectMatrixUtility utility(angle, omega);
+    { RejectMatrixUtility utility(angle);
       ss << ".reject";
       solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, ss.str(), writeTable);
     }
