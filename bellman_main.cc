@@ -25,13 +25,20 @@ round_parm(double x)
   return floor(100 * x);
 }
 
-//  prob character indicates the distribution, u for universal and g for geometric
+// player probability and omega
+//    omega = 0 defines an unconstrained player (oracle); non-zero omega implies contrained
+//    prob = 1  risk inflation oracle
+//    prob = 0  ls oracle
+
+typedef std::pair<double, double> DoublePair;
+
+double omega(DoublePair const& p) { return p.second; }
+double prob (DoublePair const& p) { return p.first; }
 
 void
 parse_arguments(int argc, char** argv,
-		bool &riskUtil, double &angle, int &nRounds, bool &constrained,
-		double &oracleProb, double &bidderProb,  double &scale,
-		double &omega, bool &writeTable);
+		bool &riskUtil, double &angle, DoublePair &oraclePO, DoublePair &bidderPO,
+		double &scale, int &nRounds,  bool &writeTable);
 
 
 // Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     
@@ -41,14 +48,12 @@ int  main(int argc, char** argv)
   bool      riskUtil  = false;    // risk or rejection, default is rejection (which is fast)
   double       angle  =     0;    // in degrees
   int        nRounds  =   100;
-  bool     constrain  = false;    // ignores oracle prob if not constrained
-  double   oracleProb = 0.0;      // use univ oracle if zero prob and constrained
-  double   bidderProb = 0.0;
   double     scale    = 1.0;      // multiplier of universal code in unconstrained
   bool     writeTable = false;    // if false, only return final value
-  double     omega    = 0.05;     // also sets the initial wealth
+  DoublePair oraclePO(0,0);       //   (alpha, oracle omega) set second (omega) to nonzero to contrain; else unconstrained
+  DoublePair bidderPO(0,0);       //   (beta, omega)
 
-  parse_arguments(argc, argv, riskUtil, angle, nRounds, constrain, oracleProb, bidderProb, scale, omega, writeTable);
+  parse_arguments(argc, argv, riskUtil, angle, oraclePO, bidderPO, scale, nRounds, writeTable);
 
   /*
      Note that alpha (aka, the oracle probability for a Bayes oracle)
@@ -57,29 +62,31 @@ int  main(int argc, char** argv)
      wealth when a rejection occurs.
   */
   
-  std::clog << "MAIN: Building wealth array for " << nRounds << " rounds with omega=" << omega
-	    << ", bidder prob=" << bidderProb << ", and scale=" << scale << std::endl;
-  DualWealthArray *pBidderWealth = make_wealth_array(nRounds, omega, bidderProb, scale);
+  std::clog << "MAIN: Building bidder wealth array for " << nRounds << " rounds with omega=" << omega(bidderPO)
+	    << ", prob=" << prob(bidderPO) << ", and scale=" << scale << std::endl;
+  DualWealthArray *pBidderWealth = make_wealth_array(nRounds, omega(bidderPO), prob(bidderPO), scale);
   // pBidderWealth->write_to(std::clog, true); std::clog << std::endl; // as lines
-  
-  if(!constrain)           // unconstrained competitor
-  { std::cout << "Oracle(" << oracleProb << ") " << pBidderWealth->name() << " ";
+
+  if(omega(oraclePO) == 0) // unconstrained competitor
+  { std::cout << "Oracle(" << prob(oraclePO) << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
-    { RiskVectorUtility utility(angle, oracleProb);
+    { RiskVectorUtility utility(angle, prob(oraclePO));
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
     else
-    { RejectVectorUtility utility(angle, oracleProb);
+    { RejectVectorUtility utility(angle, prob(oraclePO));
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
   }
   else                     // constrained competitor needs to track state as well
   { std::clog << "MAIN: Column player (bidder) uses... " << *pBidderWealth << std::endl;
-    DualWealthArray *pOracleWealth = make_wealth_array(nRounds, omega, oracleProb, scale);
+    DualWealthArray *pOracleWealth = make_wealth_array(nRounds, omega(oraclePO), prob(oraclePO), scale);
     std::clog << "MAIN: Row player (oracle) uses wealth array " << *pOracleWealth << std::endl;
     std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
     std::ostringstream ss;
-    ss << "druns/bellman.a" << angle << ".s" << round_parm(scale) <<".o" << round_parm(omega) << ".op" << round_parm(oracleProb) << ".bp" << round_parm(bidderProb);
+    ss << "druns/bellman.a" << angle << ".s" << round_parm(scale)
+       << ".o" << round_parm(omega(oraclePO)) << "_" << round_parm(prob(oraclePO))
+       << ".b" << round_parm(omega(bidderPO)) << "_" << round_parm(prob(bidderPO));
     if (riskUtil)
     { RiskMatrixUtility utility(angle);
       ss << ".risk";
@@ -98,27 +105,26 @@ int  main(int argc, char** argv)
 
 void
 parse_arguments(int argc, char** argv,
-		bool &riskUtil, double &angle, int &nRounds, bool &constrain,
-		double &oracleProb, double &bidderProb,   // zero denotes universal
-		double &scale, double &omega, bool &writeTable)
+		bool &riskUtil, double &angle, DoublePair &oraclePO, DoublePair &bidderPO,
+		double &scale, int &nRounds,  bool &writeTable)
 {
   static struct option long_options[] = {
-    {"risk",             no_argument, 0, 'R'},
-    {"reject",           no_argument, 0, 'r'},
-    {"angle",      required_argument, 0, 'a'},
-    {"constrain",        no_argument, 0, 'c'},
-    {"oracleprob", required_argument, 0, 'o'},
-    {"bidderprob", required_argument, 0, 'b'},
-    {"scale",      required_argument, 0, 's'},
-    {"rounds",     required_argument, 0, 'n'},
-    {"omega",      required_argument, 0, 'W'},
-    {"write",            no_argument, 0, 'w'},
+    {"risk",               no_argument, 0, 'R'},
+    {"reject",             no_argument, 0, 'r'},
+    {"angle",        required_argument, 0, 'a'},
+    {"oracle_prob",  required_argument, 0, 'o'},
+    {"oracle_omega", required_argument, 0, 'O'},
+    {"bidder_prob",  required_argument, 0, 'b'},
+    {"bidder_prob",  required_argument, 0, 'B'},
+    {"scale",        required_argument, 0, 's'},
+    {"rounds",       required_argument, 0, 'n'},
+    {"write",              no_argument, 0, 'w'},
     {0, 0, 0, 0}                             // terminator 
   };
   int key;
   int option_index = 0;
   bool rejectUtil = true;
-  while (-1 !=(key = getopt_long (argc, argv, "Rra:co:b:s:n:W:w", long_options, &option_index))) // colon means has argument
+  while (-1 !=(key = getopt_long (argc, argv, "Rra:o:O:b:B:s:n:w", long_options, &option_index))) // colon means has argument
   {
     // std::cout << "Option key " << char(key) << " for option " << long_options[option_index].name << ", option_index=" << option_index << std::endl;
     switch (key)
@@ -143,29 +149,29 @@ parse_arguments(int argc, char** argv,
 	nRounds = read_utils::lexical_cast<int>(optarg);
 	break;
       }
-    case 'c' : 
-      {
-	constrain = true;
-	break;
-      }
     case 'o' : 
       {
-	oracleProb = read_utils::lexical_cast<double>(optarg);
+	oraclePO.first = read_utils::lexical_cast<double>(optarg);
+	break;
+      }
+    case 'O' : 
+      {
+	oraclePO.second = read_utils::lexical_cast<double>(optarg);
 	break;
       }
     case 'b' : 
       {
-	bidderProb = read_utils::lexical_cast<double>(optarg);
+	bidderPO.first = read_utils::lexical_cast<double>(optarg);
+	break;
+      }
+    case 'B' : 
+      {
+	bidderPO.second = read_utils::lexical_cast<double>(optarg);
 	break;
       }
     case 's' : 
       {
 	scale = read_utils::lexical_cast<double>(optarg);
-	break;
-      }
-    case 'W' :
-      {
-	omega = read_utils::lexical_cast<double>(optarg);
 	break;
       }
     case 'w' : 
