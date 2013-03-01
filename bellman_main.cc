@@ -26,7 +26,8 @@ round_parm(double x)
 }
 
 // player probability and omega
-//    omega = 0 defines an unconstrained player (oracle); non-zero omega implies contrained
+//    omega = 1 defines an unconstrained player (oracle); non-zero omega implies contrained
+//    omega = 0 implies constant alpha level player (old school statistician)
 //    prob = 1  risk inflation oracle
 //    prob = 0  ls oracle
 
@@ -67,8 +68,8 @@ int  main(int argc, char** argv)
   DualWealthArray *pBidderWealth = make_wealth_array(nRounds, omega(bidderPO), prob(bidderPO), scale);
   // pBidderWealth->write_to(std::clog, true); std::clog << std::endl; // as lines
 
-  if(omega(oraclePO) == 0) // unconstrained competitor
-  { std::cout << "Oracle(" << prob(oraclePO) << ") " << pBidderWealth->name() << " ";
+  if(omega(oraclePO) == 1) // unconstrained competitor
+  { std::cout << "Oracle(" << prob(oraclePO) << "," << omega(oraclePO) << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
     { RiskVectorUtility utility(angle, prob(oraclePO));
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
@@ -79,14 +80,14 @@ int  main(int argc, char** argv)
     }
   }
   else                     // constrained competitor needs to track state as well
-  { std::clog << "MAIN: Column player (bidder) uses... " << *pBidderWealth << std::endl;
+  { std::clog << "MAIN: Column player (bidder) has omega=" << omega(bidderPO) << " and uses wealth array ... " << *pBidderWealth <<  std::endl;
     DualWealthArray *pOracleWealth = make_wealth_array(nRounds, omega(oraclePO), prob(oraclePO), scale);
-    std::clog << "MAIN: Row player (oracle) uses wealth array " << *pOracleWealth << std::endl;
-    std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";
+    std::clog << "MAIN: Row player (oracle) has omega=" << omega(oraclePO) << " and uses wealth array ... " << *pOracleWealth << std::endl;
+    std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";    // start of file output
     std::ostringstream ss;
-    ss << "druns/bellman.a" << angle << ".s" << round_parm(scale)
-       << ".o" << round_parm(omega(oraclePO)) << "_" << round_parm(prob(oraclePO))
-       << ".b" << round_parm(omega(bidderPO)) << "_" << round_parm(prob(bidderPO));
+    ss << angle << " " << scale << " "
+       << prob(oraclePO) << " " << omega(oraclePO) << " "
+       << prob(bidderPO) << " " << omega(bidderPO) << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle);
       ss << ".risk";
@@ -115,7 +116,7 @@ parse_arguments(int argc, char** argv,
     {"oracle_prob",  required_argument, 0, 'o'},
     {"oracle_omega", required_argument, 0, 'O'},
     {"bidder_prob",  required_argument, 0, 'b'},
-    {"bidder_prob",  required_argument, 0, 'B'},
+    {"bidder_omega", required_argument, 0, 'B'},
     {"scale",        required_argument, 0, 's'},
     {"rounds",       required_argument, 0, 'n'},
     {"write",              no_argument, 0, 'w'},
