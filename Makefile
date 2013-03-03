@@ -408,10 +408,13 @@ calculate: bellman.o wealth.o utility.o distribution.o bellman_calculator.o
 #
 ############################################################################################################
 
-f4_n = 40
+f4_n = 200
 f4_angles := $(base_angles)
 
 f4a := risk_alpha10_05_beta10_50_scale2_n$(f4_n)
+f4b := risk_alpha01_05_beta10_50_scale2_n$(f4_n)
+f4c := risk_alpha01_05_beta01_50_scale2_n$(f4_n)
+f4d := risk_alpha10_05_beta01_50_scale2_n$(f4_n)
 
 # --- F4A
 
@@ -435,6 +438,72 @@ $(f4a_dir)/.dir_created :
 
 figure4: $(f4a_sum)
 
+
+# --- F4B
+
+f4b_dir := figures/f4/$(f4b)
+
+f4b_obj := $(addprefix $(f4b_dir)/, $(f4_angles))
+
+f4b_sum := figures/f4/summary_$(f4b)
+
+$(f4b_sum): $(f4b_obj)
+	rm -f $@
+	cat $(f4b_obj) > $@
+
+$(f4b_dir)/%: bellman bellman.sh $(f4b_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0.01 --oracle_omega 0.05  --bidder_prob 0.1 --bidder_omega 0.50 --scale 2  --rounds $(f4_n)  >  $@
+
+
+$(f4b_dir)/.dir_created :
+	mkdir $(f4b_dir)
+	touch $@
+
+figure4: $(f4b_sum)
+
+
+# --- F4C
+f4c_dir := figures/f4/$(f4c)
+
+f4c_obj := $(addprefix $(f4c_dir)/, $(f4_angles))
+
+f4c_sum := figures/f4/summary_$(f4c)
+
+$(f4c_sum): $(f4c_obj)
+	rm -f $@
+	cat $(f4c_obj) > $@
+
+$(f4c_dir)/%: bellman bellman.sh $(f4c_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0.01 --oracle_omega 0.05  --bidder_prob 0.01 --bidder_omega 0.50 --scale 2  --rounds $(f4_n)  >  $@
+
+
+$(f4c_dir)/.dir_created :
+	mkdir $(f4c_dir)
+	touch $@
+
+figure4: $(f4c_sum)
+
+
+# --- F4D
+f4d_dir := figures/f4/$(f4d)
+
+f4d_obj := $(addprefix $(f4d_dir)/, $(f4_angles))
+
+f4d_sum := figures/f4/summary_$(f4d)
+
+$(f4d_sum): $(f4d_obj)
+	rm -f $@
+	cat $(f4d_obj) > $@
+
+$(f4d_dir)/%: bellman bellman.sh $(f4d_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0.10 --oracle_omega 0.05  --bidder_prob 0.01 --bidder_omega 0.50 --scale 2  --rounds $(f4_n)  >  $@
+
+
+$(f4d_dir)/.dir_created :
+	mkdir $(f4d_dir)
+	touch $@
+
+figure4: $(f4a_sum) $(f4b_sum) $(f4c_sum) $(f4d_sum)
 
 ###########################################################################
 include ../rules_for_makefiles
