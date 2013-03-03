@@ -431,16 +431,11 @@ $(f4a_sum): $(f4a_obj)
 $(f4a_dir)/%: bellman bellman.sh $(f4a_dir)/.dir_created 
 	./bellman --risk --angle $* --oracle_prob 0.1 --oracle_omega 0.05  --bidder_prob 0.1 --bidder_omega 0.50 --scale 2  --rounds $(f4_n)  >  $@
 
-
 $(f4a_dir)/.dir_created :
 	mkdir $(f4a_dir)
 	touch $@
 
-figure4: $(f4a_sum)
-
-
 # --- F4B
-
 f4b_dir := figures/f4/$(f4b)
 
 f4b_obj := $(addprefix $(f4b_dir)/, $(f4_angles))
@@ -454,13 +449,9 @@ $(f4b_sum): $(f4b_obj)
 $(f4b_dir)/%: bellman bellman.sh $(f4b_dir)/.dir_created 
 	./bellman --risk --angle $* --oracle_prob 0.01 --oracle_omega 0.05  --bidder_prob 0.1 --bidder_omega 0.50 --scale 2  --rounds $(f4_n)  >  $@
 
-
 $(f4b_dir)/.dir_created :
 	mkdir $(f4b_dir)
 	touch $@
-
-figure4: $(f4b_sum)
-
 
 # --- F4C
 f4c_dir := figures/f4/$(f4c)
@@ -476,13 +467,9 @@ $(f4c_sum): $(f4c_obj)
 $(f4c_dir)/%: bellman bellman.sh $(f4c_dir)/.dir_created 
 	./bellman --risk --angle $* --oracle_prob 0.01 --oracle_omega 0.05  --bidder_prob 0.01 --bidder_omega 0.50 --scale 2  --rounds $(f4_n)  >  $@
 
-
 $(f4c_dir)/.dir_created :
 	mkdir $(f4c_dir)
 	touch $@
-
-figure4: $(f4c_sum)
-
 
 # --- F4D
 f4d_dir := figures/f4/$(f4d)
@@ -498,12 +485,106 @@ $(f4d_sum): $(f4d_obj)
 $(f4d_dir)/%: bellman bellman.sh $(f4d_dir)/.dir_created 
 	./bellman --risk --angle $* --oracle_prob 0.10 --oracle_omega 0.05  --bidder_prob 0.01 --bidder_omega 0.50 --scale 2  --rounds $(f4_n)  >  $@
 
-
 $(f4d_dir)/.dir_created :
 	mkdir $(f4d_dir)
 	touch $@
 
 figure4: $(f4a_sum) $(f4b_sum) $(f4c_sum) $(f4d_sum)
+
+
+############################################################################################################
+#
+# Figure 5: Universal vs geometric bidder
+#
+############################################################################################################
+
+f5_n = 50
+f5_angles := $(base_angles)
+
+f5a := risk_alpha00_50_beta01_50_scale2_n$(f5_n)
+f5b := risk_alpha00_50_beta05_50_scale2_n$(f5_n)
+f5c := risk_alpha00_50_beta10_50_scale2_n$(f5_n)
+
+# --- F5A
+
+f5a_dir := figures/f5/$(f5a)
+
+f5a_obj := $(addprefix $(f5a_dir)/, $(f5_angles))
+
+f5a_sum := figures/f5/summary_$(f5a)
+
+$(f5a_sum): $(f5a_obj)
+	rm -f $@
+	cat $(f5a_obj) > $@
+
+$(f5a_dir)/%: bellman bellman.sh $(f5a_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.50  --bidder_prob 0.01 --bidder_omega 0.50 --scale 2  --rounds $(f5_n)  >  $@
+
+$(f5a_dir)/.dir_created :
+	mkdir $(f5a_dir)
+	touch $@
+
+# --- F5B
+
+f5b_dir := figures/f5/$(f5b)
+
+f5b_obj := $(addprefix $(f5b_dir)/, $(f5_angles))
+
+f5b_sum := figures/f5/summary_$(f5b)
+
+$(f5b_sum): $(f5b_obj)
+	rm -f $@
+	cat $(f5b_obj) > $@
+
+$(f5b_dir)/%: bellman bellman.sh $(f5b_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.50  --bidder_prob 0.05 --bidder_omega 0.50 --scale 2  --rounds $(f5_n)  >  $@
+
+
+$(f5b_dir)/.dir_created :
+	mkdir $(f5b_dir)
+	touch $@
+
+# --- F5C
+f5c_dir := figures/f5/$(f5c)
+
+f5c_obj := $(addprefix $(f5c_dir)/, $(f5_angles))
+
+f5c_sum := figures/f5/summary_$(f5c)
+
+$(f5c_sum): $(f5c_obj)
+	rm -f $@
+	cat $(f5c_obj) > $@
+
+$(f5c_dir)/%: bellman bellman.sh $(f5c_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.50  --bidder_prob 0.10 --bidder_omega 0.50 --scale 2  --rounds $(f5_n)  >  $@
+
+
+$(f5c_dir)/.dir_created :
+	mkdir $(f5c_dir)
+	touch $@
+
+# --- F5D
+f5d_dir := figures/f5/$(f5d)
+
+f5d_obj := $(addprefix $(f5d_dir)/, $(f5_angles))
+
+f5d_sum := figures/f5/summary_$(f5d)
+
+$(f5d_sum): $(f5d_obj)
+	rm -f $@
+	cat $(f5d_obj) > $@
+
+$(f5d_dir)/%: bellman bellman.sh $(f5d_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0.10 --oracle_omega 0.05  --bidder_prob 0.01 --bidder_omega 0.50 --scale 2  --rounds $(f5_n)  >  $@
+
+
+$(f5d_dir)/.dir_created :
+	mkdir $(f5d_dir)
+	touch $@
+
+
+figure5: $(f5a_sum) $(f5b_sum) $(f5c_sum)
+
 
 ###########################################################################
 include ../rules_for_makefiles
