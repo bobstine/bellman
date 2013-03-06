@@ -8,22 +8,14 @@
 #include <getopt.h>
 #include "read_utils.h"     
 
+#include <boost/tuple/tuple.hpp>
+#include <boost/tuple/tuple_io.hpp>
+
 
 // Where to start the universal coder
 
 const int universalStart (1);
 
-// Need to use special order of calls to fill geometric
-// prob=0 signals universal, prob > 0 is geometric
-
-DualWealthArray*
-make_wealth_array(int nRounds, double omega, double prob, double scale);
-
-int
-round_parm(double x)
-{
-  return floor(100 * x);
-}
 
 // player probability and omega
 //    omega = 1 defines an unconstrained player (oracle); non-zero omega implies contrained
@@ -31,15 +23,32 @@ round_parm(double x)
 //    prob = 1  risk inflation oracle
 //    prob = 0  ls oracle
 
-typedef std::pair<double, double> DoublePair;
+typedef boost::tuple<double, double, double> Triple;
 
-double omega(DoublePair const& p) { return p.second; }
-double prob (DoublePair const& p) { return p.first; }
+double w0   (Triple const& p) { return boost::get<0>(p); }
+double prob (Triple const& p) { return boost::get<1>(p); }
+double omega(Triple const& p) { return boost::get<2>(p); }
+
+
+// prob=0 signals universal, prob > 0 is geometric
+
+DualWealthArray*
+make_wealth_array(Triple const& parms, double scale, int nRounds);
+
+
+// used to format output file names
+int
+round_parm(double x)
+{
+  return floor(100 * x);
+}
+
 
 void
 parse_arguments(int argc, char** argv,
-		bool &riskUtil, double &angle, DoublePair &oraclePO, DoublePair &bidderPO,
+		bool &riskUtil, double &angle, Triple &oracle, Triple &bidder,
 		double &scale, int &nRounds,  bool &writeTable);
+
 
 
 // Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     
@@ -49,45 +58,44 @@ int  main(int argc, char** argv)
   bool      riskUtil  = false;    // risk or rejection, default is rejection (which is fast)
   double       angle  =     0;    // in degrees
   int        nRounds  =   100;
-  double     scale    = 1.0;      // multiplier of universal code in unconstrained
-  bool     writeTable = false;    // if false, only return final value
-  DoublePair oraclePO(0,0);       //   (alpha, oracle omega) set second (omega) to nonzero to contrain; else unconstrained
-  DoublePair bidderPO(0,0);       //   (beta, omega)
+  double     scale    = 1.0;                        // multiplier of universal code in unconstrained
+  bool     writeTable = false;                      // if false, only return final value
+  Triple    oracle    = boost::make_tuple(0,0,0);   //   (W0, alpha, oracle omega) set omega to nonzero to contrain; else unconstrained
+  Triple    bidder    = boost::make_tuple(0,0,0);   //   (W0, beta, bidder omega)
 
-  parse_arguments(argc, argv, riskUtil, angle, oraclePO, bidderPO, scale, nRounds, writeTable);
+  parse_arguments(argc, argv, riskUtil, angle, oracle, bidder, scale, nRounds, writeTable);
 
   /*
      Note that alpha (aka, the oracle probability for a Bayes oracle)
-     'lives' in the utility function object, and omega is embedded
-     into the wealth function for encoding the index position of the
+     'lives' in the utility function object, and W0 and omega are
+     in the wealth function for encoding the index position of the
      wealth when a rejection occurs.
   */
   
-  std::clog << "MAIN: Building bidder wealth array for " << nRounds << " rounds with omega=" << omega(bidderPO)
-	    << ", prob=" << prob(bidderPO) << ", and scale=" << scale << std::endl;
-  DualWealthArray *pBidderWealth = make_wealth_array(nRounds, omega(bidderPO), prob(bidderPO), scale);
+  std::clog << "MAIN: Building bidder wealth array for " << nRounds << " rounds with (w0, beta, omega) =" << bidder << ", and scale=" << scale << std::endl;
+  DualWealthArray *pBidderWealth = make_wealth_array(bidder, scale, nRounds);
   // pBidderWealth->write_to(std::clog, true); std::clog << std::endl; // as lines
 
-  if(omega(oraclePO) == 1) // unconstrained competitor
-  { std::cout << "Oracle(" << prob(oraclePO) << "," << omega(oraclePO) << ") " << pBidderWealth->name() << " ";
+  if(omega(oracle) == 1) // unconstrained competitor
+  { std::cout << "Oracle(" << w0(oracle) << "," << prob(oracle) << "," << omega(oracle) << ") " << pBidderWealth->name() << " ";
     if (riskUtil)
-    { RiskVectorUtility utility(angle, prob(oraclePO));
+    { RiskVectorUtility utility(angle, prob(oracle));
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
     else
-    { RejectVectorUtility utility(angle, prob(oraclePO));
+    { RejectVectorUtility utility(angle, prob(oracle));
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
   }
   else                     // constrained competitor needs to track state as well
-  { std::clog << "MAIN: Column player (bidder) has omega=" << omega(bidderPO) << " and uses wealth array ... " << *pBidderWealth <<  std::endl;
-    DualWealthArray *pOracleWealth = make_wealth_array(nRounds, omega(oraclePO), prob(oraclePO), scale);
-    std::clog << "MAIN: Row player (oracle) has omega=" << omega(oraclePO) << " and uses wealth array ... " << *pOracleWealth << std::endl;
+  { std::clog << "MAIN: Column player (bidder) has (w0,p,omega)=" << bidder << " and uses wealth array ... " << *pBidderWealth <<  std::endl;
+    DualWealthArray *pOracleWealth = make_wealth_array(oracle, scale, nRounds);
+    std::clog << "MAIN: Row player (oracle) has (w0,0,omega)=" << oracle << " and uses wealth array ... " << *pOracleWealth << std::endl;
     std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";    // start of file output
     std::ostringstream ss;
     ss << angle << " " << scale << " "
-       << prob(oraclePO) << " " << omega(oraclePO) << " "
-       << prob(bidderPO) << " " << omega(bidderPO) << " ";
+       << prob(oracle) << " " << omega(oracle) << " "
+       << prob(bidder) << " " << omega(bidder) << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle);
       ss << ".risk";
@@ -106,15 +114,17 @@ int  main(int argc, char** argv)
 
 void
 parse_arguments(int argc, char** argv,
-		bool &riskUtil, double &angle, DoublePair &oraclePO, DoublePair &bidderPO,
+		bool &riskUtil, double &angle, Triple &oracleIPO, Triple &bidderIPO,
 		double &scale, int &nRounds,  bool &writeTable)
 {
   static struct option long_options[] = {
     {"risk",               no_argument, 0, 'R'},
     {"reject",             no_argument, 0, 'r'},
     {"angle",        required_argument, 0, 'a'},
+    {"oracle_w0",    required_argument, 0, 'i'},
     {"oracle_prob",  required_argument, 0, 'o'},
     {"oracle_omega", required_argument, 0, 'O'},
+    {"bidder_w0",    required_argument, 0, 'I'},
     {"bidder_prob",  required_argument, 0, 'b'},
     {"bidder_omega", required_argument, 0, 'B'},
     {"scale",        required_argument, 0, 's'},
@@ -125,7 +135,9 @@ parse_arguments(int argc, char** argv,
   int key;
   int option_index = 0;
   bool rejectUtil = true;
-  while (-1 !=(key = getopt_long (argc, argv, "Rra:o:O:b:B:s:n:w", long_options, &option_index))) // colon means has argument
+  bool setBidderW0 = false;
+  bool setOracleW0 = false;
+  while (-1 !=(key = getopt_long (argc, argv, "Rra:i:o:O:I:b:B:s:n:w", long_options, &option_index))) // colon means has argument
   {
     // std::cout << "Option key " << char(key) << " for option " << long_options[option_index].name << ", option_index=" << option_index << std::endl;
     switch (key)
@@ -150,24 +162,36 @@ parse_arguments(int argc, char** argv,
 	nRounds = read_utils::lexical_cast<int>(optarg);
 	break;
       }
+    case 'i' : 
+      {
+	setOracleW0 = true;
+	boost::get<0>(oracleIPO) = read_utils::lexical_cast<double>(optarg);
+	break;
+      }
     case 'o' : 
       {
-	oraclePO.first = read_utils::lexical_cast<double>(optarg);
+	boost::get<1>(oracleIPO) = read_utils::lexical_cast<double>(optarg);
 	break;
       }
     case 'O' : 
       {
-	oraclePO.second = read_utils::lexical_cast<double>(optarg);
+	boost::get<2>(oracleIPO) = read_utils::lexical_cast<double>(optarg);
+	break;
+      }
+    case 'I' : 
+      {
+	setBidderW0 = true;
+	boost::get<0>(bidderIPO) = read_utils::lexical_cast<double>(optarg);
 	break;
       }
     case 'b' : 
       {
-	bidderPO.first = read_utils::lexical_cast<double>(optarg);
+	boost::get<1>(bidderIPO) = read_utils::lexical_cast<double>(optarg);
 	break;
       }
     case 'B' : 
       {
-	bidderPO.second = read_utils::lexical_cast<double>(optarg);
+	boost::get<2>(bidderIPO) = read_utils::lexical_cast<double>(optarg);
 	break;
       }
     case 's' : 
@@ -187,27 +211,30 @@ parse_arguments(int argc, char** argv,
     } // switch
   } // while
   riskUtil = !rejectUtil;
+  // set W0 to omega unless other value supplied
+  if(!setBidderW0)  boost::get<0>(bidderIPO) = omega(bidderIPO);
+  if(!setOracleW0)  boost::get<0>(oracleIPO) = omega(oracleIPO);
 }
 
 
 DualWealthArray*
-make_wealth_array(int nRounds, double omega, double prob, double scale)
+make_wealth_array(Triple const& parms, double scale, int nRounds)
 {
-  if (0 == omega)             // fixed alpha bidder
-  { prob = prob/nRounds;
-    std::clog << "MAIN: Fixed alpha bidder with constant bid alpha=" << prob << std::endl;
-    return new DualWealthArray(prob);
+  if (0 == omega(parms))             // fixed alpha bidder
+  { double p = prob(parms)/nRounds;
+    std::clog << "MAIN: Fixed alpha bidder with constant bid alpha=" << p << std::endl;
+    return new DualWealthArray(p);
   }
-  else if(0 == prob)          // universal
-  { std::clog << "MAIN: Making universal array with scale=" << scale << " and omega=" << omega << std::endl;
+  else if(0 == prob(parms))          // universal
+  { std::clog << "MAIN: Making universal array with scale=" << scale << " and W0=" << w0(parms) << " omega=" << omega(parms) << std::endl;
     UniversalBidder bidder(scale);
-    return new DualWealthArray(bidder.identifier(), omega, omega, bidder, nRounds);
-    //  return new WealthArray(omega, omega, nRounds, ScaledUniversalDist(scale));
+    return new DualWealthArray(bidder.identifier(), w0(parms), omega(parms), bidder, nRounds);
   }
   else 
-  { std::clog << "MAIN: Making geometric array with prob=" << prob << ", scale=" << scale << " and omega=" << omega << std::endl;
+  { std::clog << "MAIN: Making geometric array with prob=" << prob(parms) << ", scale=" << scale
+	      << " and W0=" << w0(parms) << " omega=" << omega(parms) << std::endl;
     UniversalBidder univ(scale);
-    GeometricBidder geoBidder(prob, univ.total_wealth());
-    return new DualWealthArray(geoBidder.identifier(), omega, omega, geoBidder, nRounds);
+    GeometricBidder geoBidder(prob(parms), univ.total_wealth());
+    return new DualWealthArray(geoBidder.identifier(), w0(parms), omega(parms), geoBidder, nRounds);
   }
 }
