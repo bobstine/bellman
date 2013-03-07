@@ -83,8 +83,8 @@ operator<< (std::ostream& os, WealthArray const& wa)
 
 
 // Dual wealth array randomizes when reject or accept H0
-// Discrete grid along wealth axis, with interpolation for reject and bid
-
+// Discrete grid along wealth axis, with interpolation to find
+// reject and bid fails positions.
 
 class DualWealthArray
 {
@@ -93,7 +93,7 @@ class DualWealthArray
   
   const std::string     mName;
   const double          mW0;                          // initial wealth
-  double const          mOmega;                       // defines wealth at zeroIndex and determines change when reject
+  double const          mOmega;                       // payout when reject
   int                   mZeroIndex;                   // position of W_0, the place used for locating initial wealth W0
   std::vector< std::pair<double,double> > mWealthBid;     
   PositionVector        mRejectPositions;             // cache new <index,prob> positions when increment wealth by rejection

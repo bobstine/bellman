@@ -17,7 +17,7 @@
 const int universalStart (1);
 
 
-// player probability and omega
+// player probability and omega, i p o, (initial prob omega)
 //    omega = 1 defines an unconstrained player (oracle); non-zero omega implies contrained
 //    omega = 0 implies constant alpha level player (old school statistician)
 //    prob = 1  risk inflation oracle
@@ -231,7 +231,7 @@ make_wealth_array(Triple const& parms, double scale, int nRounds)
     return new DualWealthArray(bidder.identifier(), w0(parms), omega(parms), bidder, nRounds);
   }
   else 
-  { std::clog << "MAIN: Making geometric array with prob=" << prob(parms) << ", scale=" << scale
+  { std::clog << "MAIN: Making geometric wealth array with p=" << prob(parms) << ", scale=" << scale
 	      << " and W0=" << w0(parms) << " omega=" << omega(parms) << std::endl;
     UniversalBidder univ(scale);
     GeometricBidder geoBidder(prob(parms), univ.total_wealth());
