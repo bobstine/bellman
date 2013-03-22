@@ -178,34 +178,42 @@ extra_angles = 91 92 93 94 96 97 98 99
 
 more_angles = 93.2 93.4 93.6 93.8 94.2 94.4 94.6 94.8 95.2 95.4 95.6 95.8 96.2 96.4 96.6 96.8
 
-############################################################################################################
+##############################################################################################################################
 #
 # Figure 1: comparisons of geometric spending testimator to risk inflation oracle, with varying payouts
 #
-############################################################################################################
+#############################################################################################################################
 
 f1_n = 500
 
-f1_beta = 0.10
-f1_beta_txt = 10
+# for RI oracle
+f1_alpha     = 1
+f1_alpha_txt = 100
+
+# for Testimator oracle
+# f1_alpha     = 0.10
+# f1_alpha_txt =   10
+
+f1_beta      = 0.10
+f1_beta_txt  =   10
 
 f1_angles := $(base_angles)  $(extra_angles) 
 
-f1a := risk_alpha100_100_100_beta05_$(f1_beta_txt)_05_scale2_n$(f1_n)
-f1aa:= risk_alpha100_100_100_beta10_$(f1_beta_txt)_10_scale2_n$(f1_n)
-f1b := risk_alpha100_100_100_beta25_$(f1_beta_txt)_25_scale2_n$(f1_n)
-f1c := risk_alpha100_100_100_beta50_$(f1_beta_txt)_50_scale2_n$(f1_n)
-f1d := risk_alpha100_100_100_beta75_$(f1_beta_txt)_75_scale2_n$(f1_n)
+f1a := risk_alpha100_$(f1_alpha_txt)_100_beta05_$(f1_beta_txt)_05_scale2_n$(f1_n)
+f1aa:= risk_alpha100_$(f1_alpha_txt)_100_beta10_$(f1_beta_txt)_10_scale2_n$(f1_n)
+f1b := risk_alpha100_$(f1_alpha_txt)_100_beta25_$(f1_beta_txt)_25_scale2_n$(f1_n)
+f1c := risk_alpha100_$(f1_alpha_txt)_100_beta50_$(f1_beta_txt)_50_scale2_n$(f1_n)
+f1d := risk_alpha100_$(f1_alpha_txt)_100_beta75_$(f1_beta_txt)_75_scale2_n$(f1_n)
 # fix W0 = 0.05
-f1ea:= risk_alpha100_100_100_beta05_$(f1_beta_txt)_10_scale2_n$(f1_n)
-f1e := risk_alpha100_100_100_beta05_$(f1_beta_txt)_25_scale2_n$(f1_n)
-f1f := risk_alpha100_100_100_beta05_$(f1_beta_txt)_50_scale2_n$(f1_n)
-f1g := risk_alpha100_100_100_beta05_$(f1_beta_txt)_75_scale2_n$(f1_n)
+f1ea:= risk_alpha100_$(f1_alpha_txt)_100_beta05_$(f1_beta_txt)_10_scale2_n$(f1_n)
+f1e := risk_alpha100_$(f1_alpha_txt)_100_beta05_$(f1_beta_txt)_25_scale2_n$(f1_n)
+f1f := risk_alpha100_$(f1_alpha_txt)_100_beta05_$(f1_beta_txt)_50_scale2_n$(f1_n)
+f1g := risk_alpha100_$(f1_alpha_txt)_100_beta05_$(f1_beta_txt)_75_scale2_n$(f1_n)
 # fix W0 = 0.50
-f1h := risk_alpha100_100_100_beta50_$(f1_beta_txt)_05_scale2_n$(f1_n)
-f1ha:= risk_alpha100_100_100_beta50_$(f1_beta_txt)_10_scale2_n$(f1_n)
-f1i := risk_alpha100_100_100_beta50_$(f1_beta_txt)_25_scale2_n$(f1_n)
-f1j := risk_alpha100_100_100_beta50_$(f1_beta_txt)_75_scale2_n$(f1_n)
+f1h := risk_alpha100_$(f1_alpha_txt)_100_beta50_$(f1_beta_txt)_05_scale2_n$(f1_n)
+f1ha:= risk_alpha100_$(f1_alpha_txt)_100_beta50_$(f1_beta_txt)_10_scale2_n$(f1_n)
+f1i := risk_alpha100_$(f1_alpha_txt)_100_beta50_$(f1_beta_txt)_25_scale2_n$(f1_n)
+f1j := risk_alpha100_$(f1_alpha_txt)_100_beta50_$(f1_beta_txt)_75_scale2_n$(f1_n)
 
 
 # --- F1A
@@ -221,7 +229,7 @@ $(f1a_sum): $(f1a_obj)
 	cat $(f1a_obj) > $@
 
 $(f1a_dir)/%: bellman bellman.sh $(f1a_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_prob $(f1_beta) --bidder_omega 0.05 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_prob $(f1_beta) --bidder_omega 0.05 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1a_dir)/.dir_created :
 	mkdir $(f1a_dir)
@@ -241,7 +249,7 @@ $(f1aa_sum): $(f1aa_obj)
 	cat $(f1aa_obj) > $@
 
 $(f1aa_dir)/%: bellman bellman.sh $(f1aa_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_prob $(f1_beta) --bidder_omega 0.10 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_prob $(f1_beta) --bidder_omega 0.10 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1aa_dir)/.dir_created :
 	mkdir $(f1aa_dir)
@@ -260,7 +268,7 @@ $(f1b_sum): $(f1b_obj)
 	cat $(f1b_obj) > $@
 
 $(f1b_dir)/%: bellman bellman.sh $(f1b_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_prob $(f1_beta) --bidder_omega 0.25 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_prob $(f1_beta) --bidder_omega 0.25 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1b_dir)/.dir_created :
 	mkdir $(f1b_dir)
@@ -280,7 +288,7 @@ $(f1c_sum): $(f1c_obj)
 	cat $(f1c_obj) > $@
 
 $(f1c_dir)/%: bellman bellman.sh $(f1c_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_prob $(f1_beta) --bidder_omega 0.50  --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_prob $(f1_beta) --bidder_omega 0.50  --scale 2  --rounds $(f1_n)  >$@
 
 $(f1c_dir)/.dir_created :
 	mkdir $(f1c_dir)
@@ -300,7 +308,7 @@ $(f1d_sum): $(f1d_obj)
 	cat $(f1d_obj) > $@
 
 $(f1d_dir)/%: bellman bellman.sh $(f1d_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_prob $(f1_beta) --bidder_omega 0.75 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_prob $(f1_beta) --bidder_omega 0.75 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1d_dir)/.dir_created:
 	mkdir $(f1d_dir)
@@ -319,7 +327,7 @@ $(f1ea_sum): $(f1ea_obj)
 	cat $(f1ea_obj) > $@
 
 $(f1ea_dir)/%: bellman bellman.sh $(f1ea_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f1_beta) --bidder_omega 0.10 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f1_beta) --bidder_omega 0.10 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1ea_dir)/.dir_created:
 	mkdir $(f1ea_dir)
@@ -338,7 +346,7 @@ $(f1e_sum): $(f1e_obj)
 	cat $(f1e_obj) > $@
 
 $(f1e_dir)/%: bellman bellman.sh $(f1e_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f1_beta) --bidder_omega 0.25 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f1_beta) --bidder_omega 0.25 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1e_dir)/.dir_created:
 	mkdir $(f1e_dir)
@@ -357,7 +365,7 @@ $(f1f_sum): $(f1f_obj)
 	cat $(f1f_obj) > $@
 
 $(f1f_dir)/%: bellman bellman.sh $(f1f_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f1_beta) --bidder_omega 0.50 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f1_beta) --bidder_omega 0.50 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1f_dir)/.dir_created:
 	mkdir $(f1f_dir)
@@ -376,7 +384,7 @@ $(f1g_sum): $(f1g_obj)
 	cat $(f1g_obj) > $@
 
 $(f1g_dir)/%: bellman bellman.sh $(f1g_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f1_beta) --bidder_omega 0.75 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f1_beta) --bidder_omega 0.75 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1g_dir)/.dir_created:
 	mkdir $(f1g_dir)
@@ -395,7 +403,7 @@ $(f1h_sum): $(f1h_obj)
 	cat $(f1h_obj) > $@
 
 $(f1h_dir)/%: bellman bellman.sh $(f1h_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f1_beta) --bidder_omega 0.05 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f1_beta) --bidder_omega 0.05 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1h_dir)/.dir_created:
 	mkdir $(f1h_dir)
@@ -414,7 +422,7 @@ $(f1ha_sum): $(f1ha_obj)
 	cat $(f1ha_obj) > $@
 
 $(f1ha_dir)/%: bellman bellman.sh $(f1ha_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f1_beta) --bidder_omega 0.10 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f1_beta) --bidder_omega 0.10 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1ha_dir)/.dir_created:
 	mkdir $(f1ha_dir)
@@ -433,7 +441,7 @@ $(f1i_sum): $(f1i_obj)
 	cat $(f1i_obj) > $@
 
 $(f1i_dir)/%: bellman bellman.sh $(f1i_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f1_beta) --bidder_omega 0.25 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f1_beta) --bidder_omega 0.25 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1i_dir)/.dir_created:
 	mkdir $(f1i_dir)
@@ -452,7 +460,7 @@ $(f1j_sum): $(f1j_obj)
 	cat $(f1j_obj) > $@
 
 $(f1j_dir)/%: bellman bellman.sh $(f1j_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f1_beta) --bidder_omega 0.75 --scale 2  --rounds $(f1_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f1_alpha) --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f1_beta) --bidder_omega 0.75 --scale 2  --rounds $(f1_n)  >$@
 
 $(f1j_dir)/.dir_created:
 	mkdir $(f1j_dir)
@@ -465,20 +473,44 @@ figure1: $(f1a_sum) $(f1aa_sum) $(f1b_sum) $(f1c_sum) $(f1d_sum)    $(f1ea_sum) 
 
 
 
-############################################################################################################
+##############################################################################################################################
 #
-# Figure 2: comparisons of geometric spending testimator to fixed Bayes oracle (testimator) with fixed alpha
+# Figure 2: comparisons of geometric spending testimator to testimator oracle, with varying payouts
+#            (same as figure 1, just different oracle)
 #
-############################################################################################################
-
+#############################################################################################################################
 
 f2_n = 500
-f2_angles := $(base_angles) $(extra_angles)
 
-f2a := risk_alpha10_100_beta10_05_scale2_n$(f2_n)
-f2b := risk_alpha10_100_beta10_25_scale2_n$(f2_n)
-f2c := risk_alpha10_100_beta10_50_scale2_n$(f2_n)
-f2d := risk_alpha10_100_beta10_75_scale2_n$(f2_n)
+# for RI oracle
+# f2_alpha     = 1
+# f2_alpha_txt = 100
+
+# for Testimator oracle
+f2_alpha     = 0.10
+f2_alpha_txt =   10
+
+f2_beta      = 0.10
+f2_beta_txt  =   10
+
+f2_angles := $(base_angles)  $(extra_angles) 
+
+f2a := risk_alpha100_$(f2_alpha_txt)_100_beta05_$(f2_beta_txt)_05_scale2_n$(f2_n)
+f2aa:= risk_alpha100_$(f2_alpha_txt)_100_beta10_$(f2_beta_txt)_10_scale2_n$(f2_n)
+f2b := risk_alpha100_$(f2_alpha_txt)_100_beta25_$(f2_beta_txt)_25_scale2_n$(f2_n)
+f2c := risk_alpha100_$(f2_alpha_txt)_100_beta50_$(f2_beta_txt)_50_scale2_n$(f2_n)
+f2d := risk_alpha100_$(f2_alpha_txt)_100_beta75_$(f2_beta_txt)_75_scale2_n$(f2_n)
+# fix W0 = 0.05
+f2ea:= risk_alpha100_$(f2_alpha_txt)_100_beta05_$(f2_beta_txt)_10_scale2_n$(f2_n)
+f2e := risk_alpha100_$(f2_alpha_txt)_100_beta05_$(f2_beta_txt)_25_scale2_n$(f2_n)
+f2f := risk_alpha100_$(f2_alpha_txt)_100_beta05_$(f2_beta_txt)_50_scale2_n$(f2_n)
+f2g := risk_alpha100_$(f2_alpha_txt)_100_beta05_$(f2_beta_txt)_75_scale2_n$(f2_n)
+# fix W0 = 0.50
+f2h := risk_alpha100_$(f2_alpha_txt)_100_beta50_$(f2_beta_txt)_05_scale2_n$(f2_n)
+f2ha:= risk_alpha100_$(f2_alpha_txt)_100_beta50_$(f2_beta_txt)_10_scale2_n$(f2_n)
+f2i := risk_alpha100_$(f2_alpha_txt)_100_beta50_$(f2_beta_txt)_25_scale2_n$(f2_n)
+f2j := risk_alpha100_$(f2_alpha_txt)_100_beta50_$(f2_beta_txt)_75_scale2_n$(f2_n)
+
 
 # --- F2A
 
@@ -493,12 +525,31 @@ $(f2a_sum): $(f2a_obj)
 	cat $(f2a_obj) > $@
 
 $(f2a_dir)/%: bellman bellman.sh $(f2a_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 0.1 --oracle_omega 1 --bidder_prob 0.1 --bidder_omega 0.05 --scale 2  --rounds $(f2_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_prob $(f2_beta) --bidder_omega 0.05 --scale 2  --rounds $(f2_n)  >$@
 
 $(f2a_dir)/.dir_created :
 	mkdir $(f2a_dir)
 	touch $@
 
+
+# --- F2AA
+
+f2aa_dir := figures/f2/$(f2aa)
+
+f2aa_obj := $(addprefix $(f2aa_dir)/, $(f2_angles))
+
+f2aa_sum := figures/f2/summary_$(f2aa)
+
+$(f2aa_sum): $(f2aa_obj)
+	rm -f $@
+	cat $(f2aa_obj) > $@
+
+$(f2aa_dir)/%: bellman bellman.sh $(f2aa_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_prob $(f2_beta) --bidder_omega 0.10 --scale 2  --rounds $(f2_n)  >$@
+
+$(f2aa_dir)/.dir_created :
+	mkdir $(f2aa_dir)
+	touch $@
 
 # --- F2B
 
@@ -513,11 +564,12 @@ $(f2b_sum): $(f2b_obj)
 	cat $(f2b_obj) > $@
 
 $(f2b_dir)/%: bellman bellman.sh $(f2b_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 0.1 --oracle_omega 1 --bidder_prob 0.1 --bidder_omega 0.25 --scale 2  --rounds $(f2_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_prob $(f2_beta) --bidder_omega 0.25 --scale 2  --rounds $(f2_n)  >$@
 
 $(f2b_dir)/.dir_created :
 	mkdir $(f2b_dir)
 	touch $@
+
 
 # --- F2C
 
@@ -532,12 +584,12 @@ $(f2c_sum): $(f2c_obj)
 	cat $(f2c_obj) > $@
 
 $(f2c_dir)/%: bellman bellman.sh $(f2c_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 0.1 --oracle_omega 1 --bidder_prob 0.1 --bidder_omega 0.50 --scale 2  --rounds $(f2_n)  >  $@
-
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_prob $(f2_beta) --bidder_omega 0.50  --scale 2  --rounds $(f2_n)  >$@
 
 $(f2c_dir)/.dir_created :
 	mkdir $(f2c_dir)
 	touch $@
+
 
 # --- F2D
 
@@ -552,13 +604,169 @@ $(f2d_sum): $(f2d_obj)
 	cat $(f2d_obj) > $@
 
 $(f2d_dir)/%: bellman bellman.sh $(f2d_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 0.1 --oracle_omega 1 --bidder_prob 0.1 --bidder_omega 0.75 --scale 2  --rounds $(f2_n)  >  $@
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_prob $(f2_beta) --bidder_omega 0.75 --scale 2  --rounds $(f2_n)  >$@
 
-$(f2d_dir)/.dir_created :
+$(f2d_dir)/.dir_created:
 	mkdir $(f2d_dir)
 	touch $@
 
-figure2: $(f2a_sum) $(f2b_sum) $(f2c_sum) $(f2d_sum)
+# --- F2EA
+
+f2ea_dir := figures/f2/$(f2ea)
+
+f2ea_obj := $(addprefix $(f2ea_dir)/, $(f2_angles))
+
+f2ea_sum := figures/f2/summary_$(f2ea)
+
+$(f2ea_sum): $(f2ea_obj)
+	rm -f $@
+	cat $(f2ea_obj) > $@
+
+$(f2ea_dir)/%: bellman bellman.sh $(f2ea_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f2_beta) --bidder_omega 0.10 --scale 2  --rounds $(f2_n)  >$@
+
+$(f2ea_dir)/.dir_created:
+	mkdir $(f2ea_dir)
+	touch $@
+
+# --- F2E
+
+f2e_dir := figures/f2/$(f2e)
+
+f2e_obj := $(addprefix $(f2e_dir)/, $(f2_angles))
+
+f2e_sum := figures/f2/summary_$(f2e)
+
+$(f2e_sum): $(f2e_obj)
+	rm -f $@
+	cat $(f2e_obj) > $@
+
+$(f2e_dir)/%: bellman bellman.sh $(f2e_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f2_beta) --bidder_omega 0.25 --scale 2  --rounds $(f2_n)  >$@
+
+$(f2e_dir)/.dir_created:
+	mkdir $(f2e_dir)
+	touch $@
+
+# --- F2F
+
+f2f_dir := figures/f2/$(f2f)
+
+f2f_obj := $(addprefix $(f2f_dir)/, $(f2_angles))
+
+f2f_sum := figures/f2/summary_$(f2f)
+
+$(f2f_sum): $(f2f_obj)
+	rm -f $@
+	cat $(f2f_obj) > $@
+
+$(f2f_dir)/%: bellman bellman.sh $(f2f_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f2_beta) --bidder_omega 0.50 --scale 2  --rounds $(f2_n)  >$@
+
+$(f2f_dir)/.dir_created:
+	mkdir $(f2f_dir)
+	touch $@
+
+# --- F2G
+
+f2g_dir := figures/f2/$(f2g)
+
+f2g_obj := $(addprefix $(f2g_dir)/, $(f2_angles))
+
+f2g_sum := figures/f2/summary_$(f2g)
+
+$(f2g_sum): $(f2g_obj)
+	rm -f $@
+	cat $(f2g_obj) > $@
+
+$(f2g_dir)/%: bellman bellman.sh $(f2g_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_w0 0.05 --bidder_prob $(f2_beta) --bidder_omega 0.75 --scale 2  --rounds $(f2_n)  >$@
+
+$(f2g_dir)/.dir_created:
+	mkdir $(f2g_dir)
+	touch $@
+
+# --- F2H
+
+f2h_dir := figures/f2/$(f2h)
+
+f2h_obj := $(addprefix $(f2h_dir)/, $(f2_angles))
+
+f2h_sum := figures/f2/summary_$(f2h)
+
+$(f2h_sum): $(f2h_obj)
+	rm -f $@
+	cat $(f2h_obj) > $@
+
+$(f2h_dir)/%: bellman bellman.sh $(f2h_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f2_beta) --bidder_omega 0.05 --scale 2  --rounds $(f2_n)  >$@
+
+$(f2h_dir)/.dir_created:
+	mkdir $(f2h_dir)
+	touch $@
+
+# --- F2HA
+
+f2ha_dir := figures/f2/$(f2ha)
+
+f2ha_obj := $(addprefix $(f2ha_dir)/, $(f2_angles))
+
+f2ha_sum := figures/f2/summary_$(f2ha)
+
+$(f2ha_sum): $(f2ha_obj)
+	rm -f $@
+	cat $(f2ha_obj) > $@
+
+$(f2ha_dir)/%: bellman bellman.sh $(f2ha_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f2_beta) --bidder_omega 0.10 --scale 2  --rounds $(f2_n)  >$@
+
+$(f2ha_dir)/.dir_created:
+	mkdir $(f2ha_dir)
+	touch $@
+
+# --- F2I
+
+f2i_dir := figures/f2/$(f2i)
+
+f2i_obj := $(addprefix $(f2i_dir)/, $(f2_angles))
+
+f2i_sum := figures/f2/summary_$(f2i)
+
+$(f2i_sum): $(f2i_obj)
+	rm -f $@
+	cat $(f2i_obj) > $@
+
+$(f2i_dir)/%: bellman bellman.sh $(f2i_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f2_beta) --bidder_omega 0.25 --scale 2  --rounds $(f2_n)  >$@
+
+$(f2i_dir)/.dir_created:
+	mkdir $(f2i_dir)
+	touch $@
+
+# --- F2J
+
+f2j_dir := figures/f2/$(f2j)
+
+f2j_obj := $(addprefix $(f2j_dir)/, $(f2_angles))
+
+f2j_sum := figures/f2/summary_$(f2j)
+
+$(f2j_sum): $(f2j_obj)
+	rm -f $@
+	cat $(f2j_obj) > $@
+
+$(f2j_dir)/%: bellman bellman.sh $(f2j_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f2_alpha) --oracle_omega 1 --bidder_w0 0.50 --bidder_prob $(f2_beta) --bidder_omega 0.75 --scale 2  --rounds $(f2_n)  >$@
+
+$(f2j_dir)/.dir_created:
+	mkdir $(f2j_dir)
+	touch $@
+
+
+#                               w0 = omega                                           w0 = 0.05                                         w0=0.50
+figure1: $(f2a_sum) $(f2aa_sum) $(f2b_sum) $(f2c_sum) $(f2d_sum)    $(f2ea_sum) $(f2e_sum) $(f2f_sum) $(f2g_sum)    $(f2h_sum) $(f2ha_sum) $(f2i_sum) $(f2j_sum)
+
+
 
 
 ############################################################################################################
