@@ -31,7 +31,6 @@ double omega(Triple const& p) { return boost::get<2>(p); }
 
 
 // prob=0 signals universal, prob > 0 is geometric
-
 DualWealthArray*
 make_wealth_array(Triple const& parms, double scale, int nRounds);
 
@@ -43,7 +42,7 @@ round_parm(double x)
   return floor(100 * x);
 }
 
-
+// read command line
 void
 parse_arguments(int argc, char** argv,
 		bool &riskUtil, double &angle, Triple &oracle, Triple &bidder,
@@ -77,7 +76,7 @@ int  main(int argc, char** argv)
   // pBidderWealth->write_to(std::clog, true); std::clog << std::endl; // as lines
 
   if(omega(oracle) == 1) // unconstrained competitor
-  { std::cout << "Oracle(" << w0(oracle) << "," << prob(oracle) << "," << omega(oracle) << ") " << pBidderWealth->name() << " ";
+  { std::cout << "MAIN: Oracle(W0,p,w)=" << oracle << " with bidder(W0,p,w)=" << bidder << " and wealth function " << pBidderWealth->name() << std::endl;
     if (riskUtil)
     { RiskVectorUtility utility(angle, prob(oracle));
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
@@ -220,8 +219,8 @@ parse_arguments(int argc, char** argv,
 DualWealthArray*
 make_wealth_array(Triple const& parms, double scale, int nRounds)
 {
-  if (0 == omega(parms))             // fixed alpha bidder
-  { double p = prob(parms)/nRounds;
+  if (1 == omega(parms))             // unconstrained, fixed alpha testimator
+  { double p = prob(parms);
     std::clog << "MAIN: Fixed alpha bidder with constant bid alpha=" << p << std::endl;
     return new DualWealthArray(p);
   }
@@ -230,7 +229,7 @@ make_wealth_array(Triple const& parms, double scale, int nRounds)
     UniversalBidder bidder(scale);
     return new DualWealthArray(bidder.identifier(), w0(parms), omega(parms), bidder, nRounds);
   }
-  else 
+  else                               // geometric
   { std::clog << "MAIN: Making geometric wealth array with p=" << prob(parms) << ", scale=" << scale
 	      << " and W0=" << w0(parms) << " omega=" << omega(parms) << std::endl;
     UniversalBidder univ(scale);

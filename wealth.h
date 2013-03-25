@@ -104,7 +104,7 @@ class DualWealthArray
   DualWealthArray ()
     : mName("empty"), mW0(0), mOmega(0), mZeroIndex(0), mWealthBid(), mRejectPositions(), mBidPositions() { }
 
-  DualWealthArray (double w0)      // constant alpha bidder
+  DualWealthArray (double w0)      // constant alpha bidder with no wealth constraint; always bids w0
     : mName("fixed"), mW0(w0), mOmega(0), mZeroIndex(0), mWealthBid(1), mRejectPositions(1), mBidPositions(1)
     { mWealthBid[0] = std::make_pair(w0,w0); mRejectPositions[0] = std::make_pair(0,1); mBidPositions[0]=std::make_pair(0,1); }
   
