@@ -26,9 +26,9 @@ make_search_engine(void)
 {
   const int                      maxIterations   (200);   
   const double                   tolerance       (0.0001);
-  const double                   initialGrid     (0.5);
+  const double                   initialGridSize (0.5);
   const std::pair<double,double> searchInterval  (std::make_pair(0.05,10.0));
-  return Line_Search::GoldenSection(tolerance, searchInterval, initialGrid, maxIterations);
+  return Line_Search::GoldenSection(tolerance, searchInterval, initialGridSize, maxIterations);
 }
 
 
