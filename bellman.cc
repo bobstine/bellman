@@ -90,12 +90,10 @@ find_process_risk (int nRounds, double pZero, double mu, VectorUtility & utility
 }
   
 
-//
-//    Unconstrained   Unconstrained   Unconstrained   Unconstrained   Unconstrained   Unconstrained
-//
 //    solve_bellman_utility dual_wealth     solve_bellman_utility dual_wealth     solve_bellman_utility dual_wealth     solve_bellman_utility dual_wealth
 //
-//       Version uses wealth sliced on y-axis, Lebesgue style
+//        * Only one is considered to be constrained.  Oracle is automatically unconstrained.
+//        * Version uses wealth sliced on y-axis, Lebesgue style
 //
 
 void
@@ -138,7 +136,7 @@ solve_bellman_utility  (int nRounds, VectorUtility &utility, DualWealthArray con
   if(writeDetails)
   { std::ostringstream ss;
     int angle (trunc(utility.angle()));
-    ss << "sim_details/dual_bellman.a" << angle << ".n" << nRounds
+    ss << "sim_details/dual_bellman.a" << angle << ".n" << nRounds << ".w" << round(100*wealth.initial_wealth())
        << ".o" << round(100*wealth.omega()) << ".al" << round(100*utility.alpha()) << ".";
     write_matrix_to_file(ss.str() + "utility",    utilityMat.topLeftCorner(nRounds+1,    utilityMat.cols()-1));  // omit boundary row, col
     write_matrix_to_file(ss.str() + "oracle" ,     oracleMat.topLeftCorner(nRounds+1,     oracleMat.cols()-1));

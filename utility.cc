@@ -81,12 +81,6 @@ optimal_alpha (double mu, double omega)
 
 
 double
-neg_risk(double mu, double alpha)
-{
-  return -risk(mu,alpha);
-}
-
-double
 risk(double mu, double alpha)
 {
   double ra, R;
@@ -158,7 +152,7 @@ RejectVectorUtility::operator()(double mu) const
 {
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rb (rprob.second);
-  return mSin*rprob.first + mCos*rb  + rb * mRejectValue + (1-rb) * mNoRejectValue;
+  return mCos*rprob.first + mSin*rb  + rb * mRejectValue + (1-rb) * mNoRejectValue;
 }
 
 double
@@ -181,15 +175,15 @@ RejectVectorUtility::oracle_utility (double mu, double rejectValue, double noRej
 
 
 double
-least_squares_oracle_risk(double mu)   { return (mu == 0.0)?     0.0  : -1.0; }
+least_squares_oracle_risk(double mu)   { return (mu == 0.0)?     0.0  : 1.0; }
 
 double
-risk_inflation_oracle_risk(double mu)  { return (mu  < 1.0)? -(mu*mu) : -1.0; }
+risk_inflation_oracle_risk(double mu)  { return (mu  < 1.0)?  (mu*mu) : 1.0; }
 
 double _testimatorAlphaLevel_ = 0.05;
 
 double
-testimator_risk(double mu)             { return neg_risk(mu,_testimatorAlphaLevel_); }
+testimator_risk(double mu)             { return risk(mu,_testimatorAlphaLevel_); }
 
 
 
@@ -223,7 +217,7 @@ double
 RiskVectorUtility::operator()(double mu) const
 {
   double rb    (r_mu_beta(mu));
-  return  mSin*mOracleRisk(mu) + mCos*neg_risk(mu,mBeta) + rb * mRejectValue + (1-rb) * mNoRejectValue;
+  return  mCos*mOracleRisk(mu) + mSin*risk(mu,mBeta) + rb * mRejectValue + (1-rb) * mNoRejectValue;
 }
 
 double
@@ -237,7 +231,7 @@ double
 RiskVectorUtility::bidder_utility (double mu, double rejectValue, double noRejectValue) const
 {
   double rb (r_mu_beta(mu));
-  return  neg_risk(mu,mBeta)  + rb * rejectValue + (1-rb) * noRejectValue;
+  return  risk(mu,mBeta)  + rb * rejectValue + (1-rb) * noRejectValue;
 }
 
 
@@ -296,7 +290,7 @@ RejectMatrixUtility::operator()(double mu) const
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rAlpha (rprob.first);
   double rBeta (rprob.second);
-  double util (mSin*rAlpha + mCos*rBeta);
+  double util (mCos*rAlpha + mSin*rBeta);
   if (rAlpha > rBeta)
     return  util + mV00 * (1-rAlpha) + mV10 * (rAlpha-rBeta) +  mV11 * rBeta;
   else
@@ -341,7 +335,7 @@ RiskMatrixUtility::operator()(double mu) const
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rAlpha (rprob.first );
   double rBeta  (rprob.second);
-  double util (mSin*neg_risk(mu,mAlpha) + mCos*neg_risk(mu,mBeta));
+  double util (mCos*risk(mu,mAlpha) + mSin*risk(mu,mBeta));
   if (rAlpha > rBeta)
     return  util + mV00 * (1-rAlpha) + mV10 * (rAlpha-rBeta) +  mV11 * rBeta;
   else
@@ -356,7 +350,7 @@ RiskMatrixUtility::row_utility  (double mu, double v00, double v01, double v10, 
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rAlpha (rprob.first );
   double rBeta  (rprob.second);
-  double util (neg_risk(mu,mAlpha));
+  double util (risk(mu,mAlpha));
   if (rAlpha > rBeta)
     return  util  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
   else
@@ -370,7 +364,7 @@ RiskMatrixUtility::col_utility (double mu, double v00, double v01, double v10, d
   std::pair<double,double>  rprob  (reject_probabilities(mu));
   double rAlpha (rprob.first);
   double rBeta (rprob.second);
-  double util  (neg_risk(mu,mBeta));
+  double util  (risk(mu,mBeta));
   if (rAlpha > rBeta)
     return  util  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
   else

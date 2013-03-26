@@ -74,7 +74,7 @@ reject_check: bellman
 	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0  --bidder_omega 0.5  --bidder_prob 0.1 --write
 
 risk_check: bellman
-	./bellman --risk --angle 10 --rounds 100 --oracle_w0 0.5 --oracle_omega 1 --bidder_w0 0.10 --bidder_omega 1  # both unconstrained
+	./bellman --risk --angle 140 --rounds 500 --oracle_w0 0.05 --oracle_omega 1 --bidder_w0 0.10 --bidder_omega 1  --write  # both unconstrained
 
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 0.5  --oracle_prob 0  --bidder_omega 0.5 --bidder_prob 0.10  # constrained
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 1    --oracle_prob 1  --bidder_omega 0.5 --bidder_prob 0.10  # unconstrained

@@ -27,7 +27,6 @@ double   reject_value(WIndex const& kp1, WIndex const& kp2, Matrix const& value,
 double   z_alpha       (double a);
 
 double   risk          (double mu, double alpha); 
-double   neg_risk      (double mu, double alpha);
 
 double   optimal_alpha (double mu, double omega);
 
