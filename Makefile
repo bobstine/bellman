@@ -71,10 +71,10 @@ bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
 #       omega      : 0 for fixed bidder
 
 reject_check: bellman
-	./bellman --reject --angle 0 --rounds 7     --oracle_omega 0.05 --oracle_prob 0  --bidder_omega 0.5  --bidder_prob 0.1 --write
+	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0  --bidder_omega 0.5  --bidder_prob 0.1 --write
 
 risk_check: bellman
-	./bellman --risk --angle 10 --rounds 100 --oracle_prob 0.50 --oracle_omega 1 --bidder_prob 0.10 --bidder_omega 1  # both unconstrained
+	./bellman --risk --angle 10 --rounds 100 --oracle_w0 0.5 --oracle_omega 1 --bidder_w0 0.10 --bidder_omega 1  # both unconstrained
 
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 0.5  --oracle_prob 0  --bidder_omega 0.5 --bidder_prob 0.10  # constrained
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 1    --oracle_prob 1  --bidder_omega 0.5 --bidder_prob 0.10  # unconstrained
@@ -993,6 +993,86 @@ $(f5d_dir)/.dir_created :
 
 
 figure5: $(f5a_sum) $(f5b_sum) $(f5c_sum)
+
+##############################################################################################################################
+#
+# Figure 6:  Comparison of two testimators (both unconstrained)
+#
+#############################################################################################################################
+
+f6_n = 500
+
+f6_alpha     = 0.05
+f6_alpha_txt =   05
+
+f6_angles := $(base_angles)  138 139 139.5 140 140.5 141 142 143 145 146 147 148 149 150 155
+
+f6a := risk_alpha$(f6_alpha_txt)_100_100_beta10_100_100_scale2_n$(f6_n)
+f6b := risk_alpha$(f6_alpha_txt)_100_100_beta15_100_100_scale2_n$(f6_n)
+f6c := risk_alpha$(f6_alpha_txt)_100_100_beta20_100_100_scale2_n$(f6_n)
+
+
+# --- F6A
+
+f6a_dir := figures/f6/$(f6a)
+
+f6a_obj := $(addprefix $(f6a_dir)/, $(f6_angles))
+
+f6a_sum := figures/f6/summary_$(f6a)
+
+$(f6a_sum): $(f6a_obj)
+	rm -f $@
+	cat $(f6a_obj) > $@
+
+$(f6a_dir)/%: bellman bellman.sh $(f6a_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_w0 $(f6_alpha) --oracle_omega 1 --bidder_w0 0.10  --bidder_omega 1 --scale 2  --rounds $(f6_n)  >$@
+
+$(f6a_dir)/.dir_created :
+	mkdir $(f6a_dir)
+	touch $@
+
+
+# --- F6B
+
+f6b_dir := figures/f6/$(f6b)
+
+f6b_obj := $(addprefix $(f6b_dir)/, $(f6_angles))
+
+f6b_sum := figures/f6/summary_$(f6b)
+
+$(f6b_sum): $(f6b_obj)
+	rm -f $@
+	cat $(f6b_obj) > $@
+
+$(f6b_dir)/%: bellman bellman.sh $(f6b_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_w0 $(f6_alpha) --oracle_omega 1 --bidder_w0 0.15  --bidder_omega 1 --scale 2  --rounds $(f6_n)  >$@
+
+$(f6b_dir)/.dir_created :
+	mkdir $(f6b_dir)
+	touch $@
+
+
+# --- F6C
+
+f6c_dir := figures/f6/$(f6c)
+
+f6c_obj := $(addprefix $(f6c_dir)/, $(f6_angles))
+
+f6c_sum := figures/f6/summary_$(f6c)
+
+$(f6c_sum): $(f6c_obj)
+	rm -f $@
+	cat $(f6c_obj) > $@
+
+$(f6c_dir)/%: bellman bellman.sh $(f6c_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_w0 $(f6_alpha) --oracle_omega 1 --bidder_w0 0.20  --bidder_omega 1 --scale 2  --rounds $(f6_n)  >$@
+
+$(f6c_dir)/.dir_created :
+	mkdir $(f6c_dir)
+	touch $@
+
+
+figure6: $(f6a_sum) $(f6b_sum) $(f6c_sum)
 
 
 ###########################################################################
