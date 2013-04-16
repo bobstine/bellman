@@ -61,7 +61,7 @@ sim_gen: bellman sim_details/.directory_built
 
 bellman_main.o: bellman_main.cc
 
-bellman: bellman.o wealth.o utility.o distribution.o bellman_main.o
+bellman: bellman.o wealth.o utility.o bellman_main.o spending_rule.o
 	$(GCC) $^ $(LDLIBS) -o  $@
 
 #  Bellman options (see code for details)
@@ -74,7 +74,7 @@ reject_check: bellman
 	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0  --bidder_omega 0.5  --bidder_prob 0.1 --write
 
 risk_check: bellman
-	./bellman --risk --angle 125 --rounds 10 --oracle_w0 0.05 --oracle_omega 1 --bidder_w0 0.10 --bidder_omega 1  --write  # both unconstrained, constant mean
+	./bellman --risk --angle 125 --rounds 10 --oracle_w0 0.10 --oracle_omega 1 --bidder_w0 0.10 --bidder_omega 1  --write  # both unconstrained, constant mean
 
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 0.5  --oracle_prob 0  --bidder_omega 0.5 --bidder_prob 0.10  # constrained
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 1    --oracle_prob 1  --bidder_omega 0.5 --bidder_prob 0.10  # unconstrained
@@ -910,9 +910,9 @@ figure4: $(f4a_sum) $(f4b_sum) $(f4c_sum) $(f4d_sum)
 f5_n = 50
 f5_angles := $(base_angles)
 
-f5a := risk_alpha00_50_beta01_50_scale2_n$(f5_n)
-f5b := risk_alpha00_50_beta05_50_scale2_n$(f5_n)
-f5c := risk_alpha00_50_beta10_50_scale2_n$(f5_n)
+f5a := risk_alpha50_00_50_beta50_01_50_scale2_n$(f5_n)
+f5b := risk_alpha50_00_50_beta50_05_50_scale2_n$(f5_n)
+f5c := risk_alpha50_00_50_beta50_10_50_scale2_n$(f5_n)
 
 # --- F5A
 

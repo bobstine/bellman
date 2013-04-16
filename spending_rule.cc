@@ -16,7 +16,7 @@ GeometricRule::identifier() const
 }
 
 double
-GeometricDist::operator() (double w) const
+GeometricRule::operator() (double w) const
 {
   return w * mPsi;
 }

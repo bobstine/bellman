@@ -215,6 +215,8 @@ parse_arguments(int argc, char** argv,
 DualWealthArray*
 make_wealth_array(Triple const& parms, double scale, int nRounds)
 {
+  const double maxWealth (5.0);
+  
   if (1 == omega(parms))             // unconstrained, fixed wealth testimator
   { double w0 = W0(parms);
     std::clog << "MAIN: Fixed bidder with constant wealth=" << w0 << std::endl;
@@ -222,14 +224,14 @@ make_wealth_array(Triple const& parms, double scale, int nRounds)
   }
   else if(0 == prob(parms))          // universal
   { std::clog << "MAIN: Making universal array with scale=" << scale << " and W0=" << W0(parms) << " omega=" << omega(parms) << std::endl;
-    UniversalBidder bidder(scale);
-    return new DualWealthArray(bidder.identifier(), W0(parms), omega(parms), bidder, nRounds);
+    UniversalRule bidder;
+    return new DualWealthArray(bidder.identifier(), maxWealth, W0(parms), omega(parms), bidder, nRounds);
   }
   else                               // geometric
   { std::clog << "MAIN: Making geometric wealth array with p=" << prob(parms) << ", scale=" << scale
 	      << " and W0=" << W0(parms) << " omega=" << omega(parms) << std::endl;
-    UniversalBidder univ(scale);
-    GeometricBidder geoBidder(prob(parms), univ.total_wealth());
-    return new DualWealthArray(geoBidder.identifier(), W0(parms), omega(parms), geoBidder, nRounds);
+    UniversalRule univ();
+    GeometricRule geoBidder(prob(parms));
+    return new DualWealthArray(geoBidder.identifier(), maxWealth, W0(parms), omega(parms), geoBidder, nRounds);
   }
 }
