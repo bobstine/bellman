@@ -23,7 +23,7 @@ class WealthArray
   const int             mZeroIndex;  // position of W_0, the place used for locating initial wealth W0
   const double          mOmega;      // defines wealth at zeroIndex; max wealth is set by zero index in fill_array_top
   std::vector<double>   mWealth;     
-  std::vector< std::pair<int,double> > mPositions;  // cache new positions when increment wealth by rejection
+  std::vector< std::pair<int,double> > mPositions;  // cache positions when increment wealth by rejection
 
  public:
 

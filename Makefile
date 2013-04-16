@@ -21,7 +21,7 @@ OPT = -O3  -std=c++0x
 
 USES = utils random
 
-level_1 = distribution.o
+level_1 = distribution.o spending_rule.o
 level_2 = wealth.o
 level_3 = utility.o
 level_4 = bellman.o
