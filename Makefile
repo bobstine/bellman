@@ -481,7 +481,7 @@ figure1: $(f1a_sum) $(f1aa_sum) $(f1b_sum) $(f1c_sum) $(f1d_sum)    $(f1ea_sum) 
 #
 #############################################################################################################################
 
-f2_n = 500
+f2_n = 1000
 
 # for RI oracle
 # f2_alpha     = 1
@@ -765,7 +765,7 @@ $(f2j_dir)/.dir_created:
 
 
 #                               w0 = omega                                           w0 = 0.05                                         w0=0.50
-figure1: $(f2a_sum) $(f2aa_sum) $(f2b_sum) $(f2c_sum) $(f2d_sum)    $(f2ea_sum) $(f2e_sum) $(f2f_sum) $(f2g_sum)    $(f2h_sum) $(f2ha_sum) $(f2i_sum) $(f2j_sum)
+figure2: $(f2a_sum) $(f2aa_sum) $(f2b_sum) $(f2c_sum) $(f2d_sum)    $(f2ea_sum) $(f2e_sum) $(f2f_sum) $(f2g_sum)    $(f2h_sum) $(f2ha_sum) $(f2i_sum) $(f2j_sum)
 
 
 

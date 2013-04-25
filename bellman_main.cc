@@ -78,7 +78,7 @@ int  main(int argc, char** argv)
   if(omega(oracle) == 1)  // unconstrained competitor
   { std::clog << "MAIN: Oracle(W0,p,w)=" << oracle << " with bidder(W0,p,w)=" << bidder << " and wealth function " << pBidderWealth->name() << std::endl;
     if (riskUtil)
-    { RiskVectorUtility utility(angle, W0(oracle));
+    { RiskVectorUtility utility(angle, prob(oracle));
       solve_bellman_utility (nRounds, utility, *pBidderWealth, writeTable);
     }
     else
