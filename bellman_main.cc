@@ -57,7 +57,7 @@ int  main(int argc, char** argv)
   bool      riskUtil  = false;    // risk or rejection, default is rejection (which is fast)
   double       angle  =     0;    // in degrees
   int        nRounds  =   100;
-  double     scale    = 1.0;                           // multiplier of universal code in unconstrained
+  double     scale    = 1.0;                           // multiplier of universal code in unconstrained  (no longer used)
   bool     writeTable = false;                         // if false, only return final value
   Triple    oracle    = boost::make_tuple(-1,-1,-1);   //   (W0, alpha, oracle omega) omega=1 implies unconstrained
   Triple    bidder    = boost::make_tuple(-1,-1,-1);   //   (W0, beta, bidder omega)  negative values on exit parse were not set
@@ -89,20 +89,16 @@ int  main(int argc, char** argv)
   else                    // constrained competitor needs to track state as well
   { std::clog << "MAIN: Column player (bidder) has (w0,p,omega)=" << bidder << " and uses wealth array ... " << *pBidderWealth <<  std::endl;
     DualWealthArray *pOracleWealth = make_wealth_array(oracle, scale, nRounds);
-    std::clog << "MAIN: Row player (oracle) has (w0,0,omega)=" << oracle << " and uses wealth array ... " << *pOracleWealth << std::endl;
-    std::cout << pOracleWealth->name() << " "     << pBidderWealth->name() << " ";    // start of file output
+    std::clog << "MAIN: Row player (oracle) has (w0,p,omega)=" << oracle << " and uses wealth array ... " << *pOracleWealth << std::endl;
+    std::clog << "MAIN: Players are : " << pOracleWealth->name() << " and " << pBidderWealth->name() << std::endl;
     std::ostringstream ss;
-    ss << angle << " " << scale << " "
-       << prob(oracle) << " " << omega(oracle) << " "
-       << prob(bidder) << " " << omega(bidder) << " ";
+    ss << angle << " " << scale << " " << prob(oracle) << " " << omega(oracle) << " " << prob(bidder) << " " << omega(bidder) << " ";
     if (riskUtil)
     { RiskMatrixUtility utility(angle);
-      ss << ".risk";
       solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, ss.str(), writeTable);
     }
     else
     { RejectMatrixUtility utility(angle);
-      ss << ".reject";
       solve_bellman_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, ss.str(), writeTable);
     }
   }

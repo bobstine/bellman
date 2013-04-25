@@ -210,7 +210,7 @@ solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray con
     write_matrix_to_file(config + ".col" ,  *pColDest);
   }
   // write summary of configuration and results to stdio
-  std::cout << config << " "  
+  std::cout << utility.angle() << " " << 1000*rowWealth.omega()+colWealth.omega() << "   " << nRounds   << "   " 
 	    << (*pUtilityDest)(zeroIndex.first, zeroIndex.second) << " "
 	    << (*pRowDest    )(zeroIndex.first, zeroIndex.second) << " "
 	    << (*pColDest    )(zeroIndex.first, zeroIndex.second) << std::endl;

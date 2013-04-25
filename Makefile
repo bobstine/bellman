@@ -817,7 +817,7 @@ calculate: bellman.o wealth.o utility.o distribution.o bellman_calculator.o
 #
 ############################################################################################################
 
-f4_n = 200
+f4_n = 20
 f4_angles := $(base_angles)
 
 f4a := risk_alpha05_10_05_beta50_10_50_scale2_n$(f4_n)
