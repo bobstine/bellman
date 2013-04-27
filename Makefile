@@ -179,6 +179,85 @@ extra_angles = 171 172 173 173.5 174 174.5   176 177 178 179   306 307 308 309  
 
 more_angles = 
 
+
+############################################################################################################
+#
+# Figure 0: Universal vs risk inflation oracle
+#
+############################################################################################################
+
+f0_n = 1000
+f0_more_angles :=  314.6 314.7 314.8 314.81 314.82 314.83 314.84 314.85 314.86 314.87 314.873  314.874
+f0_angles := $(base_angles) $(extra_angles) $(f0_more_angles) 175.1 175.11 175.12 175.13 175.14 175.15 175.151 175.152 175.153 175.154 175.156 175.157 175.158 175.159
+
+f0a := risk_alpha100_100_100_beta50_00_50_scale2_n$(f0_n)
+
+
+# --- F0A
+
+f0a_dir := figures/f0/$(f0a)
+
+f0a_obj := $(addprefix $(f0a_dir)/, $(f0_angles))
+
+f0a_sum := figures/f0/summary_$(f0a)
+
+$(f0a_sum): $(f0a_obj)
+	rm -f $@
+	cat $(f0a_obj) > $@
+
+$(f0a_dir)/%: bellman bellman.sh $(f0a_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 1 --oracle_omega 1  --bidder_prob 0 --bidder_omega 0.50 --scale 2  --rounds $(f0_n)  >  $@
+
+$(f0a_dir)/.dir_created :
+	mkdir $(f0a_dir)
+	touch $@
+
+figure0: $(f0a_sum)
+
+
+
+
+############################################################################################################
+#
+# Figure 0A: risks of paths within the feasible set for universal vs risk inflation oracle
+#
+############################################################################################################
+
+f0A_alpha     = 1
+f0A_atxt      = 100
+f0A_beta      = 0
+f0A_btxt      = 00
+f0A_omega     = 0.5
+f0A_omega_txt = 50
+f0A_scale     = 2  
+f0A_scale_txt = 2
+f0A_n         = 1000
+
+# define dir within risk subdirectory
+f0A_dir = figures/f0/risk_alpha$(f0A_atxt)_beta$(f0A_btxt)_omega$(f0A_omega_txt)_scale$(f0A_scale_txt)_n$(f0A_n)
+
+$(f0A_dir)/.directory_built: 
+	echo "Building directory for risk output:" $(f0A_dir)
+	mkdir $(f0A_dir)
+	touch $@
+
+# main command to run
+f0A_mu := 0.5 0.75 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+
+f0A_obj := $(addprefix $(f0A_dir)/m, $(f0A_mu))
+
+figure0A:  $(f0A_dir)/.directory_built $(f0A_obj)
+	echo $(f0A_obj)
+	echo "Computed risks in directory: " $(f0A_dir)
+
+$(f0A_dir)/m%: calculate
+	./calculate --signal $* --alpha $(f0A_alpha) --beta $(f0A_beta) --omega $(f0A_omega) --scale $(f0A_scale) --rounds $(f0A_n) > $@
+
+# executable
+calculate: bellman.o wealth.o utility.o spending_rule.o bellman_calculator.o
+	$(GCC) $^ $(LDLIBS) -o  $@
+
+
 ##############################################################################################################################
 #
 # Figure 1: comparisons of geometric spending testimator to risk inflation oracle, with varying payouts
@@ -803,11 +882,11 @@ figure3:  $(f3_dir)/.directory_built $(f3_obj)
 	echo $(f3_obj)
 	echo "Computed risks in directory: " $(f3_dir)
 
-$(f3_dir)/m%: calculate
+$(f3_dir)/m%: calculateGeo
 	./calculate --signal $* --alpha $(f3_alpha) --beta $(f3_beta) --omega $(f3_omega) --scale $(f3_scale) --rounds $(f3_n) > $@
 
 # executable
-calculate: bellman.o wealth.o utility.o distribution.o bellman_calculator.o
+calculateGeo: bellman.o wealth.o utility.o distribution.o bellman_calculator.o
 	$(GCC) $^ $(LDLIBS) -o  $@
 
 

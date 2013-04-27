@@ -24,6 +24,8 @@ parse_arguments(int argc, char** argv,
 // Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     Main     
 int  main(int argc, char** argv)
 {
+  const double maxWealth (5.0);
+
   // set default control values
   int    nRounds (100   );
   double alpha   (  0.1 );
@@ -36,11 +38,8 @@ int  main(int argc, char** argv)
   std::clog << "MAIN: settings are n=" << nRounds << " scale=" << scale << " omega=" << omega << " mu=" << signal << std::endl;
     
   // set up utility and wealth; angle 0.0 is not used
-  // this was the version for the |\ wealth array
-  //    WealthArray bidderWealth(omega, omega, nRounds, ScaledUniversalDist(scale));
-  //    DualWealthArray bidderWealth("univ", omega, omega, UniversalBidder(scale), nRounds);
-  UniversalBidder univBidder(scale);
-  DualWealthArray bidderWealth("geo", omega, omega, GeometricBidder(beta,univBidder.total_wealth()), nRounds);
+  UniversalRule bidder;
+  DualWealthArray bidderWealth("Univ", maxWealth, omega, omega, bidder, nRounds);
   std::clog << "MAIN: Wealth array... " << bidderWealth << std::endl;
   RiskVectorUtility utility(0.0, alpha);
 
@@ -51,7 +50,11 @@ int  main(int argc, char** argv)
     std::ios_base::openmode mode = std::ios_base::trunc;
     std::ofstream output (ss.str(), mode);
   }
-  // find expected risk, varying p_zero; write to output file
+  // find expected risk, varying p_zero from very small to larger; write to output file
+  for (double p=0.001; p < .01; p+=0.001)
+  { std::pair<double,double> result (find_process_risk (nRounds, p, signal, utility, bidderWealth));
+    std::cout << p << " " << result.first << " " << result.second << std::endl;
+  }
   for (double p=0.01; p < 1; p+=0.01)
   { std::pair<double,double> result (find_process_risk (nRounds, p, signal, utility, bidderWealth));
     std::cout << p << " " << result.first << " " << result.second << std::endl;

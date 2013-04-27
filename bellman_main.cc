@@ -226,7 +226,6 @@ make_wealth_array(Triple const& parms, double scale, int nRounds)
   else                               // geometric
   { std::clog << "MAIN: Making geometric wealth array with p=" << prob(parms) << ", scale=" << scale
 	      << " and W0=" << W0(parms) << " omega=" << omega(parms) << std::endl;
-    UniversalRule univ();
     GeometricRule geoBidder(prob(parms));
     return new DualWealthArray(geoBidder.identifier(), maxWealth, W0(parms), omega(parms), geoBidder, nRounds);
   }
