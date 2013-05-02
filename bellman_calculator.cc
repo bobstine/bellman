@@ -51,9 +51,29 @@ int  main(int argc, char** argv)
     std::ofstream output (ss.str(), mode);
   }
   // find expected risk, varying p_zero from very small to larger; write to output file
+  { std::pair<double,double> result;
+    double p;   
+    p = 0.000001;
+    result = find_process_risk (nRounds, p, signal, utility, bidderWealth);
+    std::cout << p << " " << result.first << " " << result.second << std::endl;
+    result = find_process_risk (nRounds, 1-p, signal, utility, bidderWealth);
+    std::cout << 1-p << " " << result.first << " " << result.second << std::endl;
+    p = 0.00001;
+    result = find_process_risk (nRounds, p, signal, utility, bidderWealth);
+    std::cout << p << " " << result.first << " " << result.second << std::endl;
+    result = find_process_risk (nRounds, 1-p, signal, utility, bidderWealth);
+    std::cout << 1-p << " " << result.first << " " << result.second << std::endl;
+    p = 0.0001;
+    result = find_process_risk (nRounds, p, signal, utility, bidderWealth);
+    std::cout << p << " " << result.first << " " << result.second << std::endl;
+    result = find_process_risk (nRounds, 1-p, signal, utility, bidderWealth);
+    std::cout << 1-p << " " << result.first << " " << result.second << std::endl;
+  }
   for (double p=0.001; p < .01; p+=0.001)
   { std::pair<double,double> result (find_process_risk (nRounds, p, signal, utility, bidderWealth));
     std::cout << p << " " << result.first << " " << result.second << std::endl;
+    result = find_process_risk (nRounds, 1.0-p, signal, utility, bidderWealth);
+    std::cout << 1.0-p << " " << result.first << " " << result.second << std::endl;
   }
   for (double p=0.01; p < 1; p+=0.01)
   { std::pair<double,double> result (find_process_risk (nRounds, p, signal, utility, bidderWealth));
