@@ -271,8 +271,8 @@ f1_alpha     = 1
 f1_alpha_txt = 100
 
 # for Testimator oracle
-# f1_alpha     = 0.10
-# f1_alpha_txt =   10
+f1_alpha     = 0.10
+f1_alpha_txt =   10
 
 f1_beta      = 0.10
 f1_beta_txt  =   10
