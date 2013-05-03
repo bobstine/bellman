@@ -260,6 +260,90 @@ calculate: bellman.o wealth.o utility.o spending_rule.o bellman_calculator.o
 
 ##############################################################################################################################
 #
+# Figure 11: comparisons of universal spending testimator to risk inflation oracle, with varying payouts
+#
+#############################################################################################################################
+
+f11_n = 1000
+
+# for RI oracle
+f11_alpha     = 1
+f11_alpha_txt = 100
+
+# for Testimator oracle
+# f11_alpha     = 0.10
+# f11_alpha_txt =   10
+
+f11_beta      = 0
+f11_beta_txt  = 00
+
+f11_angles := $(base_angles)  $(extra_angles) 
+
+f11a := risk_alpha100_$(f11_alpha_txt)_100_beta05_$(f11_beta_txt)_05_scale2_n$(f11_n)
+f11b := risk_alpha100_$(f11_alpha_txt)_100_beta25_$(f11_beta_txt)_25_scale2_n$(f11_n)
+f11c := risk_alpha100_$(f11_alpha_txt)_100_beta50_$(f11_beta_txt)_50_scale2_n$(f11_n)
+
+# --- F11A
+
+f11a_dir := figures/f11/$(f11a)
+
+f11a_obj := $(addprefix $(f11a_dir)/, $(f11_angles))
+
+f11a_sum := figures/f11/summary_$(f11a)
+
+$(f11a_sum): $(f11a_obj)
+	rm -f $@
+	cat $(f11a_obj) > $@
+
+$(f11a_dir)/%: bellman bellman.sh $(f11a_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f11_alpha) --oracle_omega 1 --bidder_prob $(f11_beta) --bidder_omega 0.05 --scale 2  --rounds $(f11_n)  >$@
+
+$(f11a_dir)/.dir_created :
+	mkdir $(f11a_dir)
+	touch $@
+
+# --- F11B
+
+f11b_dir := figures/f11/$(f11b)
+
+f11b_obj := $(addprefix $(f11b_dir)/, $(f11_angles))
+
+f11b_sum := figures/f11/summary_$(f11b)
+
+$(f11b_sum): $(f11b_obj)
+	rm -f $@
+	cat $(f11b_obj) > $@
+
+$(f11b_dir)/%: bellman bellman.sh $(f11b_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f11_alpha) --oracle_omega 1 --bidder_prob $(f11_beta) --bidder_omega 0.25 --scale 2  --rounds $(f11_n)  >$@
+
+$(f11b_dir)/.dir_created :
+	mkdir $(f11b_dir)
+	touch $@
+
+# --- F11C
+
+f11c_dir := figures/f11/$(f11c)
+
+f11c_obj := $(addprefix $(f11c_dir)/, $(f11_angles))
+
+f11c_sum := figures/f11/summary_$(f11c)
+
+$(f11c_sum): $(f11c_obj)
+	rm -f $@
+	cat $(f11c_obj) > $@
+
+$(f11c_dir)/%: bellman bellman.sh $(f11c_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob $(f11_alpha) --oracle_omega 1 --bidder_prob $(f11_beta) --bidder_omega 0.50 --scale 2  --rounds $(f11_n)  >$@
+
+$(f11c_dir)/.dir_created :
+	mkdir $(f11c_dir)
+	touch $@
+
+figure11: $(f11a_sum) $(f11b_sum) $(f11c_sum)
+
+##############################################################################################################################
+#
 # Figure 1: comparisons of geometric spending testimator to risk inflation oracle, with varying payouts
 #
 #############################################################################################################################
@@ -271,8 +355,8 @@ f1_alpha     = 1
 f1_alpha_txt = 100
 
 # for Testimator oracle
-f1_alpha     = 0.10
-f1_alpha_txt =   10
+# f1_alpha     = 0.10
+# f1_alpha_txt =   10
 
 f1_beta      = 0.10
 f1_beta_txt  =   10
