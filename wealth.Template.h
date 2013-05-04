@@ -5,6 +5,7 @@
 #include "line_search.Template.h"
 #include <cassert>
 
+
 template <class Rule>
 void
 DualWealthArray::initialize_wealth_bid_array(Rule const& f, double maxWealth, int nRounds)
@@ -21,18 +22,19 @@ DualWealthArray::initialize_wealth_bid_array(Rule const& f, double maxWealth, in
   double     delta   (grid_delta(maxWealth));               // tracks spacing
   double     wealth  (0.1 * floor(10*maxWealth));           // round to 0.1 to hit typical W0 value on grid
   int        limit   (1500);
-  do
-  { double bid (f(wealth));
+  wealth += delta;
+  while(limit)
+  { wealth -= delta;
+    double bid (f(wealth));
     mWealthBid.push_back( std::make_pair(wealth,bid) );
-    wealth -= delta;
+    if (wealth <= minWealth) break;
     delta = grid_delta(wealth);
-  } while ((minWealth <= wealth+0.000001) && limit--);               
+  }
   if (limit <= 0)
   { std::clog << "WLTH: *** ERROR *** Ran out of space for internal array.\n" << std::endl;
     assert(false);
   }
-  // find mZeroIndex position for which wealth equals W0 (up to rounding)
-  { int i (0);
+  { int i (0);                                               // find mZeroIndex position for which wealth equals W0 (up to rounding)
     while ((0.00001 < (mWealthBid[i].first - mW0)) && (i < (int)mWealthBid.size())) ++i;
     mZeroIndex = i;
   }

@@ -1071,7 +1071,7 @@ figure4: $(f4a_sum) $(f4b_sum) $(f4c_sum) $(f4d_sum)
 #
 ############################################################################################################
 
-f5_n = 100
+f5_n = 1000
 f5_angles := $(base_angles) $(extra_angles)
 
 f5a := risk_alpha25_01_25_beta25_00_25_scale2_n$(f5_n)
@@ -1135,27 +1135,10 @@ $(f5c_dir)/.dir_created :
 	mkdir $(f5c_dir)
 	touch $@
 
-# --- F5D
-f5d_dir := figures/f5/$(f5d)
 
-f5d_obj := $(addprefix $(f5d_dir)/, $(f5_angles))
-
-f5d_sum := figures/f5/summary_$(f5d)
-
-$(f5d_sum): $(f5d_obj)
-	rm -f $@
-	cat $(f5d_obj) > $@
-
-$(f5d_dir)/%: bellman bellman.sh $(f5d_dir)/.dir_created 
-	./bellman --risk --angle $* --oracle_prob 0.10 --oracle_omega 0.05  --bidder_prob 0.01 --bidder_omega 0.50 --scale 2  --rounds $(f5_n)  >  $@
+figure5: $(f5a_sum) $(f5b_sum) $(f5c_sum) 
 
 
-$(f5d_dir)/.dir_created :
-	mkdir $(f5d_dir)
-	touch $@
-
-
-figure5: $(f5a_sum) $(f5b_sum) $(f5c_sum)
 
 ##############################################################################################################################
 #

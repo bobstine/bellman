@@ -136,7 +136,10 @@ class MatrixUtility: public std::unary_function<double,double>
   double angle      () const { return mAngle; }
   
   void set_constants (double alpha, double beta, double v00, double v01, double v10, double v11)
-  { assert((0 <= alpha) && (alpha <= 1.0));
+  { if (!((0 <= alpha) && (alpha <= 1.0)))
+    { std::clog << "UTIL: Alpha = " << alpha << " out of bounds" << std::endl;
+      assert(false);
+    }
     assert((0 <=  beta) && ( beta <= 1.0));
     mAlpha=alpha;
     mBeta = beta;
