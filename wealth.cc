@@ -130,6 +130,7 @@ DualWealthArray::grid_delta (double wealth) const
   else if (1.0  < wealth) return 0.1;
   else if (0.5  < wealth) return 0.05;
   else if (0.1  < wealth) return 0.01;
-  else if (0.02 < wealth) return 0.005;
+  else if (0.06 < wealth) return 0.005;
+  else if (0.02 < wealth) return 0.002;
   else return 0.001;
 }
