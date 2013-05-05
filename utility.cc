@@ -86,9 +86,7 @@ risk(double mu, double alpha)
   double ra, R;
 
   if (0 == alpha)
-  { ra = alpha;
-    R = 0.0;
-  }
+    return mu*mu;          // ras 5/5/13
   else
   { ra = reject_prob(mu, alpha);
     R = (1.0 - ra) * mu * mu;

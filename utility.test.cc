@@ -11,21 +11,24 @@
 int  main()
 {
 
-  if (false)
+  if (true)
   { std::cout << "\nTEST: risk calculations." << std::endl;
-    std::cout << "   risk(0,0)   = " << risk(0,0)     << std::endl;  // mu, alpha
-    std::cout << "   risk(0,.05) = " << risk(0,0.05)   << std::endl;
-    std::cout << "   risk(1,.05) = " << risk(1,0.05)  << std::endl;
-    std::cout << "   risk(2,.05) = " << risk(2,0.05)  << std::endl;
+    std::cout << "   risk(0, 0 ) = " << risk(0,  0 ) << "  r_0(0)    = " << reject_prob(0, 0   )  << std::endl;  // mu, alpha
+    std::cout << "   risk(0,.05) = " << risk(0,0.05) << "  r_0(0.05) = " << reject_prob(0, 0.05)  << std::endl;
+    std::cout << "   risk(1, 0 ) = " << risk(1, 0  ) << "  r_1(0)    = " << reject_prob(1, 0)     << std::endl;
+    std::cout << "   risk(1,.05) = " << risk(1,0.05) << "  r_1(0.05) = " << reject_prob(1, 0.05)  << std::endl;
+    std::cout << "   risk(1,.10) = " << risk(1,0.10) << "  r_1(0.10) = " << reject_prob(1, 0.10)  << std::endl;
+    std::cout << "   risk(2,.05) = " << risk(2,0.05) << "  r_2(0.05) = " << reject_prob(2, 0.05)  << std::endl;
+    std::cout << "   risk(2,.20) = " << risk(2,0.20) << "  r_2(0.20) = " << reject_prob(2, 0.20)  << std::endl;
   }
 
   if (true)
   { std::cout << "\nTEST: test vector utility object." << std::endl;
     double angle (135);
-    double alpha (0.025);
+    double alpha ( 0    );
     double beta  (0.0125);
-    RejectVectorUtility rejectU (angle, alpha);
-    std::cout << "TEST: reject util with angle=" << angle << " at mu=0 " << rejectU(0) << "   and at mu=1 " << rejectU(1) << std::endl;
+    RiskVectorUtility rejectU (angle, alpha);
+    std::cout << "TEST: risk util with angle=" << angle << " at mu=0 " << rejectU(0) << "   and at mu=1 " << rejectU(1) << std::endl;
     std::cout << "                         Risk @ 0        Risk @ 1\n";
     for (int j = 1; j<10; ++j)
     { double alpha = (double) j/10.0;
@@ -42,8 +45,7 @@ int  main()
   if (false)
   { std::cout << "\nTEST: test basic matrix object." << std::endl;
     double angle (1.0 );
-    double omega (0.05);
-    RejectMatrixUtility rejectU (angle, omega);  
+    RejectMatrixUtility rejectU (angle);  
     std::cout << "TEST: reject util at mu=0 " << rejectU(0) << "   and at mu=1 " << rejectU(1) << std::endl;
     double mu    (7.0   );
     double alpha (0.000643 );
@@ -51,7 +53,7 @@ int  main()
     rejectU.set_constants(alpha, beta, 0,0,0,0);
     std::cout << "TEST: additivity...   net " << rejectU(mu) << " = " << rejectU.row_utility(mu, 0,0,0,0) << " - " << angle << "*" << rejectU.col_utility(mu,0,0,0,0) << std::endl;
     // risk utility,  check additive
-    RiskMatrixUtility riskU (angle, omega); 
+    RiskMatrixUtility riskU (angle); 
     riskU.set_constants(alpha, beta, 0,0,0,0);
     std::cout << "TEST: risk   util at mu=0 " << riskU(0) << "   and at mu=1 " << riskU(1) << std::endl;
     std::cout << "TEST: additivity...   net " << riskU(mu) << " = " << riskU.row_utility(mu, 0,0,0,0) << " - " << angle << "*" << riskU.col_utility(mu,0,0,0,0) << std::endl;
@@ -61,11 +63,10 @@ int  main()
   if (false)
   { std::cout << "\nTEST: test reject matrix utility, and test maximizer with alpha=beta." << std::endl;
     double angle ( 45 );
-    double omega (0.05);
     double alpha (0.025);
     double beta  (0.0125);
     { // matrix
-      RejectMatrixUtility rejectU (angle, omega);
+      RejectMatrixUtility rejectU (angle);
       rejectU.set_constants(alpha, beta, 0,0,0,0);
       std::cout << "TEST: reject util at mu=0  is " << rejectU(0) << "   and at  mu=1  is " << rejectU(1) << std::endl;
       // maximize
@@ -87,14 +88,10 @@ int  main()
  
   if(false) 
   { std::cout << "\nTEST: testing maximizer function\n";
-    const int univStart(1);
     double angle (-45);
-    double omega (0.05);
-    int    iZero (10);
-    UniversalDist univ(univStart);
-    Distribution *p = &univ;
-    WealthArray wealth(omega, iZero, 5, *p);
-    RejectVectorUtility utility (angle, omega);
+    double alpha (0.05);
+    DualWealthArray wealth(alpha);
+    RejectVectorUtility utility (angle, alpha);
     
     double gridSize (0.25);
     int    maxIt (100);

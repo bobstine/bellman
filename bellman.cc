@@ -170,12 +170,10 @@ solve_bellman_utility  (int nRounds, MatrixUtility &utility, DualWealthArray con
     { double rowBid = rowWealth.bid(r);
       std::pair<int, double> rowBidPos    = rowWealth.bid_position(r);    // if does not reject
       std::pair<int, double> rowRejectPos = rowWealth.reject_position(r); // if rejects
-      // std::cout << messageTag << "Filling row " << r << " with bid=" << rowBidPos << " and reject position (prob)" << rowPos.first << " " << rowPos.second << std::endl;
       for (int c=0; c<nCols-1; ++c) 
       { double colBid = colWealth.bid(c);
 	std::pair<int, double>  colBidPos   (colWealth.bid_position(c));
 	std::pair<int, double> colRejectPos (colWealth.reject_position(c));
-	// std::cout << messageTag << "Filling col " << c << " and col bid=" << colBid << " with positions " << colBidPos.first << " " << colRejectPos.first << std::endl;
 	utility.set_constants(rowBid, colBid,
 			      reject_value ( rowBidPos  ,  colBidPos  , *pUtilitySrc),   // v00  neither rejects; wealth function is decreasing
 			      reject_value ( rowBidPos  , colRejectPos, *pUtilitySrc),   // v01  only column player rejects
