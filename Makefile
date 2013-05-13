@@ -51,7 +51,7 @@ sim_details/.directory_built:
 	touch $@
 
 sim_gen: bellman sim_details/.directory_built
-	./bellman --risk --omega 0.5 --angle 334 --rounds 500  --oracleprob 0.05 --bidderprob 0 --scale 2 --write   # unconstrained
+	./bellman --risk --angle 165 --rounds 1000  --oracle_omega 1 --oracle_prob 1 --bidder_omega 0.5 --bidder_prob 0 --scale 2 --write   # unconstrained
 
 
 
@@ -242,7 +242,7 @@ $(f0A_dir)/.directory_built:
 	touch $@
 
 # main command to run
-f0A_mu := 0.5 0.75 1.0 1.5 2.0 2.5 3.0 3.5 4.0
+f0A_mu := 0.5 0.75 1.0 1.5 2.0 2.5 3.0 3.5 4.0 6.0
 
 f0A_obj := $(addprefix $(f0A_dir)/m, $(f0A_mu))
 
@@ -1077,7 +1077,10 @@ figure4: $(f4a_sum) $(f4b_sum) $(f4c_sum) $(f4d_sum)
 ############################################################################################################
 
 f5_n = 1000
-f5_angles := $(base_angles) $(extra_angles)
+
+f5_xtra_angles = 138   141 142 143 144  146 147 148 149  151 152 153 154  157     281 282 283 284 286 287 296 297 
+
+f5_angles := $(base_angles) $(extra_angles) $(f5_xtra_angles)
 
 f5a := risk_alpha25_001_25_beta25_00_25_scale2_n$(f5_n)
 f5b := risk_alpha25_002_25_beta25_00_25_scale2_n$(f5_n)
