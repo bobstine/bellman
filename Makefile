@@ -1077,7 +1077,9 @@ figure4: $(f4a_sum) $(f4b_sum) $(f4c_sum) $(f4d_sum)
 ############################################################################################################
 
 f5_n = 1000
-f5_angles := $(base_angles) $(extra_angles)
+
+f5_xtra_angles = 138   141 142 143 144  146 147 148 149  151 152 153 154  157   281 282 283 284 286 287 296 297
+f5_angles := $(base_angles) $(extra_angles) $(f5_xtra_angles)
 
 f5a := risk_alpha25_001_25_beta25_00_25_scale2_n$(f5_n)
 f5b := risk_alpha25_002_25_beta25_00_25_scale2_n$(f5_n)
