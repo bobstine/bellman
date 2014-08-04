@@ -14,6 +14,9 @@
 
 // #define SHOW_PROGRESS
 
+
+using EigenUtils::write_matrix_to_file;
+
 const std::string messageTag = "BELL: ";
 
 int
