@@ -1,5 +1,5 @@
 #include "line_search.Template.h"
-#include "utility.h"
+#include "utility.Template.h"
 #include "wealth.h"
 
 #include <iostream>
@@ -11,7 +11,7 @@
 int  main()
 {
 
-  if (true)
+  if (false)
   { std::cout << "\nTEST: risk calculations." << std::endl;
     std::cout << "   risk(0, 0 ) = " << risk(0,  0 ) << "  r_0(0)    = " << reject_prob(0, 0   )  << std::endl;  // mu, alpha
     std::cout << "   risk(0,.05) = " << risk(0,0.05) << "  r_0(0.05) = " << reject_prob(0, 0.05)  << std::endl;
@@ -22,7 +22,7 @@ int  main()
     std::cout << "   risk(2,.20) = " << risk(2,0.20) << "  r_2(0.20) = " << reject_prob(2, 0.20)  << std::endl;
   }
 
-  if (true)
+  if (false)
   { std::cout << "\nTEST: test vector utility object." << std::endl;
     double angle (135);
     double alpha ( 0    );
@@ -42,31 +42,35 @@ int  main()
 	      << " - " << angle << "*" << riskU.bidder_utility(mu,0,0) << std::endl;
   }
     
-  if (false)
+  // define the criterion function
+  double angle = 10;
+  AngleCriterion ac (angle);
+  
+  if (true)
   { std::cout << "\nTEST: test basic matrix object." << std::endl;
-    double angle (1.0 );
-    RejectMatrixUtility rejectU (angle);  
-    std::cout << "TEST: reject util at mu=0 " << rejectU(0) << "   and at mu=1 " << rejectU(1) << std::endl;
+    RejectMatrixUtility<AngleCriterion> rejectU ( ac );
+    std::cout << "TEST: reject util at mu=0 " << rejectU(0.0) << "   and at mu=1 " << rejectU(1.0) << std::endl;
     double mu    (7.0   );
     double alpha (0.000643 );
     double beta  (0.000691 );
     rejectU.set_constants(alpha, beta, 0,0,0,0);
-    std::cout << "TEST: additivity...   net " << rejectU(mu) << " = " << rejectU.row_utility(mu, 0,0,0,0) << " - " << angle << "*" << rejectU.col_utility(mu,0,0,0,0) << std::endl;
+    std::cout << "TEST: additivity...   net " << rejectU(mu) << " = " << rejectU.row_utility(mu, 0,0,0,0)
+	      << " - " << angle << "*" << rejectU.col_utility(mu,0,0,0,0) << std::endl;
     // risk utility,  check additive
-    RiskMatrixUtility riskU (angle); 
+    RiskMatrixUtility<AngleCriterion> riskU ( ac );
     riskU.set_constants(alpha, beta, 0,0,0,0);
     std::cout << "TEST: risk   util at mu=0 " << riskU(0) << "   and at mu=1 " << riskU(1) << std::endl;
-    std::cout << "TEST: additivity...   net " << riskU(mu) << " = " << riskU.row_utility(mu, 0,0,0,0) << " - " << angle << "*" << riskU.col_utility(mu,0,0,0,0) << std::endl;
+    std::cout << "TEST: additivity...   net " << riskU(mu) << " = " << riskU.row_utility(mu, 0,0,0,0)
+	      << " - " << angle << "*" << riskU.col_utility(mu,0,0,0,0) << std::endl;
   }
   
 
-  if (false)
+  if (true)
   { std::cout << "\nTEST: test reject matrix utility, and test maximizer with alpha=beta." << std::endl;
-    double angle ( 45 );
     double alpha (0.025);
     double beta  (0.0125);
     { // matrix
-      RejectMatrixUtility rejectU (angle);
+      RejectMatrixUtility<AngleCriterion> rejectU (ac);
       rejectU.set_constants(alpha, beta, 0,0,0,0);
       std::cout << "TEST: reject util at mu=0  is " << rejectU(0) << "   and at  mu=1  is " << rejectU(1) << std::endl;
       // maximize
@@ -81,7 +85,8 @@ int  main()
 	maxPair = std::make_pair(0.0,utilAtMuEqualZero);
       double mu (maxPair.first);
       std::cout << "TEST:                      max on [0.5,7] is " << maxPair.second << " @ " << mu << std::endl;
-      std::cout << "TEST:                      row utility = " << rejectU.row_utility(mu, 0,0,0,0) << "   col utility = " << rejectU.col_utility(mu, 0,0,0,0) << std::endl;
+      std::cout << "TEST:                      row utility = " << rejectU.row_utility(mu, 0,0,0,0)
+		<< "   col utility = " << rejectU.col_utility(mu, 0,0,0,0) << std::endl;
     }
   }
 

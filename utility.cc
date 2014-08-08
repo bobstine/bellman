@@ -233,13 +233,23 @@ RiskVectorUtility::bidder_utility (double mu, double rejectValue, double noRejec
 }
 
 
-
-
-// -------------------------------------------------------------------------------------------------------------
 // -----  MatrixUtility  -----  MatrixUtility  -----  MatrixUtility  -----  MatrixUtility  -----  MatrixUtility
 
+void
+MatrixUtility::set_constants (double alpha, double beta, double v00, double v01, double v10, double v11)
+{ if (!((0 <= alpha) && (alpha <= 1.0)))
+    { std::clog << "UTIL: Alpha = " << alpha << " out of bounds" << std::endl;
+      assert(false);
+    }
+  assert((0 <=  beta) && ( beta <= 1.0));
+  mAlpha=alpha;
+  mBeta = beta;
+  mV00 = v00; mV01 = v01; mV10 = v10; mV11 = v11;
+}
+
+
 double
-r_mu(double mu, double p)
+MatrixUtility::r_mu(double mu, double p) const
 {
   if (0.0 == mu)
     return p;
@@ -251,11 +261,13 @@ r_mu(double mu, double p)
   }
 }
 
+
 double
 MatrixUtility::r_mu_alpha (double mu) const
 {
   return r_mu(mu, mAlpha);
 }
+
 
 double
 MatrixUtility::r_mu_beta (double mu) const
@@ -278,94 +290,4 @@ MatrixUtility::reject_probabilities (double mu) const
   }
   return std::make_pair(ra,rb);
 }  
-
-
-//   RejectMatrixUtility     RejectUtility     RejectUtility     RejectUtility     RejectUtility     RejectUtility     
-
-double
-RejectMatrixUtility::operator()(double mu) const
-{
-  std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rAlpha (rprob.first);
-  double rBeta (rprob.second);
-  double util (mCos*rAlpha + mSin*rBeta);
-  if (rAlpha > rBeta)
-    return  util + mV00 * (1-rAlpha) + mV10 * (rAlpha-rBeta) +  mV11 * rBeta;
-  else
-    return  util + mV00 * (1- rBeta) + mV01 * (rBeta-rAlpha) +  mV11 * rAlpha;
-}
-
-
-double
-RejectMatrixUtility::row_utility (double mu, double v00, double v01, double v10, double v11) const
-{
-  std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rAlpha (rprob.first);
-  double rBeta (rprob.second);
-  if (rAlpha > rBeta)
-    return  rAlpha + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
-  else
-    return  rAlpha + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
-}
-
-
-double
-RejectMatrixUtility::col_utility (double mu, double v00, double v01, double v10, double v11) const
-{
-  // same recursive structure as oracle_utility, just different recursive values appear in call
-  std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rAlpha (rprob.first);
-  double rBeta (rprob.second);
-  if (rAlpha > rBeta)
-    return  rBeta + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
-  else
-    return  rBeta + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
-}
-
-
-
-
-//    RiskUtility      RiskUtility      RiskUtility      RiskUtility      RiskUtility      RiskUtility      RiskUtility      
-
-double
-RiskMatrixUtility::operator()(double mu) const
-{
-  std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rAlpha (rprob.first );
-  double rBeta  (rprob.second);
-  double util (mCos*risk(mu,mAlpha) + mSin*risk(mu,mBeta));
-  if (rAlpha > rBeta)
-    return  util + mV00 * (1-rAlpha) + mV10 * (rAlpha-rBeta) +  mV11 * rBeta;
-  else
-    return  util + mV00 * (1- rBeta) + mV01 * (rBeta-rAlpha) +  mV11 * rAlpha;
-}
-
-
-
-double
-RiskMatrixUtility::row_utility  (double mu, double v00, double v01, double v10, double v11) const
-{
-  std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rAlpha (rprob.first );
-  double rBeta  (rprob.second);
-  double util (risk(mu,mAlpha));
-  if (rAlpha > rBeta)
-    return  util  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
-  else
-    return  util  + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
-}
-
-
-double
-RiskMatrixUtility::col_utility (double mu, double v00, double v01, double v10, double v11) const
-{
-  std::pair<double,double>  rprob  (reject_probabilities(mu));
-  double rAlpha (rprob.first);
-  double rBeta (rprob.second);
-  double util  (risk(mu,mBeta));
-  if (rAlpha > rBeta)
-    return  util  + v00 * (1-rAlpha) + v10 * (rAlpha-rBeta) +  v11 * rBeta;
-  else
-    return  util  + v00 * (1- rBeta) + v01 * (rBeta-rAlpha) +  v11 * rAlpha;
-}
 

@@ -25,7 +25,7 @@ level_1 = distribution.o spending_rule.o
 level_2 = wealth.o
 level_3 = utility.o
 level_4 = bellman.o
-level_5 = bellman_main.o bellman_calculator.o
+level_5 = bellman_main.o bellman_calculator.o bellman_optimize.o
 
 ############################################################################
 #
@@ -61,8 +61,14 @@ sim_gen: bellman sim_details/.directory_built
 
 bellman_main.o: bellman_main.cc
 
+bellman_optimize.o: bellman_optimize.cc
+
 bellman: bellman.o wealth.o utility.o bellman_main.o spending_rule.o
 	$(GCC) $^ $(LDLIBS) -o  $@
+
+optimize: bellman.o wealth.o utility.o spending_rule.o bellman_optimize.o
+	$(GCC) $^ $(LDLIBS) -o  $@
+
 
 #  Bellman options (see code for details)
 #       constrain  : oracle has state (2 dim)
@@ -74,7 +80,10 @@ reject_check: bellman
 	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0  --bidder_omega 0.5  --bidder_prob 0.1 --write
 
 risk_check: bellman
-	./bellman --risk --angle 10 --rounds 100 --oracle_omega 0.5  --oracle_prob 0  --bidder_omega 0.3 --bidder_prob 0     # constrained
+	./bellman --risk --angle 45 --rounds 100 --oracle_omega 0.5  --oracle_prob .1  --bidder_omega 0.3 --bidder_prob .3     # constrained
+
+risk_inflation: optimize
+	./optimize
 
 # 	./bellman --risk --angle 0 --rounds 10  --oracle_w0 0.10 --oracle_omega 1 --bidder_w0 0.10 --bidder_omega 1  --write# both unconst
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 0.5  --oracle_prob 0  --bidder_omega 0.5 --bidder_prob 0.10  # constrained
