@@ -77,10 +77,10 @@ optimize: bellman.o wealth.o utility.o spending_rule.o bellman_optimize.o
 #       omega      : 0 for fixed bidder
 
 reject_check: bellman
-	./bellman --reject --angle 0 --rounds 7 --oracle_omega 0.05 --oracle_prob 0  --bidder_omega 0.5  --bidder_prob 0.1 --write
+	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0   --bidder_omega 0.5  --bidder_prob 0.10 --write
 
 risk_check: bellman
-	./bellman --risk --angle 45 --rounds 10 --oracle_omega 0.5  --oracle_prob .1  --bidder_omega 0.3 --bidder_prob .3  
+	./bellman --risk --angle 165 --rounds 200 --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
 
 risk_inflation: optimize
 	./optimize

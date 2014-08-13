@@ -2,6 +2,7 @@
 #include "utility.h"
 #include "line_search.h"
 
+#include <fstream>
 #include <iomanip>
 #include <ios>
 
@@ -191,6 +192,17 @@ solve_bellman_matrix_utility (int nRounds, Util &utility,
       write_matrix_to_file(path + config + sr + ".mean"   , meanMat[round]);
       write_matrix_to_file(path + config + sr + ".rowProb", rowRejectProbMat[round]);
       write_matrix_to_file(path + config + sr + ".colProb", colRejectProbMat[round]);
+    }
+    // write details of wealth functions
+    { std::ios_base::openmode mode = std::ios_base::trunc;
+      std::ofstream output (path + config + ".row_wealth", mode);
+      rowWealth.write_to(output, true);  // true = as lines
+      output.close();
+    }
+    { std::ios_base::openmode mode = std::ios_base::trunc;
+      std::ofstream output (path + config + ".col_wealth", mode);
+      colWealth.write_to(output, true);  // true = as lines
+      output.close();
     }
   }
 }
