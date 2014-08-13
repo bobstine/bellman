@@ -85,9 +85,11 @@ solve_bellman_matrix_utility (int nRounds, Util &utility,
   }
   std::cout << std::setprecision(6);
   if(writeTable)
-  { write_matrix_to_file(config + ".utility", *pUtilityDest);
-    write_matrix_to_file(config + ".row" ,  *pRowDest);
-    write_matrix_to_file(config + ".col" ,  *pColDest);
+  { std::string path = "sim_details/";
+    std::clog << "BELL: Writing table process summary in directory " << path << config << " with files .utility, .row, and .col" << std::endl;
+    write_matrix_to_file(path + config + ".utility", *pUtilityDest);
+    write_matrix_to_file(path + config + ".row"    , *pRowDest);
+    write_matrix_to_file(path + config + ".col"    , *pColDest);
   }
   // write summary of configuration and results to stdio
   std::cout << std::setprecision(8)

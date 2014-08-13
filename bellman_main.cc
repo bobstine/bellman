@@ -29,7 +29,7 @@ double prob (Triple const& p) { return std::get<1>(p); }
 double omega(Triple const& p) { return std::get<2>(p); }
 
 std::ostream & operator<<(std::ostream & o, Triple const& tri)
-{ o << "{ W0=" << W0(tri) << ", p=" << prob(tri) << ", w=" << omega(tri) << "}";
+{ o << " { W0=" << W0(tri) << ", p=" << prob(tri) << ", w=" << omega(tri) << " } ";
   return o;
 }
 
@@ -68,6 +68,7 @@ int  main(int argc, char** argv)
 
   parse_arguments(argc, argv, riskUtil, angle, oracle, bidder, scale, nRounds, writeTable);
 
+  std::clog << "MAIN: Running " << nRounds << " rounds at angle " << angle << " with writeTable=" << writeTable << std::endl;
   /*
      Note that alpha (aka, the oracle probability for a Bayes oracle)
      'lives' in the utility function object, and W0 and omega are
@@ -76,12 +77,12 @@ int  main(int argc, char** argv)
   */
   
   std::clog << "MAIN: Building bidder wealth array for "
-	    << nRounds << " rounds with (w0, beta, omega) =" << bidder << ", and scale=" << scale << std::endl;
+	    << nRounds << " rounds with " << bidder << ", and scale=" << scale << std::endl;
   DualWealthArray *pBidderWealth = make_wealth_array(bidder, scale, nRounds);
   // pBidderWealth->write_to(std::clog, true); std::clog << std::endl; // as lines
 
   if(omega(oracle) == 1)  // unconstrained competitor
-  { std::clog << "MAIN: Oracle(W0,p,w)=" << oracle << " with bidder(W0,p,w)=" << bidder << " and wealth function " << pBidderWealth->name() << std::endl;
+  { std::clog << "MAIN: Oracle(W0,p,w)=" << oracle << " with bidder " << bidder << " and wealth function " << pBidderWealth->name() << std::endl;
     if (riskUtil)
     { RiskVectorUtility utility(angle, prob(oracle));
       solve_bellman_vector_utility (nRounds, utility, *pBidderWealth, writeTable);
@@ -92,12 +93,12 @@ int  main(int argc, char** argv)
     }
   }
   else                    // constrained competitor needs to track state as well
-  { std::clog << "MAIN: Column player (bidder) has (w0,p,omega)=" << bidder << " and uses wealth array ... " << *pBidderWealth <<  std::endl;
+  { std::clog << "MAIN: Column player (bidder) " << bidder << " with wealth array ... " << *pBidderWealth <<  std::endl;
     DualWealthArray *pOracleWealth = make_wealth_array(oracle, scale, nRounds);
-    std::clog << "MAIN: Row player (oracle) has (w0,p,omega)=" << oracle << " and uses wealth array ... " << *pOracleWealth << std::endl;
+    std::clog << "MAIN: Row player (oracle)    " << oracle << " with wealth array ... " << *pOracleWealth << std::endl;
     std::clog << "MAIN: Players are : " << pOracleWealth->name() << " and " << pBidderWealth->name() << std::endl;
     std::ostringstream ss;
-    ss << angle << " " << scale << " " << prob(oracle) << " " << omega(oracle) << " " << prob(bidder) << " " << omega(bidder) << " ";
+    ss << "n_" << nRounds << "_angle_" << angle << "_oracle_" << prob(oracle) << "_" << omega(oracle) << "_bidder_" << prob(bidder) << "_" << omega(bidder);
     AngleCriterion ac(angle);
     if (riskUtil)
     { RiskMatrixUtility<AngleCriterion> utility(ac);

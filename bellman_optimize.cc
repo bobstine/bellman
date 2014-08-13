@@ -61,7 +61,7 @@ int  main(int argc, char** argv)
   bool      riskUtil  = false;    // risk or rejection, default is rejection (which is fast)
   //  double       RiB0   =  4.0;     // risk inflation intercept and slope
   double       RiB1   =  2.0;
-  int        nRounds  = 100 ;
+  int        nRounds  = 200 ;
   bool     writeTable = false;                             // if false, only return final value
   Triple    oracle    = std::make_tuple(0.25, 0, 0.25);    //   (W0, univ, omega)              omega=1 implies unconstrained
   Triple    baseBidder= std::make_tuple(0.25,-1, 0.25);    //   (W0, beta, bidder omega)       negative values on exit parse were not set

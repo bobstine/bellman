@@ -51,7 +51,7 @@ sim_details/.directory_built:
 	touch $@
 
 sim_gen: bellman sim_details/.directory_built
-	./bellman --risk --angle 165 --rounds 1000  --oracle_omega 1 --oracle_prob 1 --bidder_omega 0.5 --bidder_prob 0 --scale 2 --write   # unconstrained
+	./bellman --risk --angle 296.565 --rounds 200  --oracle_omega 0.25 --oracle_prob 0 --bidder_omega 0.25 --bidder_prob 0.001 --write
 
 
 
@@ -61,10 +61,10 @@ sim_gen: bellman sim_details/.directory_built
 
 bellman_main.o: bellman_main.cc
 
-bellman_optimize.o: bellman_optimize.cc
-
 bellman: bellman.o wealth.o utility.o bellman_main.o spending_rule.o
 	$(GCC) $^ $(LDLIBS) -o  $@
+
+bellman_optimize.o: bellman_optimize.cc
 
 optimize: bellman.o wealth.o utility.o spending_rule.o bellman_optimize.o
 	$(GCC) $^ $(LDLIBS) -o  $@
