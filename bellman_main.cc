@@ -14,7 +14,6 @@
 
 const int universalStart (1);
 
-
 // player probability and omega, i p o, (initial prob omega)
 //    omega = 1 defines an unconstrained player (oracle); non-zero omega implies contrained
 //    omega = 0 implies constant alpha level player (old school statistician)
@@ -102,7 +101,10 @@ int  main(int argc, char** argv)
     AngleCriterion ac(angle);
     if (riskUtil)
     { RiskMatrixUtility<AngleCriterion> utility(ac);
-      solve_bellman_matrix_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, ss.str(), writeTable);
+      if (writeTable)
+	solve_bellman_matrix_utility (nRounds, utility, *pOracleWealth, *pBidderWealth, ss.str(), writeTable); //tensor version
+      else
+	solve_bellman_matrix_utility (nRounds, utility, *pOracleWealth, *pBidderWealth);	
     }
     else
     { RejectMatrixUtility<AngleCriterion> utility(ac);
