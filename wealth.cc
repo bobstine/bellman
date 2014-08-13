@@ -126,8 +126,9 @@ DualWealthArray::initialize_bid_array ()
 double
 DualWealthArray::grid_delta (double wealth) const
 {
-  if      (3.0    < wealth) return 0.25;
-  else if (2.0    < wealth) return 0.1;
+  if      (5.0    < wealth) return 0.50;
+  else if (3.0    < wealth) return 0.25;
+  else if (2.0    < wealth) return 0.10;
   else if (1.0    < wealth) return 0.05;
   else if (0.5    < wealth) return 0.025;
   else if (0.1    < wealth) return 0.01;

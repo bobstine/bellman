@@ -80,7 +80,7 @@ reject_check: bellman
 	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0   --bidder_omega 0.5  --bidder_prob 0.10 --write
 
 risk_check: bellman
-	./bellman --risk --angle 165 --rounds 200 --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
+	./bellman --risk --angle 296.565 --rounds 200 --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
 
 risk_inflation: optimize
 	./optimize
