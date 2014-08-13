@@ -24,11 +24,20 @@ std::pair<double,double>
 
 // oracle with no wealth constraint
 void
-solve_bellman_utility  (int nRounds, VectorUtility &util,                               DualWealthArray const& wealth, bool writeDetails);
+solve_bellman_vector_utility  (int nRounds, VectorUtility &util,                               DualWealthArray const& wealth, bool writeDetails);
 
 
 // constrained oracle, two-player competition  (empty prefix means don't write)
 
+//  this version does not save path information (alternating arrays)
+template<class MatrixUtil>
 void
-solve_bellman_utility  (int nRounds, MatrixUtility & util, DualWealthArray const& oWealth,  DualWealthArray const& bidderWealth, std::string config, bool writeDetails);
+solve_bellman_matrix_utility  (int nRounds, MatrixUtil & util,
+			DualWealthArray const& oWealth,  DualWealthArray const& bidderWealth);
+
+//  this version does save path information and writes out if asked (saves tensor)
+template<class MatrixUtil>
+void
+solve_bellman_matrix_utility  (int nRounds, MatrixUtil & util,
+			DualWealthArray const& oWealth,  DualWealthArray const& bidderWealth, std::string fileId, bool write);
 

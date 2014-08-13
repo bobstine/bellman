@@ -30,7 +30,6 @@ double   risk          (double mu, double alpha);
 
 double   optimal_alpha (double mu, double omega);
 
-
 ////   Vector utility trades off between two possible values
 
 class VectorUtility: public std::unary_function<double,double>
@@ -109,86 +108,101 @@ class RiskVectorUtility: public VectorUtility
   void set_oracle_risk();
   void print_type() const;
   
-}; 
+};
 
 
+//     Criteria     Criteria     Criteria     Criteria     Criteria     Criteria     Criteria     Criteria     Criteria
+
+class AngleCriterion:  public std::binary_function<double,double,double>
+{
+ private:
+  const double mAngle, mSin, mCos;
+
+ public:
+  AngleCriterion(double angle)
+    : mAngle(angle), mSin(sin(angle * 3.1415926536/180)), mCos(cos(angle * 3.1415926536/180)) { }
+
+  std::string identifier() const     { return std::to_string(mAngle); }
+
+  double operator()(double x, double y) const { return mCos*x + mSin*y; }
+};
 
 
+class RiskInflationCriterion:  public std::binary_function<double,double,double>
+{
+ private:
+  const double mB1;
 
-////   Matrix utility trades off between four possible values
+ public:
+  RiskInflationCriterion(double b1)
+    : mB1(b1) { }
+
+  std::string identifier() const     { return std::to_string((int)round(mB1)); }
+
+  double operator()(double x, double y) const { return x - mB1*y; }
+};
+
+
+//  Matrix     Matrix     Matrix     Matrix     Matrix     Matrix     Matrix     Matrix     Matrix     Matrix     Matrix
 
 class MatrixUtility: public std::unary_function<double,double>
 {
  protected:
-  const double mAngle, mSin, mCos;
   double mAlpha, mBeta;
-  double mV00, mV01, mV10, mV11;  // 0 for not reject, 1 for reject
-  
+  double mV00, mV01, mV10, mV11;      // 0 for not reject, 1 for reject
+
  public:
-
- MatrixUtility(double angle)
-   : mAngle(angle), mSin(sin(angle * 3.1415926536/180)), mCos(cos(angle * 3.1415926536/180)),
-    mAlpha(0.0), mBeta(0.0), mV00(0.0), mV01(0.0), mV10(0.0), mV11(0.0)
-    { /* std::clog << "UTIL: s=" << mSin << "   c=" << mCos << " " << std::endl;*/ }
-
-  double alpha      () const { return mAlpha; }
-  double beta       () const { return mBeta;  }
-  double angle      () const { return mAngle; }
   
-  void set_constants (double alpha, double beta, double v00, double v01, double v10, double v11)
-  { if (!((0 <= alpha) && (alpha <= 1.0)))
-    { std::clog << "UTIL: Alpha = " << alpha << " out of bounds" << std::endl;
-      assert(false);
-    }
-    assert((0 <=  beta) && ( beta <= 1.0));
-    mAlpha=alpha;
-    mBeta = beta;
-    mV00 = v00; mV01 = v01; mV10 = v10; mV11 = v11;
-  }
-
-  double r_mu_alpha (double mu) const;
-  double r_mu_beta  (double mu) const;
+ MatrixUtility()
+   : mV00(0.0), mV01(0.0), mV10(0.0), mV11(0.0) {}
+  
+  void set_constants (double alpha, double beta, double v00, double v01, double v10, double v11);
+  
+  double r_mu       (double mu, double p) const;
+  double r_mu_alpha (double mu)           const;
+  double r_mu_beta  (double mu)           const;
   
   std::pair<double,double> reject_probabilities (double mu) const;    // prob rejecting for alpha and beta
-  
-  virtual
-    double operator()(double mu) const  { std::cout << "UTIL:  Call to operator of matrix base class." << std::endl; return 0*mu; }
-
-  virtual
-    double row_utility (double mu, double v00, double v01, double v10, double v11) const = 0;
-  
-  virtual
-    double  col_utility (double mu, double v00, double v01, double v10, double v11) const = 0;
-  
 }; 
 
 
 
 ////  RejectMatrixUtility     Rejects     Rejects     Rejects     Rejects     Rejects     Rejects     
 
+template <class C>
 class RejectMatrixUtility: public MatrixUtility
 {
- public:
+ private:
+  C mCriterion;
 
- RejectMatrixUtility(double angle)
-   : MatrixUtility(angle) { }
+ public:
+  
+ RejectMatrixUtility(C criterion)
+   : MatrixUtility(), mCriterion(criterion) { }
+
+  std::string identifier() const                { return mCriterion.identifier(); }
 
   double operator()(double mu) const;
 
   double row_utility (double mu, double v00, double v01, double v10, double v11) const;
-  double col_utility (double mu, double v00, double v01, double v10, double v11) const;
-  
+  double col_utility (double mu, double v00, double v01, double v10, double v11) const;  
 }; 
 
 
 ////  Risk     Risk     Risk     Risk     Risk     Risk     Risk     Risk     Risk     Risk
 
+template <class C>
 class RiskMatrixUtility: public MatrixUtility
 {
+ private:
+  C mCriterion;
+
  public:
 
- RiskMatrixUtility(double angle)
-   : MatrixUtility(angle) { }
+ RiskMatrixUtility(C criterion)
+   : MatrixUtility(), mCriterion(criterion) { }
+  
+  std::string identifier() const                { return mCriterion.identifier(); }
   
   double operator()(double mu) const;
   

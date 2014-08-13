@@ -16,7 +16,7 @@ PROJECT_NAME = bellman
 
 # OPT = -O3 -std=c++0x -DNDEBUG
 
-OPT = -O3  -std=c++0x
+OPT = -O3
 
 
 USES = utils random
@@ -25,7 +25,7 @@ level_1 = distribution.o spending_rule.o
 level_2 = wealth.o
 level_3 = utility.o
 level_4 = bellman.o
-level_5 = bellman_main.o bellman_calculator.o
+level_5 = bellman_main.o bellman_calculator.o bellman_optimize.o
 
 ############################################################################
 #
@@ -51,7 +51,7 @@ sim_details/.directory_built:
 	touch $@
 
 sim_gen: bellman sim_details/.directory_built
-	./bellman --risk --angle 165 --rounds 1000  --oracle_omega 1 --oracle_prob 1 --bidder_omega 0.5 --bidder_prob 0 --scale 2 --write   # unconstrained
+	./bellman --risk --angle 296.565 --rounds 200  --oracle_omega 0.25 --oracle_prob 0 --bidder_omega 0.25 --bidder_prob 0.001 --write
 
 
 
@@ -64,6 +64,12 @@ bellman_main.o: bellman_main.cc
 bellman: bellman.o wealth.o utility.o bellman_main.o spending_rule.o
 	$(GCC) $^ $(LDLIBS) -o  $@
 
+bellman_optimize.o: bellman_optimize.cc
+
+optimize: bellman.o wealth.o utility.o spending_rule.o bellman_optimize.o
+	$(GCC) $^ $(LDLIBS) -o  $@
+
+
 #  Bellman options (see code for details)
 #       constrain  : oracle has state (2 dim)
 #	oracle prob: 0 LS, 1 RI, otherwise testimator
@@ -71,10 +77,17 @@ bellman: bellman.o wealth.o utility.o bellman_main.o spending_rule.o
 #       omega      : 0 for fixed bidder
 
 reject_check: bellman
-	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0  --bidder_omega 0.5  --bidder_prob 0.1 --write
+	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0   --bidder_omega 0.5  --bidder_prob 0.10 --write
 
 risk_check: bellman
-	./bellman --risk --angle 10 --rounds 100 --oracle_omega 0.5  --oracle_prob 0  --bidder_omega 0.3 --bidder_prob 0     # constrained
+	./bellman --risk --angle 165 --rounds 200 --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
+
+risk_inflation: optimize
+	./optimize
+
+#  risk check results 24 Aug 2014  (before finer wealth grid)
+#	165.000    250.25   200   12.53072    229.18925   903.76172                                                   
+#       296.565    250.25   200    3.0054817   50.305794   21.792614
 
 # 	./bellman --risk --angle 0 --rounds 10  --oracle_w0 0.10 --oracle_omega 1 --bidder_w0 0.10 --bidder_omega 1  --write# both unconst
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 0.5  --oracle_prob 0  --bidder_omega 0.5 --bidder_prob 0.10  # constrained

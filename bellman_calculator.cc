@@ -1,3 +1,9 @@
+/*
+  Use this main routine to generate the two-point paths within the
+  feasible set that explore the use of a Bayesian model to generate
+  the feasible set.
+*/
+
 #include "bellman.h"
 #include "wealth.Template.h"
 #include "read_utils.h"  // coerce
