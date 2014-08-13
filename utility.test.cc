@@ -42,9 +42,9 @@ int  main()
 	      << " - " << angle << "*" << riskU.bidder_utility(mu,0,0) << std::endl;
   }
     
-  if (false)
+  if (true)
   { std::cout << "\nTEST: test basic matrix object." << std::endl;
-    double angle (1.0 );
+    double angle ( 10 );
     RejectMatrixUtility rejectU (angle);  
     std::cout << "TEST: reject util at mu=0 " << rejectU(0) << "   and at mu=1 " << rejectU(1) << std::endl;
     double mu    (7.0   );
@@ -60,9 +60,9 @@ int  main()
   }
   
 
-  if (false)
+  if (true)
   { std::cout << "\nTEST: test reject matrix utility, and test maximizer with alpha=beta." << std::endl;
-    double angle ( 45 );
+    double angle ( 10 );
     double alpha (0.025);
     double beta  (0.0125);
     { // matrix
