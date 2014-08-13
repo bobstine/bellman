@@ -32,6 +32,124 @@ w1 <- w0 - alpha.univ(w0); w1
 w2 <- w1 - alpha.univ(w1); w2
 w3 <- w2 - alpha.univ(w2); w3
 
+
+########################################################################################
+##
+##		This code works for the *matrix* utility results; see below for vector
+##
+########################################################################################
+
+setwd("/Users/bob/C/bellman/sim_details/")
+
+nRounds <- 200
+
+angle   <- 296.565  #165
+x.prob  <-   0
+x.omega <-   0.25
+y.prob  <-   0.001
+y.omega <-   0.25
+
+(prefix <- paste("n_",nRounds,"_angle_",angle,"_oracle_",x.prob,"_",x.omega,"_bidder_",y.prob,"_",y.omega,sep=""))
+
+# --- parse wealth details
+
+RowWealth <- readLines(paste(prefix,"row_wealth",sep="."))
+(rowWealth.desc  <- RowWealth[1])
+rowWealth.array <-   as.numeric(unlist(strsplit(substring(RowWealth[2],first=11)," ")))
+rowWealth.bids  <-   as.numeric(unlist(strsplit(substring(RowWealth[3],first= 9)," ")))
+rowWealth.rIndx <- 1+as.numeric(unlist(strsplit(substring(RowWealth[4],first=13)," ")))
+rowWealth.rWts  <-   as.numeric(unlist(strsplit(substring(RowWealth[5],first=13)," ")))
+rowWealth.bIndx <- 1+as.numeric(unlist(strsplit(substring(RowWealth[6],first=13)," ")))
+rowWealth.bWts <-    as.numeric(unlist(strsplit(substring(RowWealth[7],first=13)," ")))
+plot(rowWealth.array, rowWealth.bids)
+
+ColWealth <- readLines(paste(prefix,"col_wealth",sep="."))
+(colWealth.desc  <- ColWealth[1])
+colWealth.array <-   as.numeric(unlist(strsplit(substring(ColWealth[2],first=11)," ")))
+colWealth.bids  <-   as.numeric(unlist(strsplit(substring(ColWealth[3],first= 9)," ")))
+colWealth.rIndx <- 1+as.numeric(unlist(strsplit(substring(ColWealth[4],first=13)," ")))
+colWealth.rWts  <-   as.numeric(unlist(strsplit(substring(ColWealth[5],first=13)," ")))
+colWealth.bIndx <- 1+as.numeric(unlist(strsplit(substring(ColWealth[6],first=13)," ")))
+colWealth.bWts <-    as.numeric(unlist(strsplit(substring(ColWealth[7],first=13)," ")))
+plot(colWealth.array, colWealth.bids)
+
+
+# --- check initial wealth positions (add 1 for 0-based index to 1-based)
+
+iZeroRow <- 60 + 1        # value from first line of RowWealth description
+rowWealth.array[iZeroRow] # should be omega (or closest that is less)
+
+iZeroCol <- 60 + 1
+colWealth.array[iZeroCol]
+
+
+# --- simulate
+
+doit <- function(seed=sample.int(100000,1)) {
+	set.seed(seed)
+	meanProcess 	<- rep(0, nRounds); 
+	positions <- risks <- rejectProb		<- matrix(NA, nrow=nRounds, ncol=2)		# row and column
+	# --- run simulation
+	kR <- iZeroRow; kC <- iZeroCol
+	for(round in 1:nRounds) {
+		positions[round,] <- c(kR,kC)		# current wealth states
+		# --
+		mu      <- read.table(paste(prefix,"_",round-1,".mean", sep=""))
+		meanProcess[round] <- mu[kR,kC]		# mean at current state
+		# --
+		rowProb <- read.table(paste(prefix,"_",round-1,".rowProb", sep=""))
+		rejectProb[round,1] <- rowProb[kR,kC]
+		colProb <- read.table(paste(prefix,"_",round-1,".colProb", sep=""))
+		rejectProb[round,2] <- colProb[kR,kC]
+		# --
+		cat("round ", round, "@ k=", kR,",", kC, 
+			" mean=", meanProcess[round]," p(reject)=",rejectProb[round,],"\n");
+		# -- random chance
+		p <- runif(1)
+		w <- runif(1) # linear weights for wealth
+		if (p < rejectProb[round,1]) { 
+			kR <-rowWealth.rIndx[kR]+(rowWealth.rWts[kR]<w); 
+			risks[round,1]<-1; } 
+		else {                    
+			kR <-rowWealth.bIndx[kR]+(rowWealth.bWts[kR]<w); 
+			risks[round,1]<-meanProcess[round]^2; }
+		if (p < rejectProb[round,2]) { 
+			kC <-colWealth.rIndx[kC]+(colWealth.rWts[kC]<w); 
+			risks[round,2]<-1; } 
+		else {                    
+			kC <-colWealth.bIndx[kC]+(colWealth.bWts[kC]<w); 
+			risks[round,2]<-meanProcess[round]^2; 
+		}
+	}   
+	list(risks=risks, positions=positions, means=meanProcess, rejectProbs=rejectProb)
+}
+
+simres <- doit(); colSums(simres$risks); 
+
+	plot(simres$means, type="l")
+
+	plot(simres$risks[,1], col="magenta", ylim=range(simres$risks), type="l"); points(simres$risks[,2])
+	
+	plot(cumsum(simres$risks[,1]),type="l", col="magenta"); lines(cumsum(simres$risks[,2]))
+	
+	plot(rowWealth.array[simres$positions[,1]], type="l", ylim=c(0,1.5)); lines(simres$means, col="red")
+	
+	plot (rowWealth.array[simres$positions[,1]], type="l", col="magenta", ylim=c(0,2), ylab="Wealths")
+	lines(colWealth.array[simres$positions[,2]], type="l", col="black")
+	
+	plot (rowWealth.bids[simres$positions[,1]], type="l", col="magenta", log="y")
+	lines(colWealth.bids[simres$positions[,2]], type="l", col="black")
+	
+reset()
+
+
+
+########################################################################################
+##
+##		This code works for the *vector* utility results
+##
+########################################################################################
+
 ####################################################################
 #
 #  Simulation process from C++ files
@@ -80,7 +198,7 @@ wealth.array[iZero] # should be omega (or closest that is less)
 doit <- function(seed=sample.int(100000,1)) {
 	set.seed(seed)
 	meanProcess <-indxProcess <- reject.prob <- rep(0, nRounds); 
-	pvals <- riskProcess <-oracleRisk <- rep(0, nRounds);
+	riskProcess <-oracleRisk <- rep(0, nRounds);
 	# --- run simulation
 	k <- iZero
 	for(round in 1:nRounds) {
@@ -97,7 +215,7 @@ doit <- function(seed=sample.int(100000,1)) {
 		else {                    k<-wealth.bIndx[k]+(wealth.bWts[k]<w); riskProcess[round]<-meanProcess[round]^2;}
 	}   
 	list(bidder.risk=riskProcess, bidder.prob = reject.prob, bidder.state=indxProcess,  
-			seed=seed, pvals=pvals, mean=meanProcess, mean = meanProcess, oracle.risk=oracleRisk,
+			seed=seed, pvals=pvals, mean=meanProcess, oracle.risk=oracleRisk,
 			bidder.rejects = (pvals<reject.prob), oracle.rejects = (pvals<0.05))
 }
 
