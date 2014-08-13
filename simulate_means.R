@@ -126,18 +126,19 @@ doit <- function(seed=sample.int(100000,1)) {
 
 simres <- doit(); colSums(simres$risks); 
 
-	plot(simres$means, type="l")
+	plot(simres$means, type="l", ylab="Mean Process")
 
 	plot(simres$risks[,1], col="magenta", ylim=range(simres$risks), type="l"); points(simres$risks[,2])
 	
-	plot(cumsum(simres$risks[,1]),type="l", col="magenta"); lines(cumsum(simres$risks[,2]))
+	plot(cumsum(simres$risks[,1]),type="l", col="magenta", ylab="Cumulate Risk"); lines(cumsum(simres$risks[,2]))
 	
 	plot(rowWealth.array[simres$positions[,1]], type="l", ylim=c(0,1.5)); lines(simres$means, col="red")
 	
 	plot (rowWealth.array[simres$positions[,1]], type="l", col="magenta", ylim=c(0,2), ylab="Wealths")
 	lines(colWealth.array[simres$positions[,2]], type="l", col="black")
 	
-	plot (rowWealth.bids[simres$positions[,1]], type="l", col="magenta", log="y")
+	plot (rowWealth.bids[simres$positions[,1]], type="l", col="magenta", log="y", ylab="Bids", 
+				ylim=c(0.0005,max(rowWealth.bids[simres$positions[,1]])))
 	lines(colWealth.bids[simres$positions[,2]], type="l", col="black")
 	
 reset()
