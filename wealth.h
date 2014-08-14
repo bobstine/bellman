@@ -12,7 +12,7 @@
 
 class DualWealthArray
 {
-  typedef std::pair<int, double>  Position;
+  typedef std::pair<int, double>  Position;           // first is index, second is probability (with rest on next higher index wealth with 1-p)
   typedef std::vector< Position > PositionVector;
   
   const std::string     mName;
@@ -69,9 +69,6 @@ class DualWealthArray
   double grid_delta (double wealth) const;
   void print_arrays   (std::ostream& os, bool asLines=false) const;
 };
-
-
-
 
 inline
 std::ostream&

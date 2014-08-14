@@ -16,7 +16,7 @@ PROJECT_NAME = bellman
 
 # OPT = -O3 -std=c++0x -DNDEBUG
 
-OPT = -O3  -std=c++11
+OPT = -O3
 
 
 USES = utils random
@@ -80,10 +80,14 @@ reject_check: bellman
 	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0   --bidder_omega 0.5  --bidder_prob 0.10 --write
 
 risk_check: bellman
-	./bellman --risk --angle 165 --rounds 200 --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
+	./bellman --risk --angle 296.565 --rounds 200 --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
 
 risk_inflation: optimize
 	./optimize
+
+#  risk check results 24 Aug 2014  (before finer wealth grid)
+#	165.000    250.25   200   12.53072    229.18925   903.76172                                                   
+#       296.565    250.25   200    3.0054817   50.305794   21.792614
 
 # 	./bellman --risk --angle 0 --rounds 10  --oracle_w0 0.10 --oracle_omega 1 --bidder_w0 0.10 --bidder_omega 1  --write# both unconst
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 0.5  --oracle_prob 0  --bidder_omega 0.5 --bidder_prob 0.10  # constrained
@@ -1082,13 +1086,13 @@ figure4: $(f4a_sum) $(f4b_sum) $(f4c_sum) $(f4d_sum)
 
 ############################################################################################################
 #
-# Figure 5: Universal vs geometric bidder
+# Figure 5: Universal vs geometric bidder  (two separate batches, first batch for paper)
 #
 ############################################################################################################
 
 f5_n = 1000
 
-f5_xtra_angles = 138   141 142 143 144  146 147 148 149  151 152 153 154  157     281 282 283 284 286 287 296 297 
+f5_xtra_angles = 138   141 142 143 144  146 147 148 149  151 152 153 154  157   281 282 283 284 286 287 296 297
 
 f5_angles := $(base_angles) $(extra_angles) $(f5_xtra_angles)
 
@@ -1111,7 +1115,7 @@ $(f5a_sum): $(f5a_obj)
 $(f5a_dir)/%: bellman bellman.sh $(f5a_dir)/.dir_created 
 	./bellman --risk --angle $* --oracle_prob 0.001 --oracle_omega 0.25  --bidder_prob 0 --bidder_omega 0.25 --scale 2  --rounds $(f5_n)  >  $@
 
-$(f5a_dir)/.dir_created :
+$(f5a_dir)/.dir_created:
 	mkdir $(f5a_dir)
 	touch $@
 
@@ -1130,7 +1134,7 @@ $(f5b_sum): $(f5b_obj)
 $(f5b_dir)/%: bellman bellman.sh $(f5b_dir)/.dir_created 
 	./bellman --risk --angle $* --oracle_prob 0.002 --oracle_omega 0.25  --bidder_prob 0 --bidder_omega 0.25 --scale 2  --rounds $(f5_n)  >  $@
 
-$(f5b_dir)/.dir_created :
+$(f5b_dir)/.dir_created:
 	mkdir $(f5b_dir)
 	touch $@
 
@@ -1148,13 +1152,144 @@ $(f5c_sum): $(f5c_obj)
 $(f5c_dir)/%: bellman bellman.sh $(f5c_dir)/.dir_created 
 	./bellman --risk --angle $* --oracle_prob 0.005 --oracle_omega 0.25  --bidder_prob 0 --bidder_omega 0.25 --scale 2  --rounds $(f5_n)  >  $@
 
-
-$(f5c_dir)/.dir_created :
+$(f5c_dir)/.dir_created:
 	mkdir $(f5c_dir)
 	touch $@
 
-
 figure5: $(f5a_sum) $(f5b_sum) $(f5c_sum) 
+
+
+# --- F51 series flips axes to place universal on x with geo on y, and explores wider range of geometrics
+
+f51_n = 200
+
+f51_xtra_angles = 291.801 296.565 # 138   141 142 143 144  146 147 148 149  151 152 153 154  157   281 282 283 284 286 287 296 297
+
+f51_angles := $(base_angles) $(extra_angles) $(f51_xtra_angles)
+
+f51a := risk_alpha25_00_25_beta25_001_25_scale2_n$(f51_n)
+f51b := risk_alpha25_00_25_beta25_01_25_scale2_n$(f51_n)
+f51c := risk_alpha25_00_25_beta25_10_25_scale2_n$(f51_n)
+f51d := risk_alpha25_00_25_beta25_25_25_scale2_n$(f51_n)
+f51e := risk_alpha25_00_25_beta25_35_25_scale2_n$(f51_n)
+f51f := risk_alpha25_00_25_beta25_0001_25_scale2_n$(f51_n)
+
+# --- F51A
+
+f51a_dir := figures/f51/$(f51a)
+
+f51a_obj := $(addprefix $(f51a_dir)/, $(f51_angles))
+
+f51a_sum := figures/f51/summary_$(f51a)
+
+$(f51a_sum): $(f51a_obj)
+	rm -f $@
+	cat $(f51a_obj) > $@
+
+$(f51a_dir)/%: bellman bellman.sh $(f51a_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25  --bidder_prob 0.001 --bidder_omega 0.25 --scale 2  --rounds $(f51_n)  >  $@
+
+$(f51a_dir)/.dir_created :
+	mkdir $(f51a_dir)
+	touch $@
+
+# --- F51B
+
+f51b_dir := figures/f51/$(f51b)
+
+f51b_obj := $(addprefix $(f51b_dir)/, $(f51_angles))
+
+f51b_sum := figures/f51/summary_$(f51b)
+
+$(f51b_sum): $(f51b_obj)
+	rm -f $@
+	cat $(f51b_obj) > $@
+
+$(f51b_dir)/%: bellman bellman.sh $(f51b_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25  --bidder_prob 0.01 --bidder_omega 0.25 --scale 2  --rounds $(f51_n)  >  $@
+
+$(f51b_dir)/.dir_created :
+	mkdir $(f51b_dir)
+	touch $@
+
+# --- F51C
+
+f51c_dir := figures/f51/$(f51c)
+
+f51c_obj := $(addprefix $(f51c_dir)/, $(f51_angles))
+
+f51c_sum := figures/f51/summary_$(f51c)
+
+$(f51c_sum): $(f51c_obj)
+	rm -f $@
+	cat $(f51c_obj) > $@
+
+$(f51c_dir)/%: bellman bellman.sh $(f51c_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25  --bidder_prob 0.10 --bidder_omega 0.25 --scale 2  --rounds $(f51_n)  >  $@
+
+$(f51c_dir)/.dir_created:
+	mkdir $(f51c_dir)
+	touch $@
+
+# --- F51D
+
+f51d_dir := figures/f51/$(f51d)
+
+f51d_obj := $(addprefix $(f51d_dir)/, $(f51_angles))
+
+f51d_sum := figures/f51/summary_$(f51d)
+
+$(f51d_sum): $(f51d_obj)
+	rm -f $@
+	cat $(f51d_obj) > $@
+
+$(f51d_dir)/%: bellman bellman.sh $(f51d_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25  --bidder_prob 0.25 --bidder_omega 0.25 --scale 2  --rounds $(f51_n)  >  $@
+
+$(f51d_dir)/.dir_created :
+	mkdir $(f51d_dir)
+	touch $@
+
+# --- F51E
+
+f51e_dir := figures/f51/$(f51e)
+
+f51e_obj := $(addprefix $(f51e_dir)/, $(f51_angles))
+
+f51e_sum := figures/f51/summary_$(f51e)
+
+$(f51e_sum): $(f51e_obj)
+	rm -f $@
+	cat $(f51e_obj) > $@
+
+$(f51e_dir)/%: bellman bellman.sh $(f51e_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25  --bidder_prob 0.35 --bidder_omega 0.25 --scale 2  --rounds $(f51_n)  >  $@
+
+$(f51e_dir)/.dir_created :
+	mkdir $(f51e_dir)
+	touch $@
+
+# --- F51F
+
+f51f_dir := figures/f51/$(f51f)
+
+f51f_obj := $(addprefix $(f51f_dir)/, $(f51_angles))
+
+f51f_sum := figures/f51/summary_$(f51f)
+
+$(f51f_sum): $(f51f_obj)
+	rm -f $@
+	cat $(f51f_obj) > $@
+
+$(f51f_dir)/%: bellman bellman.sh $(f51f_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25  --bidder_prob 0.0001 --bidder_omega 0.25 --scale 2  --rounds $(f51_n)  >  $@
+
+$(f51f_dir)/.dir_created :
+	mkdir $(f51f_dir)
+	touch $@
+
+
+figure51: $(f51a_sum) $(f51b_sum) $(f51c_sum) $(f51d_sum) $(f51e_sum) $(f51f_sum)
 
 
 
@@ -1243,17 +1378,17 @@ figure6: $(f6a_sum) $(f6b_sum) $(f6c_sum)
 
 ############################################################################################################
 #
-# Figure X: Universal vs Universal, with varying initial wealths
+# Figure X,Y: Universal vs Universal, with varying initial wealths
 #
-#     Manual... need to make directory figures, figures/fX
+#     Manual... need to make directory figures/fX
 #
 ############################################################################################################
 
 fX_n = 200
 
-fX_xtra_angles = 
+fX_angles =  2.5 5 10    97 112 142 147 152 157 162 167 171 172 173 175.5 176 176.33 176.67 177    292 302 307 312 317 322
 
-fX_angles := $(base_angles) # $(extra_angles) $(fX_xtra_angles)
+fX_angles := $(base_angles) $(fX_angles)
 
 fXa := risk_alpha50_00_50_beta25_00_25_scale2_n$(fX_n)
 fXb := risk_alpha50_00_50_beta10_00_10_scale2_n$(fX_n)
@@ -1321,7 +1456,6 @@ $(fXc_dir)/.dir_created :
 	mkdir $(fXc_dir)
 	touch $@
 
-
 # --- FXD
 
 fXd_dir := figures/fX/$(fXd)
@@ -1340,8 +1474,6 @@ $(fXd_dir)/%: bellman bellman.sh $(fXd_dir)/.dir_created
 $(fXd_dir)/.dir_created :
 	mkdir $(fXd_dir)
 	touch $@
-
-
 
 # --- FXE
 
@@ -1362,17 +1494,434 @@ $(fXe_dir)/.dir_created :
 	mkdir $(fXe_dir)
 	touch $@
 
-
-
-
 # ---
 
 figureX: $(fXa_sum) $(fXb_sum)  $(fXc_sum) $(fXd_sum)  $(fXe_sum) 
 
 # virtual machine...
 # cp figures/fX/summary_risk_alpha50_00_50_beta25_00_25_scale2_n50 /mnt/hgfs/bob/C/bellman/figures/fX
-# cp figures/fX/summary_risk_alpha50_00_50_beta10_00_10_scale2_n50 /mnt/hgfs/bob/C/bellman/figures/fX
-# cp figures/fX/summary_risk_alpha50_00_50_beta35_00_35_scale2_n50 /mnt/hgfs/bob/C/bellman/figures/fX
+
+
+# ---------------------------------------  FY  -----------------------------------------------------
+
+fY_n = 200
+
+fY_angles =  97 112 142 147 152 157 162 167 171 172 173 175.5 176 176.33 176.67 177 178 179.71 179.72 179.73 179.74 179.75 179.8  \
+            292 302 307 312 317 322     0.25 0.26 0.27 0.4 2.5 5 10  
+
+fY_angles := $(base_angles)  $(fY_angles)
+
+fY0 := risk_alpha25_00_25_beta02_00_02_scale2_n$(fY_n)
+fYa := risk_alpha25_00_25_beta05_00_05_scale2_n$(fY_n)
+fYb := risk_alpha25_00_25_beta10_00_10_scale2_n$(fY_n)
+fYc := risk_alpha25_00_25_beta15_00_15_scale2_n$(fY_n)
+fYd := risk_alpha25_00_25_beta20_00_20_scale2_n$(fY_n)
+fYe := risk_alpha25_00_25_beta30_00_30_scale2_n$(fY_n)
+fYf := risk_alpha25_00_25_beta35_00_35_scale2_n$(fY_n)
+fYg := risk_alpha25_00_25_beta40_00_40_scale2_n$(fY_n)
+fYh := risk_alpha25_00_25_beta45_00_45_scale2_n$(fY_n)
+fYi := risk_alpha25_00_25_beta50_00_50_scale2_n$(fY_n)
+fYj := risk_alpha25_00_25_beta60_00_60_scale2_n$(fY_n)
+fYk := risk_alpha25_00_25_beta70_00_70_scale2_n$(fY_n)
+fYm := risk_alpha25_00_25_beta90_00_90_scale2_n$(fY_n)
+
+# --- FYA
+
+fYa_dir := figures/fY/$(fYa)
+
+fYa_obj := $(addprefix $(fYa_dir)/, $(fY_angles))
+
+fYa_sum := figures/fY/summary_$(fYa)
+
+$(fYa_sum): $(fYa_obj)
+	rm -f $@
+	cat $(fYa_obj) > $@
+
+$(fYa_dir)/%: bellman bellman.sh $(fYa_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.05 --rounds $(fY_n)  >  $@
+
+$(fYa_dir)/.dir_created :
+	mkdir $(fYa_dir)
+	touch $@
+
+
+# --- FYB
+
+fYb_dir := figures/fY/$(fYb)
+
+fYb_obj := $(addprefix $(fYb_dir)/, $(fY_angles))
+
+fYb_sum := figures/fY/summary_$(fYb)
+
+$(fYb_sum): $(fYb_obj)
+	rm -f $@
+	cat $(fYb_obj) > $@
+
+$(fYb_dir)/%: bellman bellman.sh $(fYb_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.10 --rounds $(fY_n)  >  $@
+
+$(fYb_dir)/.dir_created :
+	mkdir $(fYb_dir)
+	touch $@
+
+
+# --- FYC
+
+fYc_dir := figures/fY/$(fYc)
+
+fYc_obj := $(addprefix $(fYc_dir)/, $(fY_angles))
+
+fYc_sum := figures/fY/summary_$(fYc)
+
+$(fYc_sum): $(fYc_obj)
+	rm -f $@
+	cat $(fYc_obj) > $@
+
+$(fYc_dir)/%: bellman bellman.sh $(fYc_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.15 --rounds $(fY_n)  >  $@
+
+$(fYc_dir)/.dir_created :
+	mkdir $(fYc_dir)
+	touch $@
+
+
+# --- FYD
+
+fYd_dir := figures/fY/$(fYd)
+
+fYd_obj := $(addprefix $(fYd_dir)/, $(fY_angles))
+
+fYd_sum := figures/fY/summary_$(fYd)
+
+$(fYd_sum): $(fYd_obj)
+	rm -f $@
+	cat $(fYd_obj) > $@
+
+$(fYd_dir)/%: bellman bellman.sh $(fYd_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.20 --rounds $(fY_n)  >  $@
+
+$(fYd_dir)/.dir_created :
+	mkdir $(fYd_dir)
+	touch $@
+
+# --- FYE
+
+fYe_dir := figures/fY/$(fYe)
+
+fYe_obj := $(addprefix $(fYe_dir)/, $(fY_angles))
+
+fYe_sum := figures/fY/summary_$(fYe)
+
+$(fYe_sum): $(fYe_obj)
+	rm -f $@
+	cat $(fYe_obj) > $@
+
+$(fYe_dir)/%: bellman bellman.sh $(fYe_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.30 --rounds $(fY_n)  >  $@
+
+$(fYe_dir)/.dir_created :
+	mkdir $(fYe_dir)
+	touch $@
+
+# --- FYF
+
+fYf_dir := figures/fY/$(fYf)
+
+fYf_obj := $(addprefix $(fYf_dir)/, $(fY_angles))
+
+fYf_sum := figures/fY/summary_$(fYf)
+
+$(fYf_sum): $(fYf_obj)
+	rm -f $@
+	cat $(fYf_obj) > $@
+
+$(fYf_dir)/%: bellman bellman.sh $(fYf_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.35 --rounds $(fY_n)  >  $@
+
+$(fYf_dir)/.dir_created :
+	mkdir $(fYf_dir)
+	touch $@
+
+
+# --- FYG
+
+fYg_dir := figures/fY/$(fYg)
+
+fYg_obj := $(addprefix $(fYg_dir)/, $(fY_angles))
+
+fYg_sum := figures/fY/summary_$(fYg)
+
+$(fYg_sum): $(fYg_obj)
+	rm -f $@
+	cat $(fYg_obj) > $@
+
+$(fYg_dir)/%: bellman bellman.sh $(fYg_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.40 --rounds $(fY_n)  >  $@
+
+$(fYg_dir)/.dir_created :
+	mkdir $(fYg_dir)
+	touch $@
+
+# --- FYH
+
+fYh_dir := figures/fY/$(fYh)
+
+fYh_obj := $(addprefix $(fYh_dir)/, $(fY_angles))
+
+fYh_sum := figures/fY/summary_$(fYh)
+
+$(fYh_sum): $(fYh_obj)
+	rm -f $@
+	cat $(fYh_obj) > $@
+
+$(fYh_dir)/%: bellman bellman.sh $(fYh_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.45 --rounds $(fY_n)  >  $@
+
+$(fYh_dir)/.dir_created :
+	mkdir $(fYh_dir)
+	touch $@
+
+# --- FYI
+
+fYi_dir := figures/fY/$(fYi)
+
+fYi_obj := $(addprefix $(fYi_dir)/, $(fY_angles))
+
+fYi_sum := figures/fY/summary_$(fYi)
+
+$(fYi_sum): $(fYi_obj)
+	rm -f $@
+	cat $(fYi_obj) > $@
+
+$(fYi_dir)/%: bellman bellman.sh $(fYi_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.50 --rounds $(fY_n)  >  $@
+
+$(fYi_dir)/.dir_created :
+	mkdir $(fYi_dir)
+	touch $@
+
+# --- FYJ
+
+fYj_dir := figures/fY/$(fYj)
+
+fYj_obj := $(addprefix $(fYj_dir)/, $(fY_angles))
+
+fYj_sum := figures/fY/summary_$(fYj)
+
+$(fYj_sum): $(fYj_obj)
+	rm -f $@
+	cat $(fYj_obj) > $@
+
+$(fYj_dir)/%: bellman bellman.sh $(fYj_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.60 --rounds $(fY_n)  >  $@
+
+$(fYj_dir)/.dir_created :
+	mkdir $(fYj_dir)
+	touch $@
+
+
+# --- FYK
+
+fYk_dir := figures/fY/$(fYk)
+
+fYk_obj := $(addprefix $(fYk_dir)/, $(fY_angles))
+
+fYk_sum := figures/fY/summary_$(fYk)
+
+$(fYk_sum): $(fYk_obj)
+	rm -f $@
+	cat $(fYk_obj) > $@
+
+$(fYk_dir)/%: bellman bellman.sh $(fYk_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.70 --rounds $(fY_n)  >  $@
+
+$(fYk_dir)/.dir_created :
+	mkdir $(fYk_dir)
+	touch $@
+
+# --- FY0
+
+fY0_dir := figures/fY/$(fY0)
+
+fY0_obj := $(addprefix $(fY0_dir)/, $(fY_angles))
+
+fY0_sum := figures/fY/summary_$(fY0)
+
+$(fY0_sum): $(fY0_obj)
+	rm -f $@
+	cat $(fY0_obj) > $@
+
+$(fY0_dir)/%: bellman bellman.sh $(fY0_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.02 --rounds $(fY_n)  >  $@
+
+$(fY0_dir)/.dir_created :
+	mkdir $(fY0_dir)
+	touch $@
+
+# --- FYM
+
+fYm_dir := figures/fY/$(fYm)
+
+fYm_obj := $(addprefix $(fYm_dir)/, $(fY_angles))
+
+fYm_sum := figures/fY/summary_$(fYm)
+
+$(fYm_sum): $(fYm_obj)
+	rm -f $@
+	cat $(fYm_obj) > $@
+
+$(fYm_dir)/%: bellman bellman.sh $(fYm_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_prob 0 --bidder_omega 0.90 --rounds $(fY_n)  >  $@
+
+$(fYm_dir)/.dir_created :
+	mkdir $(fYm_dir)
+	touch $@
+
+# ---
+
+figureY: $(fYa_sum) $(fYb_sum) $(fYc_sum) $(fYd_sum) $(fYe_sum) $(fYf_sum) $(fYg_sum) $(fYh_sum) $(fYi_sum) $(fYj_sum) $(fYk_sum) $(fY0_sum) $(fYm_sum)
+
+# virtual machine...
+# cp figures/fY/summary_risk_alpha50_00_50_beta25_00_25_scale2_n50 /mnt/hgfs/bob/C/bellman/figures/fY
+
+
+# ---------------------------------------  FZ  -----------------------------------------------------
+
+fZ_n = 200
+
+fZ_angles =  97 112 142 147 152 157 162 167 171 172 173 175.5 176 176.33 176.67 177 178 179.71 179.72 179.73 179.74 179.75 179.8  \
+            292 302 307 312 317 322     0.25 0.26 0.27 0.4 2.5 5 10  
+
+fZ_angles := $(base_angles) # $(fZ_angles)
+
+fZa := risk_alpha25_00_25_beta05_00_25_scale2_n$(fZ_n)
+fZb := risk_alpha25_00_25_beta10_00_25_scale2_n$(fZ_n)
+fZc := risk_alpha25_00_25_beta20_00_25_scale2_n$(fZ_n)
+fZd := risk_alpha25_00_25_beta30_00_25_scale2_n$(fZ_n)
+fZe := risk_alpha25_00_25_beta40_00_25_scale2_n$(fZ_n)
+fZf := risk_alpha25_00_25_beta50_00_25_scale2_n$(fZ_n)
+
+# --- FZa
+
+fZa_dir := figures/fZ/$(fZa)
+
+fZa_obj := $(addprefix $(fZa_dir)/, $(fZ_angles))
+
+fZa_sum := figures/fZ/summary_$(fZa)
+
+$(fZa_sum): $(fZa_obj)
+	rm -f $@
+	cat $(fZa_obj) > $@
+
+$(fZa_dir)/%: bellman bellman.sh $(fZa_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_w0 0.05 --bidder_prob 0 --bidder_omega 0.25 --rounds $(fZ_n)  >  $@
+
+$(fZa_dir)/.dir_created :
+	mkdir $(fZa_dir)
+	touch $@
+
+# --- FZb
+
+fZb_dir := figures/fZ/$(fZb)
+
+fZb_obj := $(addprefix $(fZb_dir)/, $(fZ_angles))
+
+fZb_sum := figures/fZ/summary_$(fZb)
+
+$(fZb_sum): $(fZb_obj)
+	rm -f $@
+	cat $(fZb_obj) > $@
+
+$(fZb_dir)/%: bellman bellman.sh $(fZb_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_w0 0.10 --bidder_prob 0 --bidder_omega 0.25 --rounds $(fZ_n)  >  $@
+
+$(fZb_dir)/.dir_created :
+	mkdir $(fZb_dir)
+	touch $@
+
+
+# --- FZc
+
+fZc_dir := figures/fZ/$(fZc)
+
+fZc_obj := $(addprefix $(fZc_dir)/, $(fZ_angles))
+
+fZc_sum := figures/fZ/summary_$(fZc)
+
+$(fZc_sum): $(fZc_obj)
+	rm -f $@
+	cat $(fZc_obj) > $@
+
+$(fZc_dir)/%: bellman bellman.sh $(fZc_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_w0 0.20 --bidder_prob 0 --bidder_omega 0.25 --rounds $(fZ_n)  >  $@
+
+$(fZc_dir)/.dir_created :
+	mkdir $(fZc_dir)
+	touch $@
+
+
+# --- FZd
+
+fZd_dir := figures/fZ/$(fZd)
+
+fZd_obj := $(addprefix $(fZd_dir)/, $(fZ_angles))
+
+fZd_sum := figures/fZ/summary_$(fZd)
+
+$(fZd_sum): $(fZd_obj)
+	rm -f $@
+	cat $(fZd_obj) > $@
+
+$(fZd_dir)/%: bellman bellman.sh $(fZd_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_w0 0.30 --bidder_prob 0 --bidder_omega 0.25 --rounds $(fZ_n)  >  $@
+
+$(fZd_dir)/.dir_created :
+	mkdir $(fZd_dir)
+	touch $@
+
+
+# --- FZe
+
+fZe_dir := figures/fZ/$(fZe)
+
+fZe_obj := $(addprefix $(fZe_dir)/, $(fZ_angles))
+
+fZe_sum := figures/fZ/summary_$(fZe)
+
+$(fZe_sum): $(fZe_obj)
+	rm -f $@
+	cat $(fZe_obj) > $@
+
+$(fZe_dir)/%: bellman bellman.sh $(fZe_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_w0 0.40 --bidder_prob 0 --bidder_omega 0.25 --rounds $(fZ_n)  >  $@
+
+$(fZe_dir)/.dir_created :
+	mkdir $(fZe_dir)
+	touch $@
+
+# --- FZf
+
+fZf_dir := figures/fZ/$(fZf)
+
+fZf_obj := $(addprefix $(fZf_dir)/, $(fZ_angles))
+
+fZf_sum := figures/fZ/summary_$(fZf)
+
+$(fZf_sum): $(fZf_obj)
+	rm -f $@
+	cat $(fZf_obj) > $@
+
+$(fZf_dir)/%: bellman bellman.sh $(fZf_dir)/.dir_created 
+	./bellman --risk --angle $* --oracle_prob 0 --oracle_omega 0.25 --bidder_w0 0.50 --bidder_prob 0 --bidder_omega 0.25 --rounds $(fZ_n)  >  $@
+
+$(fZf_dir)/.dir_created :
+	mkdir $(fZf_dir)
+	touch $@
+# ---
+
+figureZ: $(fZa_sum) $(fZb_sum) $(fZc_sum) $(fZd_sum) $(fZe_sum) $(fZf_sum) # $(fZg_sum) $(fZh_sum) $(fZi_sum) $(fZj_sum) $(fZk_sum) 
+
+
 
 
 ###########################################################################

@@ -11,15 +11,23 @@
 int  main()
 {
 
-  if (false)
+  if (true)
   { std::cout << "\nTEST: risk calculations." << std::endl;
     std::cout << "   risk(0, 0 ) = " << risk(0,  0 ) << "  r_0(0)    = " << reject_prob(0, 0   )  << std::endl;  // mu, alpha
     std::cout << "   risk(0,.05) = " << risk(0,0.05) << "  r_0(0.05) = " << reject_prob(0, 0.05)  << std::endl;
+    std::cout << "   risk(0,.10) = " << risk(0,0.10) << "  r_0(0.10) = " << reject_prob(0, 0.10)  << std::endl;
+    std::cout << "   risk(0,.25) = " << risk(0,0.25) << "  r_0(0.25) = " << reject_prob(0, 0.25)  << std::endl;
+    std::cout << "   risk(0,.60) = " << risk(0,0.60) << "  r_0(0.60) = " << reject_prob(0, 0.60)  << std::endl;
     std::cout << "   risk(1, 0 ) = " << risk(1, 0  ) << "  r_1(0)    = " << reject_prob(1, 0)     << std::endl;
     std::cout << "   risk(1,.05) = " << risk(1,0.05) << "  r_1(0.05) = " << reject_prob(1, 0.05)  << std::endl;
     std::cout << "   risk(1,.10) = " << risk(1,0.10) << "  r_1(0.10) = " << reject_prob(1, 0.10)  << std::endl;
+    std::cout << "   risk(1,.25) = " << risk(1,0.25) << "  r_1(0.25) = " << reject_prob(1, 0.25)  << std::endl;
+    std::cout << "   risk(1,.60) = " << risk(1,0.60) << "  r_1(0.60) = " << reject_prob(1, 0.60)  << std::endl;
+    std::cout << "   risk(2, 0 ) = " << risk(2, 0  ) << "  r_2(0)    = " << reject_prob(2, 0)     << std::endl;
     std::cout << "   risk(2,.05) = " << risk(2,0.05) << "  r_2(0.05) = " << reject_prob(2, 0.05)  << std::endl;
-    std::cout << "   risk(2,.20) = " << risk(2,0.20) << "  r_2(0.20) = " << reject_prob(2, 0.20)  << std::endl;
+    std::cout << "   risk(2,.10) = " << risk(2,0.10) << "  r_2(0.10) = " << reject_prob(2, 0.10)  << std::endl;
+    std::cout << "   risk(2,.25) = " << risk(2,0.25) << "  r_2(0.25) = " << reject_prob(2, 0.25)  << std::endl;
+    std::cout << "   risk(2,.60) = " << risk(2,0.60) << "  r_2(0.60) = " << reject_prob(2, 0.60)  << std::endl;
   }
 
   if (false)

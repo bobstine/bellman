@@ -19,8 +19,12 @@ reject_prob(double mu, double alpha)    // r_mu(alpha)
   if(alpha < epsilon)
     return 0.0;
   else
-  { double z = z_alpha(alpha/2);   // two sided
-    return normal_cdf(mu-z) + normal_cdf(-mu-z);
+  { if (abs(mu) < epsilon)
+      return alpha;
+    else
+    { double z = z_alpha(alpha/2);   // two sided
+      return normal_cdf(mu-z) + normal_cdf(-mu-z);
+    }
   }
 }
 
@@ -83,19 +87,19 @@ optimal_alpha (double mu, double omega)
 double
 risk(double mu, double alpha)
 {
-  double ra, R;
-
   if (0 == alpha)
     return mu*mu;          // ras 5/5/13
   else
-  { ra = reject_prob(mu, alpha);
-    R = (1.0 - ra) * mu * mu;
+  { double z_a = z_alpha(alpha/2);
+    if (abs(mu) < epsilon)
+      return  2 * (z_a * normal_density(z_a) + normal_cdf(-z_a));
+    else
+    { double R = (1.0 - reject_prob(mu, alpha)) * mu * mu;
+      double dev = z_a - mu;
+      double sum = z_a + mu;   // two-sided
+      return R + dev * normal_density(dev) + normal_cdf(-dev) + sum * normal_density(sum) + normal_cdf(-sum);
+    }
   }
-  double z_a = z_alpha(alpha/2);
-  double dev = z_a - mu;
-  double sum = z_a + mu;   // two-sided
-  R += dev * normal_density(dev) + normal_cdf(-dev) + sum * normal_density(sum) + normal_cdf(-sum);
-  return R;
 }
 
 

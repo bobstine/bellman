@@ -15,7 +15,7 @@ int  main()
     double omega = 0.25;
     int rounds   = 1000;
     double maxWealth = 5.0;
-    double psi = 0.05;
+    double psi = 0.001;
     DualWealthArray bonferroni(0.001);
     std::cout << "\nTEST: Bonferroni wealth array: \n ";
     bonferroni.write_to(std::cout);

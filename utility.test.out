@@ -1,0 +1,37 @@
+-*- mode: compilation; default-directory: "/home/bob/C/bellman/" -*-
+Compilation started at Wed Aug 13 15:32:08
+
+make -k -j 12 utility.test; ./utility.test
+make: `utility.test' is up to date.
+
+TEST: risk calculations.
+   risk(0, 0 ) = 0  r_0(0)    = 0
+   risk(0,.05) = 0.2791  r_0(0.05) = 0.05
+   risk(0,.10) = 0.439286  r_0(0.10) = 0.1
+   risk(0,.25) = 0.723607  r_0(0.25) = 0.25
+   risk(0,.60) = 0.96466  r_0(0.60) = 0.6
+   risk(1, 0 ) = 1  r_1(0)    = 0
+   risk(1,.05) = 1.25636  r_1(0.05) = 0.170075
+   risk(1,.10) = 1.2409  r_1(0.10) = 0.263597
+   risk(1,.25) = 1.14429  r_1(0.25) = 0.456008
+   risk(1,.60) = 1.02084  r_1(0.60) = 0.746524
+   risk(2, 0 ) = 4  r_2(0)    = 0
+   risk(2,.05) = 2.43665  r_2(0.05) = 0.516005
+   risk(2,.10) = 1.95219  r_2(0.10) = 0.638894
+   risk(2,.25) = 1.36337  r_2(0.25) = 0.803056
+   risk(2,.60) = 1.03613  r_2(0.60) = 0.935769
+
+TEST: test basic matrix object.
+TEST: reject util at mu=0 3.08908e-317   and at mu=1 0
+TEST: additivity...   net 1.15826 = 0.999833 - 10*0.999845
+TEST: risk   util at mu=0 0.0101692   and at mu=1 1.21964
+TEST: additivity...   net 1.16501 = 1.00572 - 10*1.00528
+
+TEST: test reject matrix utility, and test maximizer with alpha=beta.
+TEST: reject util at mu=0  is 0.0267908   and at  mu=1  is 0.117879
+TEST: with alpha=beta=0.002, reject util at mu=0 is 0.00231691   and at  mu=1  is  0.0212229
+TEST:                      max on [0.5,7] is 1.15846 @ 8.75
+TEST:                      row utility = 1   col utility = 1
+
+Compilation finished at Wed Aug 13 15:32:08
+
