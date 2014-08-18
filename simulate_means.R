@@ -78,9 +78,9 @@ w3 <- w2 - alpha.univ(w2); w3
 
 setwd("/Users/bob/C/bellman/sim_details/")
 
-nRounds <- 200
+nRounds <- 400
 
-angle   <- 296.565 # 165 296.565
+angle   <- 165 # 165 296.565
 x.prob  <-   0
 x.omega <-   0.25
 y.prob  <-   0.001
@@ -171,10 +171,10 @@ simres <- doit(); colSums(simres$risks);
 
 # --- plots
 
-dither <- function(x, sd=NULL) { return (x+rnorm(length(x),sd=0.05*sd(x))); }
+	dither <- function(x, sd=NULL) { return (x+rnorm(length(x),sd=0.05*sd(x))); }
 
 	# --- sequence of process means, risks
-	plot(simres$means, type="l", ylab="Mean Process")
+	plot(simres$means, type="b", ylab="Mean Process", cex=0.5)
 
 	# --- sequence of risks, cumulative risks
 	plot(simres$risks[,1], col="magenta", pch=20, ylim=range(simres$risks),ylab="Risks");
@@ -191,12 +191,12 @@ dither <- function(x, sd=NULL) { return (x+rnorm(length(x),sd=0.05*sd(x))); }
 	points(x, dither(simres$risks[,2], sd=0.04))
 	
 	# --- wealths (discreteness in wealth explains discrete mean choices)
-	plot(rowWealth.array[simres$positions[,1]], type="l", col="magenta", ylim=c(0,5), ylab="Wealths")
+	plot(rowWealth.array[simres$positions[,1]], type="l", col="magenta", ylim=c(0,10), ylab="Wealths")
 	lines(colWealth.array[simres$positions[,2]], type="l", col="black")
 	
 	# --- bids  (same as rowWealth.bids[simres$positions[,1]])
 	plot (simres$bids[,1], type="l", col="magenta", log="y", ylab="Bids", 
-				ylim=c(0.0001,max(simres$bids[,1])))
+				ylim=c(0.00005,max(simres$bids[,1])))
 	lines(simres$bids[,2], type="l", col="black")
 	
 	
