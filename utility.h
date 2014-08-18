@@ -186,6 +186,8 @@ class RejectMatrixUtility: public MatrixUtility
 
   double row_utility (double mu, double v00, double v01, double v10, double v11) const;
   double col_utility (double mu, double v00, double v01, double v10, double v11) const;  
+
+  void   write_details_to_stream(double mu, std::ostream& os) const;
 }; 
 
 
@@ -210,6 +212,9 @@ class RiskMatrixUtility: public MatrixUtility
 
   double row_utility (double mu, double v00, double v01, double v10, double v11) const;
   double col_utility (double mu, double v00, double v01, double v10, double v11) const;
+
+  void   write_details_to_stream(double mu, std::ostream& os) const;
+  
 }; 
 
 

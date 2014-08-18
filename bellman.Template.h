@@ -15,12 +15,14 @@ using EigenUtils::write_matrix_to_file;
 
 Line_Search::GoldenSection make_search_engine(void);
 
+//
+
 template<class Util>
 void
 solve_bellman_matrix_utility (int nRounds, Util &utility,
 			      DualWealthArray const& rowWealth,  DualWealthArray const& colWealth)
 {
-  std::clog << "BELL: Space conserving matrix  version being used to find Bellman matrix utility, Eigen " << /* EigenUtils::version() <<*/ std::endl;
+  std::clog << "BELL: Space conserving matrix  version being used to find Bellman matrix utility, Eigen " <<  EigenUtils::version() << std::endl;
   
   const int nRows (1+rowWealth.number_wealth_positions());                // extra 1 for padding; allow 0 * 0
   const int nCols (1+colWealth.number_wealth_positions());
@@ -100,7 +102,7 @@ void
 solve_bellman_matrix_utility (int nRounds, Util &utility,
 			      DualWealthArray const& rowWealth,  DualWealthArray const& colWealth, std::string config, bool writePathDetails)
 {
-  std::clog << "BELL: Tensor version being used to solve for Bellman matrix utility, Eigen " << /* EigenUtils::version() << */ std::endl;
+  std::clog << "BELL: Tensor version being used to solve for Bellman matrix utility, Eigen " << EigenUtils::version() << std::endl;
   
   const int nRows (1+rowWealth.number_wealth_positions());                // extra 1 for padding; allow 0 * 0
   const int nCols (1+colWealth.number_wealth_positions());
@@ -153,8 +155,7 @@ solve_bellman_matrix_utility (int nRounds, Util &utility,
 	else if (maxPair.first > bestMeanInterval.second)
 	  bestMeanInterval.second = maxPair.first;	
 	double utilAtMuEqualZero = utility(0.0);
-	if (maxPair.second < utilAtMuEqualZero)
-	  maxPair = std::make_pair(0.0,utilAtMuEqualZero);
+	if (maxPair.second < utilAtMuEqualZero)  maxPair = std::make_pair(0.0,utilAtMuEqualZero);
 	if(writePathDetails)
 	{ (* pMeanMat)(r,c) = maxPair.first;
 	  (* pRowRejectProbMat)(r,c) = reject_prob(maxPair.first, (rowBid < 0.99) ? rowBid : 0.99); // insure prob less than 1

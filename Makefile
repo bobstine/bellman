@@ -16,7 +16,7 @@ PROJECT_NAME = bellman
 
 # OPT = -O3 -std=c++0x -DNDEBUG
 
-OPT = -O3
+OPT = -O1
 
 
 USES = utils random
@@ -77,15 +77,15 @@ optimize: bellman.o wealth.o utility.o spending_rule.o bellman_optimize.o
 #       omega      : 0 for fixed bidder
 
 reject_check: bellman
-	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0   --bidder_omega 0.5  --bidder_prob 0.10 --write
+	./bellman --reject --angle 0       --rounds   7  --oracle_omega 0.05 --oracle_prob 0   --bidder_omega 0.5  --bidder_prob 0.10 --write
 
 risk_check: bellman
-	./bellman --risk --angle 296.565 --rounds 200 --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
+	./bellman --risk   --angle 296.565 --rounds  10  --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
 
 risk_inflation: optimize
 	./optimize
 
-#  risk check results 24 Aug 2014  (before finer wealth grid)
+#  risk check results 14 Aug 2014  (before finer wealth grid)
 #	165.000    250.25   200   12.53072    229.18925   903.76172                                                   
 #       296.565    250.25   200    3.0054817   50.305794   21.792614
 
