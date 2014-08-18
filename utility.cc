@@ -13,7 +13,6 @@ const int         messageLim (2);
 static const double maximumZ = 8.0;
 static const double epsilon  = 1.0e-15;
 
-#define ABS(X) (((X) < 0) ? (-(X)) : (X))
 
 double
 reject_prob(double mu, double alpha)    // r_mu(alpha)
@@ -21,7 +20,7 @@ reject_prob(double mu, double alpha)    // r_mu(alpha)
   if(alpha < epsilon)
     return 0.0;
   else
-  { if (ABS(mu) < epsilon)
+  { if (fabs(mu) < epsilon)
       return alpha;
     else
     { double z = z_alpha(alpha/2);   // two sided
@@ -93,7 +92,7 @@ risk(double mu, double alpha)
     return mu*mu;          // ras 5/5/13
   else
   { double z_a = z_alpha(alpha/2);
-    if (ABS(mu) < epsilon)
+    if (fabs(mu) < epsilon)
       return  2 * (z_a * normal_density(z_a) + normal_cdf(-z_a));
     else
     { double R = (1.0 - reject_prob(mu, alpha)) * mu * mu;
