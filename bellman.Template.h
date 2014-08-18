@@ -116,25 +116,20 @@ solve_bellman_matrix_utility (int nRounds, Util &utility,
     rowMat[r]     = Matrix::Zero(nRows,nCols);
     colMat[r]     = Matrix::Zero(nRows,nCols);
   }
-  MatrixVec meanMat(1+nRounds), rowRejectProbMat(1+nRounds), colRejectProbMat(1+nRounds);    // hold space for path
-  { int useRows = writePathDetails ? nRows : 1;           // small placeholder used if no space needed
+  MatrixVec meanMat(1+nRounds);                                           // hold space for path
+  { int useRows = writePathDetails ? nRows : 1;                           // small placeholder used if no space needed
     int useCols = writePathDetails ? nCols : 1;
     for(int r=0; r <=nRounds; ++r)
-    { meanMat[r] = Matrix::Zero(useRows, useCols);
-      rowRejectProbMat[r] = Matrix::Zero(useRows,useCols);
-      colRejectProbMat[r] = Matrix::Zero(useRows,useCols);
-    }
+      meanMat[r] = Matrix::Zero(useRows, useCols);
   }
   // iteration vars
   std::pair<double,double> maxPair;                                       // x,f(x)
   std::pair<double,double> bestMeanInterval = std::make_pair(10,0);
   auto search = make_search_engine();
   for (int round = nRounds; 0 < round; --round)
-  { Matrix *pUtilitySrc = &utilityMat[round  ]; Matrix *pRowSrc  = & rowMat[round  ]; Matrix *pColSrc  = & colMat[round  ];
-    Matrix *pUtilityDest= &utilityMat[round-1]; Matrix *pRowDest = & rowMat[round-1]; Matrix *pColDest = & colMat[round-1];
-    Matrix *pMeanMat = &meanMat[round-1],
-      *pRowRejectProbMat = &rowRejectProbMat[round-1],
-      *pColRejectProbMat = &colRejectProbMat[round-1];
+  { Matrix *pUtilitySrc = &utilityMat[round  ], *pRowSrc  = & rowMat[round  ], *pColSrc  = & colMat[round  ];
+    Matrix *pUtilityDest= &utilityMat[round-1], *pRowDest = & rowMat[round-1], *pColDest = & colMat[round-1];
+    Matrix *pMeanMat = &meanMat[round-1];
     for(int r=0; r<nRows-1; ++r)                                          //  padding... allows zero weight on zero value without if/else
     { double rowBid = rowWealth.bid(r);
       std::pair<int, double> rowBidPos    = rowWealth.bid_position(r);    // if does not reject
@@ -157,11 +152,8 @@ solve_bellman_matrix_utility (int nRounds, Util &utility,
 	double utilAtMuEqualZero = utility(0.0);
 	if (maxPair.second < utilAtMuEqualZero)  maxPair = std::make_pair(0.0,utilAtMuEqualZero);
 	if(writePathDetails)
-	{ (* pMeanMat)(r,c) = maxPair.first;
-	  (* pRowRejectProbMat)(r,c) = reject_prob(maxPair.first, (rowBid < 0.99) ? rowBid : 0.99); // insure prob less than 1
-	  (* pColRejectProbMat)(r,c) = reject_prob(maxPair.first, (colBid < 0.99) ? colBid : 0.99);
-	}
-	(*pUtilityDest)(r,c) = maxPair.second;
+	  (* pMeanMat)(r,c) = maxPair.first;
+	(* pUtilityDest)(r,c) = maxPair.second;
 	(* pRowDest)(r,c) = utility.row_utility(maxPair.first,                                            // opt mu
 						reject_value (rowBidPos   ,  colBidPos  , *pRowSrc),   // v00  neither reject
 						reject_value (rowBidPos   , colRejectPos, *pRowSrc),   // v01  only column player rejects
@@ -191,8 +183,6 @@ solve_bellman_matrix_utility (int nRounds, Util &utility,
       write_matrix_to_file(path + config + sr + ".row"    , rowMat[round]);
       write_matrix_to_file(path + config + sr + ".col"    , colMat[round]);
       write_matrix_to_file(path + config + sr + ".mean"   , meanMat[round]);
-      write_matrix_to_file(path + config + sr + ".rowProb", rowRejectProbMat[round]);
-      write_matrix_to_file(path + config + sr + ".colProb", colRejectProbMat[round]);
     }
     // write details of wealth functions
     { std::ios_base::openmode mode = std::ios_base::trunc;

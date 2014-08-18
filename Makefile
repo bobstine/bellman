@@ -85,12 +85,12 @@ risk_inflation: optimize
 	./optimize
 
 #  risk check results 14 Aug 2014  (before finer wealth grid)
-#	165.000    250.25   200   12.53072    229.18925   903.76172                                                   
+#	165        250.25   200   12.53072    229.18925   903.76172                                                   
 #       296.565    250.25   200    3.0054817   50.305794   21.792614
-#                     18 Aug 2014  (finer grid with zero point at 93 and after patched line search)
+#                     18 Aug 2014  (finer grid with zero point at 93 and after patched line search, upper limit at 10)
+#       165        250.25   200    7.7545943   63.933151  268.5632
 #       296.565    250.25   200    3.0122957   49.897739   21.580969
 
-# 	./bellman --risk --angle 0 --rounds 10  --oracle_w0 0.10 --oracle_omega 1 --bidder_w0 0.10 --bidder_omega 1  --write# both unconst
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 0.5  --oracle_prob 0  --bidder_omega 0.5 --bidder_prob 0.10  # constrained
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 1    --oracle_prob 1  --bidder_omega 0.5 --bidder_prob 0.10  # unconstrained
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 1    --oracle_prob 1  --bidder_omega 0   --bidder_prob 0.05  # fixed alpha bid,uncon
