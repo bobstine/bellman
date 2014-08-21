@@ -80,7 +80,7 @@ setwd("/Users/bob/C/bellman/sim_details/")
 
 nRounds <- 400
 
-angle   <- 165 # 165 296.565
+angle   <- 296.565 # 165 296.565
 x.prob  <-   0
 x.omega <-   0.25
 y.prob  <-   0.001
@@ -202,6 +202,12 @@ simres <- doit(); colSums(simres$risks);
 	
 reset()
 
+#  round  56 @ k= 56 , 11  mean= 2.9618  bids= 0.246893 0.005 
+
+# steady state behavior, angle 165
+qnorm(1-.005/2)
+reject.prob(2.9618, .246)
+reject.prob(2.9618, .005)
 
 
 ########################################################################################
