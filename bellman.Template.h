@@ -22,7 +22,7 @@ void
 solve_bellman_matrix_utility (int nRounds, Util &utility,
 			      DualWealthArray const& rowWealth,  DualWealthArray const& colWealth)
 {
-  std::clog << "BELL: Space conserving matrix  version being used to find Bellman matrix utility, Eigen " <<  EigenUtils::version() << std::endl;
+  //  std::clog << "BELL: Space conserving matrix  version being used to find Bellman matrix utility, Eigen " <<  EigenUtils::version() << std::endl;
   
   const int nRows (1+rowWealth.number_wealth_positions());                // extra 1 for padding; allow 0 * 0
   const int nCols (1+colWealth.number_wealth_positions());
@@ -102,7 +102,7 @@ void
 solve_bellman_matrix_utility (int nRounds, Util &utility,
 			      DualWealthArray const& rowWealth,  DualWealthArray const& colWealth, std::string config, bool writePathDetails)
 {
-  std::clog << "BELL: Tensor version being used to solve for Bellman matrix utility, Eigen " << EigenUtils::version() << std::endl;
+  std::clog << "BELL: Tensor version being used to solve for Bellman matrix utility, Eigen " /* << EigenUtils::version() */ << std::endl;
   
   const int nRows (1+rowWealth.number_wealth_positions());                // extra 1 for padding; allow 0 * 0
   const int nCols (1+colWealth.number_wealth_positions());
