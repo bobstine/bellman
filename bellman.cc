@@ -27,10 +27,10 @@ imin(int a, int b)
 Line_Search::GoldenSection
 make_search_engine(void)
 {
-  const int                      maxIterations   (200);   
   const double                   tolerance       (0.0001);
-  const double                   initialGridSize (0.5);
   const std::pair<double,double> searchInterval  (std::make_pair(0.05,10.0));
+  const double                   initialGridSize (0.5);
+  const int                      maxIterations   (200);   
   return Line_Search::GoldenSection(tolerance, searchInterval, initialGridSize, maxIterations);
 }
 

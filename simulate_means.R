@@ -1,25 +1,62 @@
 ###  Code to simulate mean stochastic process
 
-set.par <- function (mfrow=c(1,1)) {
-	fg.col <- "black";
-	par(mfrow=mfrow, mgp=c(2,1,0),
-		# fg="white", bg = "slategray4",
-		fg=fg.col, bg = "white",
-		mar=c(3.1,3.1,1,1), # bottom left top right, add space when show several default:   c(5, 4, 4, 2) + 0.1.
-		col=fg.col,col.main=fg.col,col.sub=fg.col,col.lab=fg.col,col.axis=fg.col)
-	}
-		
-reset <- function() { 
-	par(mfrow=c(1,1),mar=c(5,4,4,2)+.1,mgp=c(3,1,0), 
-	fg="black",bg="white",col="black",	
-	col.main="black", col.sub="black", col.lab="black", col.axis="black"); 
-	palette("default");  
-	}
+      
+####################################################################
+#
+#  Risk components
+#
+####################################################################
+                                                                                                                                     
+reject.prob <- function(mu, alpha)    # r_mu(alpha)                                                                                                                     
+{                                                                                                                                                                          
+  if(alpha < 0.0001) return (0)                                                                                                                                                        
+  else { 
+  	if (abs(mu) < 0.0001) return (alpha)                                                                                                                                                       
+    else { 
+    	z = qnorm(1-alpha/2)                                                                                                                          
+		return (pnorm(mu-z) + pnorm(-mu-z));                                                                                                                         
+    }                                                                                                                                                                      
+  }                                                                                                                                                                        
+}                                                                                                                                                                          
 
+
+risk <- function(mu, alpha) {
+  if (0 == alpha)   return (mu*mu)
+  else { 
+  	za = qnorm(1-alpha/2);                                                                                                                                         
+    if (abs(mu) < 0.00001)                                                                                                                                                 
+      return (2 * (za * dnorm(za) + pnorm(-za)))                                                                                                       
+    else { 
+		r = (1.0 - reject.prob(mu, alpha)) * mu * mu;                                                                                                                 
+		dev = za - mu;                                                                                                                                               
+		sum = za + mu;   # two-sided                                                                                                                                
+		return (r + dev * dnorm(dev) + pnorm(-dev) + sum * dnorm(sum) + pnorm(-sum));                                                              
+    }                                                                                                                                                                      
+  }                                                                                                                                                                        
+}                                                                                                                                                                      
+
+# risk(2,0.25)
+
+
+risk.if.rejected <- function(mu, alpha) {
+  	za = qnorm(1-alpha/2);                                                                                                                                         
+	pr = reject.prob(mu, alpha)                                                                                                              
+    if (abs(mu) < 0.00001)                                                                                                                                                 
+      return ((2 * (za * dnorm(za) + pnorm(-za)))/pr)                                                                                                 
+    else { 
+		dev = za - mu;                                                                                                                                               
+		sum = za + mu;   # two-sided                                                                                                                                
+		return ((dev * dnorm(dev) + pnorm(-dev) + sum * dnorm(sum) + pnorm(-sum))/pr);                                                              
+    }                                                                                                                                                                                                                                                                                                                                           
+}                                                                                                                                                                          
+
+risk.if.not.rejected <- function(mu, alpha) { return (mu*mu) }                                                                                                                                                                          
+
+# m<-0;a<-0.25;(p <- reject.prob(m,a)); p*risk.if.rejected(m,a) + (1-p)*risk.if.not.rejected(m,a)
 
 ####################################################################
 #
-#  Bid as function of wealth
+#  Bid as function of wealth for universal
 #
 ####################################################################
 
@@ -41,9 +78,9 @@ w3 <- w2 - alpha.univ(w2); w3
 
 setwd("/Users/bob/C/bellman/sim_details/")
 
-nRounds <- 200
+nRounds <- 400
 
-angle   <- 296.565  #165
+angle   <- 296.565 # 165 296.565
 x.prob  <-   0
 x.omega <-   0.25
 y.prob  <-   0.001
@@ -61,7 +98,6 @@ rowWealth.rIndx <- 1+as.numeric(unlist(strsplit(substring(RowWealth[4],first=13)
 rowWealth.rWts  <-   as.numeric(unlist(strsplit(substring(RowWealth[5],first=13)," ")))
 rowWealth.bIndx <- 1+as.numeric(unlist(strsplit(substring(RowWealth[6],first=13)," ")))
 rowWealth.bWts <-    as.numeric(unlist(strsplit(substring(RowWealth[7],first=13)," ")))
-plot(rowWealth.array, rowWealth.bids)
 
 ColWealth <- readLines(paste(prefix,"col_wealth",sep="."))
 (colWealth.desc  <- ColWealth[1])
@@ -71,15 +107,18 @@ colWealth.rIndx <- 1+as.numeric(unlist(strsplit(substring(ColWealth[4],first=13)
 colWealth.rWts  <-   as.numeric(unlist(strsplit(substring(ColWealth[5],first=13)," ")))
 colWealth.bIndx <- 1+as.numeric(unlist(strsplit(substring(ColWealth[6],first=13)," ")))
 colWealth.bWts <-    as.numeric(unlist(strsplit(substring(ColWealth[7],first=13)," ")))
-plot(colWealth.array, colWealth.bids)
+
+plot(rowWealth.array, rowWealth.bids, xlab="Wealth", 
+		ylab="Bids", log="y", col="magenta", type="b")
+lines(colWealth.array, colWealth.bids, ylab="Bids", type="b")
 
 
 # --- check initial wealth positions (add 1 for 0-based index to 1-based)
 
-iZeroRow <- 60 + 1        # value from first line of RowWealth description
+iZeroRow <- 93 + 1        # value from first line of RowWealth description
 rowWealth.array[iZeroRow] # should be omega (or closest that is less)
 
-iZeroCol <- 60 + 1
+iZeroCol <- 93 + 1
 colWealth.array[iZeroCol]
 
 
@@ -87,62 +126,88 @@ colWealth.array[iZeroCol]
 
 doit <- function(seed=sample.int(100000,1)) {
 	set.seed(seed)
-	meanProcess 	<- rep(0, nRounds); 
-	positions <- risks <- rejectProb		<- matrix(NA, nrow=nRounds, ncol=2)		# row and column
+	meanProcess 				<- rep(0, nRounds); 
+	positions <- risks	<- bids	<- matrix(NA, nrow=nRounds, ncol=2)		# row and column
 	# --- run simulation
 	kR <- iZeroRow; kC <- iZeroCol
 	for(round in 1:nRounds) {
 		positions[round,] <- c(kR,kC)		# current wealth states
 		# --
-		mu      <- read.table(paste(prefix,"_",round-1,".mean", sep=""))
-		meanProcess[round] <- mu[kR,kC]		# mean at current state
+		mu      <- read.table(paste(prefix,"_",round-1,".mean", sep=""))[kR,kC]
+		meanProcess[round] <- mu			# mean at current state
+		# -- these agree with c++ output so avoid reading/saving 
+		# rejectProb[round,2] === reject.prob(mu,colBid) and similar for row prob
+		# rowProb <- read.table(paste(prefix,"_",round-1,".rowProb", sep=""))[kR,kC]
+		# colProb <- read.table(paste(prefix,"_",round-1,".colProb", sep=""))[kR,kC]
+		# rejectProb[round,1] <- rowProb; rejectProb[round,2] <- colProb; 
 		# --
-		rowProb <- read.table(paste(prefix,"_",round-1,".rowProb", sep=""))
-		rejectProb[round,1] <- rowProb[kR,kC]
-		colProb <- read.table(paste(prefix,"_",round-1,".colProb", sep=""))
-		rejectProb[round,2] <- colProb[kR,kC]
+		bids[round,1] <- rowWealth.bids[kR]; 	
+		bids[round,2] <- colWealth.bids[kC]
 		# --
 		cat("round ", round, "@ k=", kR,",", kC, 
-			" mean=", meanProcess[round]," p(reject)=",rejectProb[round,],"\n");
+			" mean=", meanProcess[round]," bids=",bids[round,],"\n");
 		# -- random chance
 		p <- runif(1)
 		w <- runif(1) # linear weights for wealth
-		if (p < rejectProb[round,1]) { 
+		if (p < reject.prob(mu,bids[round,1])) {		# reject H0
 			kR <-rowWealth.rIndx[kR]+(rowWealth.rWts[kR]<w); 
-			risks[round,1]<-1; } 
-		else {                    
+			risks[round,1]<-risk.if.rejected (mu,bids[round,1]) } 
+		else { 								# did not reject
 			kR <-rowWealth.bIndx[kR]+(rowWealth.bWts[kR]<w); 
-			risks[round,1]<-meanProcess[round]^2; }
-		if (p < rejectProb[round,2]) { 
+			risks[round,1]<-mu^2; }
+		if (p < reject.prob(mu,bids[round,2])) {		# reject
 			kC <-colWealth.rIndx[kC]+(colWealth.rWts[kC]<w); 
-			risks[round,2]<-1; } 
-		else {                    
+			risks[round,2]<-risk.if.rejected (mu,bids[round,2]); } 
+		else {								# did not reject
 			kC <-colWealth.bIndx[kC]+(colWealth.bWts[kC]<w); 
-			risks[round,2]<-meanProcess[round]^2; 
+			risks[round,2]<-mu^2; 
 		}
 	}   
-	list(risks=risks, positions=positions, means=meanProcess, rejectProbs=rejectProb)
+	list(risks=risks, positions=positions, means=meanProcess, bids=bids)
 }
 
 simres <- doit(); colSums(simres$risks); 
 
-	plot(simres$means, type="l", ylab="Mean Process")
 
-	plot(simres$risks[,1], col="magenta", ylim=range(simres$risks), type="l"); points(simres$risks[,2])
+# --- plots
+
+	dither <- function(x, sd=NULL) { return (x+rnorm(length(x),sd=0.05*sd(x))); }
+
+	# --- sequence of process means, risks
+	plot(simres$means, type="b", ylab="Mean Process", cex=0.5)
+
+	# --- sequence of risks, cumulative risks
+	plot(simres$risks[,1], col="magenta", pch=20, ylim=range(simres$risks),ylab="Risks");
+	points(simres$risks[,2])
 	
-	plot(cumsum(simres$risks[,1]),type="l", col="magenta", ylab="Cumulate Risk"); lines(cumsum(simres$risks[,2]))
+	plot(cumsum(simres$risks[,1]),type="l", col="magenta", ylab="Cumulative Risk",
+		ylim=c(0,max(colSums(simres$risks))))
+	lines(cumsum(simres$risks[,2]))
+
+	# --- risks as function of mean
+	x <- dither(simres$means, sd = 0.04)
+	plot(x,dither(simres$risks[,1], sd=0.04), col="magenta", main="Risk vs Mean", pch=20,
+			ylim=c(range(simres$risks)), xlab="Mean", ylab="Risk"); 
+	points(x, dither(simres$risks[,2], sd=0.04))
 	
-	plot(rowWealth.array[simres$positions[,1]], type="l", ylim=c(0,1.5)); lines(simres$means, col="red")
-	
-	plot (rowWealth.array[simres$positions[,1]], type="l", col="magenta", ylim=c(0,2), ylab="Wealths")
+	# --- wealths (discreteness in wealth explains discrete mean choices)
+	plot(rowWealth.array[simres$positions[,1]], type="l", col="magenta", ylim=c(0,10), ylab="Wealths")
 	lines(colWealth.array[simres$positions[,2]], type="l", col="black")
 	
-	plot (rowWealth.bids[simres$positions[,1]], type="l", col="magenta", log="y", ylab="Bids", 
-				ylim=c(0.0005,max(rowWealth.bids[simres$positions[,1]])))
-	lines(colWealth.bids[simres$positions[,2]], type="l", col="black")
+	# --- bids  (same as rowWealth.bids[simres$positions[,1]])
+	plot (simres$bids[,1], type="l", col="magenta", log="y", ylab="Bids", 
+				ylim=c(0.00005,max(simres$bids[,1])))
+	lines(simres$bids[,2], type="l", col="black")
+	
 	
 reset()
 
+#  round  56 @ k= 56 , 11  mean= 2.9618  bids= 0.246893 0.005 
+
+# steady state behavior, angle 165
+qnorm(1-.005/2)
+reject.prob(2.9618, .246)
+reject.prob(2.9618, .005)
 
 
 ########################################################################################
@@ -187,7 +252,7 @@ dim(mean)
 
 ####################################################################
 #
-#  run simulation
+#  run simulation... this is wrong!!!
 #
 ####################################################################
 
@@ -212,7 +277,7 @@ doit <- function(seed=sample.int(100000,1)) {
 		oracleRisk[round] <- min(1,meanProcess[round]^2)
 		# bidder risk
 		w <- runif(1);
-		if (runif(1) < p.reject){ k<-wealth.rIndx[k]+(wealth.rWts[k]<w); riskProcess[round]<-1; }
+		if (runif(1) < p.reject){ k<-wealth.rIndx[k]+(wealth.rWts[k]<w); riskProcess[round]<-1; } # error here
 		else {                    k<-wealth.bIndx[k]+(wealth.bWts[k]<w); riskProcess[round]<-meanProcess[round]^2;}
 	}   
 	list(bidder.risk=riskProcess, bidder.prob = reject.prob, bidder.state=indxProcess,  

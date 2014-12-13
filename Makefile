@@ -18,7 +18,6 @@ PROJECT_NAME = bellman
 
 OPT = -O3
 
-
 USES = utils random
 
 level_1 = distribution.o spending_rule.o
@@ -77,7 +76,7 @@ optimize: bellman.o wealth.o utility.o spending_rule.o bellman_optimize.o
 #       omega      : 0 for fixed bidder
 
 reject_check: bellman
-	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0   --bidder_omega 0.5  --bidder_prob 0.10 --write
+	./bellman --reject --angle 0       --rounds   7  --oracle_omega 0.05 --oracle_prob 0   --bidder_omega 0.5  --bidder_prob 0.10 --write
 
 risk_check: bellman
 	./bellman --risk --angle 296.565 --rounds 100 --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
@@ -85,11 +84,15 @@ risk_check: bellman
 risk_inflation: optimize
 	./optimize
 
-#  risk check results 24 Aug 2014  (before finer wealth grid)
-#	165.000    250.25   200   12.53072    229.18925   903.76172                                                   
+#  risk check results 14 Aug 2014  (before finer wealth grid)
+#	165        250.25   200   12.53072    229.18925   903.76172                                                   
 #       296.565    250.25   200    3.0054817   50.305794   21.792614
+#                     18 Aug 2014  (finer grid with zero point at 93 and after patched line search, upper limit at 10)
+#       165        250.25   200    7.7545943   63.933151  268.5632
+#       165        250.25   400   10.038836    71.703323  306.38754
+#       296.565    250.25   200    3.0122957   49.897739   21.580969
+#       296.565    250.25   400    3.1305635   65.771912   29.385805
 
-# 	./bellman --risk --angle 0 --rounds 10  --oracle_w0 0.10 --oracle_omega 1 --bidder_w0 0.10 --bidder_omega 1  --write# both unconst
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 0.5  --oracle_prob 0  --bidder_omega 0.5 --bidder_prob 0.10  # constrained
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 1    --oracle_prob 1  --bidder_omega 0.5 --bidder_prob 0.10  # unconstrained
 #	./bellman --risk --angle 0 --rounds 100 --oracle_omega 1    --oracle_prob 1  --bidder_omega 0   --bidder_prob 0.05  # fixed alpha bid,uncon

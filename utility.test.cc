@@ -28,7 +28,10 @@ int  main()
     std::cout << "   risk(2,.10) = " << risk(2,0.10) << "  r_2(0.10) = " << reject_prob(2, 0.10)  << std::endl;
     std::cout << "   risk(2,.25) = " << risk(2,0.25) << "  r_2(0.25) = " << reject_prob(2, 0.25)  << std::endl;
     std::cout << "   risk(2,.60) = " << risk(2,0.60) << "  r_2(0.60) = " << reject_prob(2, 0.60)  << std::endl;
-  }
+    std::cout << " Special case of mean 0.999949...\n";
+    std::cout << "   risk(0.999949,.05) = " << risk(0.999949,0.05) << "  r_0.999949(.05) = " << reject_prob(0.999949, 0.05)  << std::endl;
+    std::cout << "   risk(0.999949,.10) = " << risk(0.999949,0.10) << "  r_0.999949(.10) = " << reject_prob(0.999949, 0.10)  << std::endl;
+}
 
   if (false)
   { std::cout << "\nTEST: test vector utility object." << std::endl;
