@@ -80,7 +80,7 @@ reject_check: bellman
 	./bellman --reject --angle 0 --rounds 7  --oracle_omega 0.05 --oracle_prob 0   --bidder_omega 0.5  --bidder_prob 0.10 --write
 
 risk_check: bellman
-	./bellman --risk --angle 296.565 --rounds 200 --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
+	./bellman --risk --angle 296.565 --rounds 100 --oracle_omega 0.25 --oracle_prob 0   --bidder_omega 0.25 --bidder_prob 0.001 --write
 
 risk_inflation: optimize
 	./optimize
@@ -202,7 +202,9 @@ more_angles =
 
 f0_n = 1000
 f0_more_angles :=  314.6 314.7 314.8 314.81 314.82 314.83 314.84 314.85 314.86 314.87 314.873  314.874
-f0_angles := $(base_angles) $(extra_angles) $(f0_more_angles) 175.1 175.11 175.12 175.13 175.14 175.15 175.151 175.152 175.153 175.154 175.156 175.157 175.158 175.159
+f0_even_more = 175.1 175.11 175.12 175.13 175.14 175.15 175.151 175.152 175.153 175.154 175.156 175.157 175.158 175.159
+f0_yet_more = 175.2 175.3 175.4 175.41 175.42 175.43 175.44 175.45 175.46 175.47 175.48 175.49 175.5 
+f0_angles := $(base_angles) $(extra_angles) $(f0_more_angles)                $(f0_yet_more) 
 
 f0a := risk_alpha100_100_100_beta50_00_50_scale2_n$(f0_n)
 
@@ -228,6 +230,11 @@ $(f0a_dir)/.dir_created :
 
 figure0: $(f0a_sum)
 
+
+test0: bellman Makefile
+	rm -f test0
+	./bellman --risk --angle 310 --oracle_prob 1 --oracle_omega 1  --bidder_prob 0 --bidder_omega 0.50 --scale 2  --rounds 1000 > $@
+	cat test0
 
 
 
